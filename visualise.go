@@ -5,21 +5,28 @@ import (
 	"image/color"
 	"image/draw"
 	"image/jpeg"
+	"image/png"
 	"math"
 	"os"
 )
 
 type GenotypeVisualiser struct {
-	ImgSizeX   int
-	ImgSizeY   int
-	NeuronSize int
+	ImgSizeX          int
+	ImgSizeY          int
+	NeuronSize        int
+	InputNeuronColor  color.Color
+	HiddenNeuronColor color.Color
+	OutputNeuronColor color.Color
 }
 
 func NewGenotypeVisualiser() GenotypeVisualiser {
 	return GenotypeVisualiser{
-		ImgSizeX:   800,
-		ImgSizeY:   800,
-		NeuronSize: 13,
+		ImgSizeX:          800,
+		ImgSizeY:          800,
+		NeuronSize:        13,
+		InputNeuronColor:  color.RGBA{0, 255, 0, 255},
+		HiddenNeuronColor: color.RGBA{255, 0, 255, 255},
+		OutputNeuronColor: color.RGBA{255, 255, 0, 255},
 	}
 }
 
@@ -29,36 +36,17 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 	img := image.NewRGBA(image.Rect(0, 0, v.ImgSizeX, v.ImgSizeY))
 	countsInp, countsHid, countsOut := g.GetNodeTypeCounts()
 	for i := 0; i < countsInp; i++ {
-		var pos float64
-		if countsInp == 1 {
-			pos = 0.5
-		} else {
-			pos = float64(i) / float64(countsInp-1)
-		}
-		w := float64(v.ImgSizeX) * 0.8
-		pad := (v.ImgSizeX - int(w)) / 2
-		yPos := int(pos*w) + pad
+		yPos := getPaddedPosition(i, countsInp, v.ImgSizeY, 0.8)
 		nodeYPosses[g.Nodes[i].ID] = yPos
 		nodeXPosses[g.Nodes[i].ID] = drawInputNeuron(img, v, yPos)
 	}
 	for i := 0; i < countsOut; i++ {
-		var pos float64
-		if countsOut == 1 {
-			pos = 0.5
-		} else {
-			pos = float64(i) / float64(countsOut-1)
-		}
-		w := float64(v.ImgSizeX) * 0.8
-		pad := (v.ImgSizeX - int(w)) / 2
-		yPos := int(pos*w) + pad
+		yPos := getPaddedPosition(i, countsOut, v.ImgSizeY, 0.8)
 		nodeXPosses[g.Nodes[i+countsInp+countsHid].ID] = drawOutputNeuron(img, v, yPos)
 		nodeYPosses[g.Nodes[i+countsHid+countsInp].ID] = yPos
 	}
 	for i := 0; i < countsHid; i++ {
-		pos := float64(i+1) / float64(countsHid+1)
-		w := float64(v.ImgSizeX) * 0.8
-		pad := (v.ImgSizeX - int(w)) / 2
-		posX := int(pos*w) + pad
+		posX := getPaddedPosition(i+1, countsHid+2, v.ImgSizeX, 0.8)
 		avPos := 0
 		avPosN := 0
 		for c := range g.Connections {
@@ -74,16 +62,20 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 	}
 	for i := range g.Connections {
 		if g.Connections[i].Enabled {
-			startID := g.Connections[i].In
-			startX, startY := nodeXPosses[startID], nodeYPosses[startID]
-			endID := g.Connections[i].Out
-			endX, endY := nodeXPosses[endID], nodeYPosses[endID]
-			c := uint8(255 * (g.Connections[i].Weight/2 + 0.5))
-			ic := 255 - c
-			line(img, startX, startY, endX, endY, color.RGBA{ic, c / 2, c, 255})
+			drawConnection(img, nodeXPosses, nodeYPosses, &g.Connections[i])
 		}
 	}
 	return img
+}
+
+func getPaddedPosition(n, max, width int, pad float64) int {
+	if max == 1 {
+		return width / 2
+	}
+	w := int(float64(width) * pad)
+	p := (width - w) / 2
+	i := w / (max - 1)
+	return i*n + p
 }
 
 func (v *GenotypeVisualiser) DrawImageToJPGFile(filename string, g *Genotype) {
@@ -94,6 +86,17 @@ func (v *GenotypeVisualiser) DrawImageToJPGFile(filename string, g *Genotype) {
 	}
 	defer f.Close()
 	if err = jpeg.Encode(f, img, nil); err != nil {
+		panic(any(err))
+	}
+}
+func (v *GenotypeVisualiser) DrawImageToPNGFile(filename string, g *Genotype) {
+	img := v.DrawImage(g)
+	f, err := os.Create(filename)
+	if err != nil {
+		panic(any(err))
+	}
+	defer f.Close()
+	if err = png.Encode(f, img); err != nil {
 		panic(any(err))
 	}
 }
@@ -127,20 +130,21 @@ func drawCircle(img draw.Image, x0, y0, r int, c color.Color) {
 
 func drawNeuron(img draw.Image, g *GenotypeVisualiser, posX, posY int, c color.Color) {
 	drawCircle(img, posX, posY, g.NeuronSize, c)
+	drawCircle(img, posX, posY, g.NeuronSize-1, c)
 }
 func drawInputNeuron(img draw.Image, g *GenotypeVisualiser, posY int) int {
 	xpos := g.NeuronSize + 10
-	drawNeuron(img, g, xpos, posY, color.RGBA{0, 255, 0, 255})
+	drawNeuron(img, g, xpos, posY, g.InputNeuronColor)
 	return xpos
 }
 func drawOutputNeuron(img draw.Image, g *GenotypeVisualiser, posY int) int {
 	xpos := g.ImgSizeX - (g.NeuronSize + 10)
-	drawNeuron(img, g, xpos, posY, color.RGBA{255, 255, 0, 255})
+	drawNeuron(img, g, xpos, posY, g.OutputNeuronColor)
 	return xpos
 }
 
 func drawHiddenNeuron(img draw.Image, g *GenotypeVisualiser, posX, posY int) {
-	drawNeuron(img, g, posX, posY, color.RGBA{255, 0, 255, 255})
+	drawNeuron(img, g, posX, posY, g.HiddenNeuronColor)
 }
 
 func line(img draw.Image, x0, y0, x1, y1 int, c color.Color) {
@@ -170,4 +174,14 @@ func line(img draw.Image, x0, y0, x1, y1 int, c color.Color) {
 		img.Set(x0, y0, c)
 	}
 
+}
+
+func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *ConnectionGene) {
+	startID := con.In
+	startX, startY := xPoses[startID], yPoses[startID]
+	endID := con.Out
+	endX, endY := xPoses[endID], yPoses[endID]
+	c := uint8(255 * (con.Weight/2 + 0.5))
+	ic := 255 - c
+	line(img, startX, startY, endX, endY, color.RGBA{ic, c / 2, c, 255})
 }
