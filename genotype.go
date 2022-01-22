@@ -1,5 +1,7 @@
 package goevo
 
+import "math"
+
 const (
 	InputNode NodeFunction = iota
 	HiddenNode
@@ -220,4 +222,28 @@ func CopyGenotype(g *Genotype) *Genotype {
 		numOutput:   g.numOutput,
 	}
 	return g1
+}
+
+// ApproximateGeneticDistance : This is not the correct genetic difference, but rather a heuristic
+func (g *Genotype) ApproximateGeneticDistance(g1 *Genotype) float64 {
+	weightDiff := 1.0
+	connDiff := 1.0
+	d := 0.0
+	found := make(map[ConnectionID]*ConnectionGene)
+	for c := range g.Connections {
+		found[g.Connections[c].ID] = &g.Connections[c]
+		// assume this is the only gene. We will reverse this if the other genome has this gene
+		d += connDiff
+	}
+	for c := range g1.Connections {
+		if v, ok := found[g1.Connections[c].ID]; ok {
+			// Both genomes have this connection
+			d -= connDiff
+			d += math.Abs(v.Weight-g1.Connections[c].Weight) * weightDiff
+		} else {
+			// only this genome has this connection
+			d += connDiff
+		}
+	}
+	return d
 }
