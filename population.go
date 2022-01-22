@@ -26,6 +26,11 @@ func (p Population) Repopulate(ratio float64, f func(g1 *Genotype, g2 *Genotype)
 	for g := numberToKeep; g < len(p); g++ {
 		parent1I := rand.Intn(numberToKeep)
 		parent2I := rand.Intn(numberToKeep)
+		if p[parent1I].Fitness < p[parent2I].Fitness {
+			c := parent2I
+			parent2I = parent1I
+			parent1I = c
+		}
 		gt := f(p[parent1I].GT, p[parent2I].GT)
 		pt := GrowPhenotype(gt)
 		p[g] = &Agent{GT: gt, PT: pt}
