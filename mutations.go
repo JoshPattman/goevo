@@ -1,6 +1,7 @@
 package goevo
 
-/*
+import "math/rand"
+
 type GenotypeMutator struct {
 	MaxNewSynapseValue      float64
 	MaxSynapseMutationValue float64
@@ -15,7 +16,7 @@ func (gm *GenotypeMutator) GrowRandomSynapse(g *Genotype, counter InnovationCoun
 			s = inps
 		}
 		rb := randRange(s, inps+hids+outs)
-		if g.CreateConnection(g.Nodes[ra].ID, g.Nodes[rb].ID, (rand.Float64()*2-1)*gm.MaxNewSynapseValue, counter) {
+		if g.CreateConnection(g.Layers[ra].ID, g.Layers[rb].ID, (rand.Float64()*2-1)*gm.MaxNewSynapseValue, counter) {
 			return
 		}
 	}
@@ -26,7 +27,7 @@ func (gm *GenotypeMutator) GrowRandomNode(g *Genotype, counter InnovationCounter
 	consI := 0
 	for i := range g.Connections {
 		if g.Connections[i].Enabled {
-			cons[consI] = &g.Connections[i]
+			cons[consI] = g.Connections[i]
 			consI++
 		}
 	}
@@ -43,7 +44,7 @@ func (gm *GenotypeMutator) MutateRandomConnection(g *Genotype) {
 	consI := 0
 	for i := range g.Connections {
 		if g.Connections[i].Enabled {
-			cons[consI] = &g.Connections[i]
+			cons[consI] = g.Connections[i]
 			consI++
 		}
 	}
@@ -54,4 +55,3 @@ func (gm *GenotypeMutator) MutateRandomConnection(g *Genotype) {
 	si := randRange(0, len(cons))
 	cons[si].Weight += (rand.Float64()*2 - 1) * gm.MaxSynapseMutationValue
 }
-*/

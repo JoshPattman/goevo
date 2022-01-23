@@ -134,16 +134,14 @@ func (g *Genotype) CreateNode(conID ConnectionID, counter InnovationCounter) boo
 	nb := g.GetNode(c.Out)
 
 	insertionPoint := integerMidpoint(na.Layer, nb.Layer)
-
+	inpC, _, _ := g.GetNodeTypeCounts()
+	if insertionPoint < inpC {
+		insertionPoint = inpC
+	}
 	n := &NodeGene{
 		NodeID(counter.Next()),
 		HiddenNode,
 		insertionPoint,
-	}
-
-	inpC, _, _ := g.GetNodeTypeCounts()
-	if insertionPoint < inpC {
-		insertionPoint = inpC
 	}
 	g.Nodes[n.ID] = n
 	// insertion

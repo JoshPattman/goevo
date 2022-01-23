@@ -1,5 +1,6 @@
 package goevo
 
+/*
 import (
 	"image"
 	"image/color"
@@ -185,3 +186,4 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *Connecti
 	ic := 255 - c
 	line(img, startX, startY, endX, endY, color.RGBA{ic, c / 2, c, 255})
 }
+*/
