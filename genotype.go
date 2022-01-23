@@ -159,57 +159,6 @@ func (g *Genotype) MutateConnectionBy(cid ConnectionID, v float64) bool {
 	return true
 }
 
-/*func (g *Genotype) DestroyNode(nid NodeID) {
-	consTo := make([]*ConnectionGene, 0)
-	consFrom := make([]*ConnectionGene, 0)
-	for c := range g.Connections {
-		if g.Connections[c].Out == nid {
-			consTo = append(consTo, &g.Connections[c])
-		} else if g.Connections[c].In == nid {
-			consFrom = append(consFrom, &g.Connections[c])
-		}
-	}
-	conIdsToDestroy := make([]ConnectionID, 0)
-	for c := range consFrom {
-		for c2 := range consTo {
-			t := 0.0
-			t += consFrom[c].Weight * consTo[c2].Weight
-			direct, _ := g.GetConnectionByEndpoints(consTo[c].In, consFrom[c].Out)
-			if direct != nil {
-				t += direct.Weight
-				direct.Weight = t
-				conIdsToDestroy = append(conIdsToDestroy, consTo[c2].ID)
-			} else {
-				consTo[c2].Weight = t
-				consTo[c2].Out = consFrom[c].Out
-			}
-			conIdsToDestroy = append(conIdsToDestroy, consFrom[c].ID)
-		}
-
-	}
-	for _, c := range conIdsToDestroy {
-		found := false
-		for i := range g.Connections {
-			if !found {
-				if g.Connections[i].ID == c {
-					g.Connections = append(g.Connections[:i], g.Connections[i+1:]...)
-				}
-				found = true
-			}
-		}
-	}
-	found := false
-	for i := range g.Nodes {
-		if !found {
-			if g.Nodes[i].ID == nid {
-				g.Nodes = append(g.Nodes[:i], g.Nodes[i+1:]...)
-			}
-			found = true
-		}
-	}
-
-}*/
-
 func CopyGenotype(g *Genotype) *Genotype {
 	nodes := make([]NodeGene, len(g.Nodes))
 	cons := make([]ConnectionGene, len(g.Connections))
