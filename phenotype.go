@@ -1,5 +1,6 @@
 package goevo
 
+/*
 type PhenotypeNode struct {
 	Value      float64
 	Successors []*PhenotypeNode
@@ -73,3 +74,4 @@ func GrowPhenotype(g *Genotype) *Phenotype {
 		OutputNodes: onodes[:oc],
 	}
 }
+*/

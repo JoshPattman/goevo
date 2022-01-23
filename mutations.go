@@ -1,7 +1,6 @@
 package goevo
 
-import "math/rand"
-
+/*
 type GenotypeMutator struct {
 	MaxNewSynapseValue      float64
 	MaxSynapseMutationValue float64
@@ -55,3 +54,4 @@ func (gm *GenotypeMutator) MutateRandomConnection(g *Genotype) {
 	si := randRange(0, len(cons))
 	cons[si].Weight += (rand.Float64()*2 - 1) * gm.MaxSynapseMutationValue
 }
+*/

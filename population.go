@@ -1,10 +1,6 @@
 package goevo
 
-import (
-	"math/rand"
-	"sort"
-)
-
+/*
 type Agent struct {
 	GT      *Genotype
 	PT      *Phenotype
@@ -45,3 +41,4 @@ func CreatePopulation(gts []*Genotype) Population {
 	}
 	return p
 }
+*/

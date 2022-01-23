@@ -1,10 +1,9 @@
 package goevo
 
-import "math/rand"
-
 type GenotypeCrossover struct {
 }
 
+/*
 func (c *GenotypeCrossover) CrossoverSimple(g1, g2 *Genotype) *Genotype {
 	g := CopyGenotype(g1)
 	for s := range g.Connections {
@@ -17,3 +16,4 @@ func (c *GenotypeCrossover) CrossoverSimple(g1, g2 *Genotype) *Genotype {
 	}
 	return g
 }
+*/
