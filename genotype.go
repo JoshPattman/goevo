@@ -34,7 +34,7 @@ type Genotype struct {
 	numOutput   int
 }
 
-func CreateGenotype(numIn, numOut int, counter InnovationCounter) *Genotype {
+func NewGenotype(numIn, numOut int, counter InnovationCounter) *Genotype {
 	nodes := make([]*NodeGene, numIn+numOut)
 	for i := 0; i < numIn; i++ {
 		nodes[i] = &NodeGene{

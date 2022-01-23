@@ -10,7 +10,7 @@ func (c *GenotypeCrossover) CrossoverSimple(g1, g2 *Genotype) *Genotype {
 		c2 := g2.GetConnection(sid)
 		if c2 != nil {
 			if rand.Float64() > 0.5 {
-				g.Connections[s] = *c2
+				g.Connections[sid] = &*c2
 			}
 		}
 	}
