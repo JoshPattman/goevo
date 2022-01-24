@@ -1,6 +1,6 @@
 package goevo
 
-/*
+
 type PhenotypeNode struct {
 	Value      float64
 	Successors []*PhenotypeNode
@@ -47,17 +47,17 @@ func GrowPhenotype(g *Genotype) *Phenotype {
 		connections := make([]*PhenotypeNode, 0)
 		weights := make([]float64, 0)
 		for _, c := range g.Connections {
-			if c.In == g.Nodes[i].ID && c.Enabled {
-				_, oi := g.GetNode(c.Out)
-				connections = append(connections, nodes[oi])
+			if c.In == g.Layers[i].ID && c.Enabled {
+				oi := g.GetNode(c.Out)
+				connections = append(connections, nodes[oi.Layer])
 				weights = append(weights, c.Weight)
 			}
 		}
-		if g.Nodes[i].Function == InputNode {
+		if g.Layers[i].Function == InputNode {
 			nodes[i].Activation = LinearActivation
 			inodes[ic] = nodes[i]
 			ic++
-		} else if g.Nodes[i].Function == OutputNode {
+		} else if g.Layers[i].Function == OutputNode {
 			nodes[i].Activation = LinearActivation
 			onodes[oc] = nodes[i]
 			oc++
@@ -74,4 +74,4 @@ func GrowPhenotype(g *Genotype) *Phenotype {
 		OutputNodes: onodes[:oc],
 	}
 }
-*/
+
