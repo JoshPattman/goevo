@@ -1,6 +1,6 @@
 package goevo
 
-/*
+
 import (
 	"image"
 	"image/color"
@@ -38,32 +38,32 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 	countsInp, countsHid, countsOut := g.GetNodeTypeCounts()
 	for i := 0; i < countsInp; i++ {
 		yPos := getPaddedPosition(i, countsInp, v.ImgSizeY, 0.8)
-		nodeYPosses[g.Nodes[i].ID] = yPos
-		nodeXPosses[g.Nodes[i].ID] = drawInputNeuron(img, v, yPos)
+		nodeYPosses[g.Layers[i].ID] = yPos
+		nodeXPosses[g.Layers[i].ID] = drawInputNeuron(img, v, yPos)
 	}
 	for i := 0; i < countsOut; i++ {
 		yPos := getPaddedPosition(i, countsOut, v.ImgSizeY, 0.8)
-		nodeXPosses[g.Nodes[i+countsInp+countsHid].ID] = drawOutputNeuron(img, v, yPos)
-		nodeYPosses[g.Nodes[i+countsHid+countsInp].ID] = yPos
+		nodeXPosses[g.Layers[i+countsInp+countsHid].ID] = drawOutputNeuron(img, v, yPos)
+		nodeYPosses[g.Layers[i+countsHid+countsInp].ID] = yPos
 	}
 	for i := 0; i < countsHid; i++ {
 		posX := getPaddedPosition(i+1, countsHid+2, v.ImgSizeX, 0.8)
 		avPos := 0
 		avPosN := 0
 		for c := range g.Connections {
-			if g.Connections[c].Out == g.Nodes[i+countsInp].ID {
+			if g.Connections[c].Out == g.Layers[i+countsInp].ID {
 				avPos += nodeYPosses[g.Connections[c].In]
 				avPosN++
 			}
 		}
 		yPos := avPos/avPosN + randRange(-50, 50)
-		nodeYPosses[g.Nodes[i+countsInp].ID] = yPos
-		nodeXPosses[g.Nodes[i+countsInp].ID] = posX
+		nodeYPosses[g.Layers[i+countsInp].ID] = yPos
+		nodeXPosses[g.Layers[i+countsInp].ID] = posX
 		drawHiddenNeuron(img, v, posX, yPos)
 	}
 	for i := range g.Connections {
 		if g.Connections[i].Enabled {
-			drawConnection(img, nodeXPosses, nodeYPosses, &g.Connections[i])
+			drawConnection(img, nodeXPosses, nodeYPosses, g.Connections[i])
 		}
 	}
 	return img
@@ -186,4 +186,4 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *Connecti
 	ic := 255 - c
 	line(img, startX, startY, endX, endY, color.RGBA{ic, c / 2, c, 255})
 }
-*/
+
