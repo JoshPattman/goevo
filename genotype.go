@@ -1,5 +1,10 @@
 package goevo
 
+import (
+	"fmt"
+	"strconv"
+)
+
 const (
 	InputNode NodeFunction = iota
 	HiddenNode
@@ -172,13 +177,14 @@ func CopyGenotype(g *Genotype) *Genotype {
 	cons := make(map[ConnectionID]*ConnectionGene)
 
 	for l, n := range g.Layers {
-		newNode := &*n
-		layers[l] = newNode
-		nodes[newNode.ID] = newNode
+		newNode := *n
+		layers[l] = &newNode
+		nodes[newNode.ID] = &newNode
 	}
 
 	for _, c := range g.Connections {
-		cons[c.ID] = &*c
+		newCon := *c
+		cons[c.ID] = &newCon
 	}
 
 	g1 := &Genotype{
@@ -216,3 +222,23 @@ func (g *Genotype) ApproximateGeneticDistance(g1 *Genotype) float64 {
 	return d
 }
 */
+
+func (g *Genotype)String() string{
+	s := "(["
+	for k, v := range g.Nodes{
+		s += strconv.Itoa(int(k)) + ":"
+		s += fmt.Sprint(*v) + ","
+	}
+	s += "]["
+	for k, v := range g.Connections{
+		s += strconv.Itoa(int(k)) + ":"
+		s += fmt.Sprint(*v) + ","
+	}
+	s += "]["
+	for k, v := range g.Layers{
+		s += strconv.Itoa(int(k)) + ":"
+		s += fmt.Sprint(v.ID) + ","
+	}
+	s += "])"
+	return s
+}

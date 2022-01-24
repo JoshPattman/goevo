@@ -1,6 +1,5 @@
 package goevo
 
-
 type PhenotypeNode struct {
 	Value      float64
 	Successors []*PhenotypeNode
