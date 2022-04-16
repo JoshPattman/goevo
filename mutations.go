@@ -26,7 +26,7 @@ func (gm *GenotypeMutator) GrowRandomNode(g *Genotype, counter InnovationCounter
 	cons := make([]*ConnectionGene, len(g.Connections))
 	consI := 0
 	for i := range g.Connections {
-		if g.Connections[i].Enabled {
+		if g.Connections[i].Enabled && !g.Connections[i].Recurrent {
 			cons[consI] = g.Connections[i]
 			consI++
 		}

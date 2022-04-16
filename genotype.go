@@ -162,7 +162,9 @@ func (g *Genotype) CreateNode(conID ConnectionID, counter InnovationCounter) boo
 	if c == nil {
 		return false
 	}
-
+	if c.Recurrent {
+		return false
+	}
 	na := g.GetNode(c.In)
 	nb := g.GetNode(c.Out)
 

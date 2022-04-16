@@ -23,7 +23,7 @@ func NewGenotypeVisualiser() GenotypeVisualiser {
 	return GenotypeVisualiser{
 		ImgSizeX:          800,
 		ImgSizeY:          800,
-		NeuronSize:        13,
+		NeuronSize:        15,
 		InputNeuronColor:  color.RGBA{0, 255, 0, 255},
 		HiddenNeuronColor: color.RGBA{255, 0, 255, 255},
 		OutputNeuronColor: color.RGBA{255, 255, 0, 255},
@@ -189,9 +189,9 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *Connecti
 	}
 	c := uint8(255 * (w/2 + 0.5))
 	ic := 255 - c
-	col := color.RGBA{ic, 0, c, 255}
-	if con.Recurrent {
-		col = color.RGBA{0, 255, 0, 255}
+	col := color.RGBA{R: ic, B: c, A: 255}
+	if con.Recurrent && false {
+		col = color.RGBA{G: 255, A: 255}
 	}
 	line(img, startX, startY, endX, endY, col)
 }
