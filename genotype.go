@@ -2,6 +2,7 @@ package goevo
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -197,7 +198,6 @@ func CopyGenotype(g *Genotype) *Genotype {
 	return g1
 }
 
-/*
 // ApproximateGeneticDistance : This is not the correct genetic difference, but rather a heuristic
 func (g *Genotype) ApproximateGeneticDistance(g1 *Genotype) float64 {
 	weightDiff := 1.0
@@ -205,7 +205,7 @@ func (g *Genotype) ApproximateGeneticDistance(g1 *Genotype) float64 {
 	d := 0.0
 	found := make(map[ConnectionID]*ConnectionGene)
 	for c := range g.Connections {
-		found[g.Connections[c].ID] = &g.Connections[c]
+		found[g.Connections[c].ID] = g.Connections[c]
 		// assume this is the only gene. We will reverse this if the other genome has this gene
 		d += connDiff
 	}
@@ -221,21 +221,20 @@ func (g *Genotype) ApproximateGeneticDistance(g1 *Genotype) float64 {
 	}
 	return d
 }
-*/
 
-func (g *Genotype)String() string{
+func (g *Genotype) String() string {
 	s := "(["
-	for k, v := range g.Nodes{
+	for k, v := range g.Nodes {
 		s += strconv.Itoa(int(k)) + ":"
 		s += fmt.Sprint(*v) + ","
 	}
 	s += "]["
-	for k, v := range g.Connections{
+	for k, v := range g.Connections {
 		s += strconv.Itoa(int(k)) + ":"
 		s += fmt.Sprint(*v) + ","
 	}
 	s += "]["
-	for k, v := range g.Layers{
+	for k, v := range g.Layers {
 		s += strconv.Itoa(int(k)) + ":"
 		s += fmt.Sprint(v.ID) + ","
 	}
