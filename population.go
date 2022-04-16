@@ -37,7 +37,7 @@ func (p Population) Repopulate(ratio float64, f func(g1 *Genotype, g2 *Genotype)
 	}
 }
 
-func CreatePopulation(gts []*Genotype) Population {
+func NewPopulation(gts []*Genotype) Population {
 	p := make(Population, len(gts))
 	for i := range p {
 		pt := GrowPhenotype(gts[i])
@@ -45,3 +45,4 @@ func CreatePopulation(gts []*Genotype) Population {
 	}
 	return p
 }
+

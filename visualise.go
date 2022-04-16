@@ -23,7 +23,7 @@ func NewGenotypeVisualiser() GenotypeVisualiser {
 	return GenotypeVisualiser{
 		ImgSizeX:          800,
 		ImgSizeY:          800,
-		NeuronSize:        13,
+		NeuronSize:        15,
 		InputNeuronColor:  color.RGBA{0, 255, 0, 255},
 		HiddenNeuronColor: color.RGBA{255, 0, 255, 255},
 		OutputNeuronColor: color.RGBA{255, 255, 0, 255},
@@ -37,32 +37,32 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 	countsInp, countsHid, countsOut := g.GetNodeTypeCounts()
 	for i := 0; i < countsInp; i++ {
 		yPos := getPaddedPosition(i, countsInp, v.ImgSizeY, 0.8)
-		nodeYPosses[g.Nodes[i].ID] = yPos
-		nodeXPosses[g.Nodes[i].ID] = drawInputNeuron(img, v, yPos)
+		nodeYPosses[g.Layers[i].ID] = yPos
+		nodeXPosses[g.Layers[i].ID] = drawInputNeuron(img, v, yPos)
 	}
 	for i := 0; i < countsOut; i++ {
 		yPos := getPaddedPosition(i, countsOut, v.ImgSizeY, 0.8)
-		nodeXPosses[g.Nodes[i+countsInp+countsHid].ID] = drawOutputNeuron(img, v, yPos)
-		nodeYPosses[g.Nodes[i+countsHid+countsInp].ID] = yPos
+		nodeXPosses[g.Layers[i+countsInp+countsHid].ID] = drawOutputNeuron(img, v, yPos)
+		nodeYPosses[g.Layers[i+countsHid+countsInp].ID] = yPos
 	}
 	for i := 0; i < countsHid; i++ {
 		posX := getPaddedPosition(i+1, countsHid+2, v.ImgSizeX, 0.8)
 		avPos := 0
 		avPosN := 0
 		for c := range g.Connections {
-			if g.Connections[c].Out == g.Nodes[i+countsInp].ID {
+			if g.Connections[c].Out == g.Layers[i+countsInp].ID {
 				avPos += nodeYPosses[g.Connections[c].In]
 				avPosN++
 			}
 		}
 		yPos := avPos/avPosN + randRange(-50, 50)
-		nodeYPosses[g.Nodes[i+countsInp].ID] = yPos
-		nodeXPosses[g.Nodes[i+countsInp].ID] = posX
+		nodeYPosses[g.Layers[i+countsInp].ID] = yPos
+		nodeXPosses[g.Layers[i+countsInp].ID] = posX
 		drawHiddenNeuron(img, v, posX, yPos)
 	}
 	for i := range g.Connections {
 		if g.Connections[i].Enabled {
-			drawConnection(img, nodeXPosses, nodeYPosses, &g.Connections[i])
+			drawConnection(img, nodeXPosses, nodeYPosses, g.Connections[i], v.NeuronSize)
 		}
 	}
 	return img
@@ -175,13 +175,72 @@ func line(img draw.Image, x0, y0, x1, y1 int, c color.Color) {
 	}
 
 }
+func thickLine(img draw.Image, x0, y0, x1, y1, w int, c color.Color) {
+	var dx = math.Abs(float64(x1 - x0))
+	var dy = math.Abs(float64(y1 - y0))
+	var err = dx - dy
+	var sx, sy = 1, 1
 
-func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *ConnectionGene) {
+	if x0 > x1 {
+		sx = -1
+	}
+	if y0 > y1 {
+		sy = -1
+	}
+
+	img.Set(x0, y0, c)
+
+	for x0 != x1 || y0 != y1 {
+		var e2 = 2 * err
+		if e2 > -dy {
+			err -= dy
+			x0 += sx
+		}
+		if e2 < dx {
+			err += dx
+			y0 += sy
+		}
+		st := int(w / 2)
+		for xo := -st; xo < w-st; xo++ {
+			for yo := -st; yo < w-st; yo++ {
+				img.Set(x0+xo, y0+yo, c)
+			}
+		}
+	}
+
+}
+
+func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *ConnectionGene, r int) {
 	startID := con.In
-	startX, startY := xPoses[startID], yPoses[startID]
+	startX, startY := xPoses[startID]+r, yPoses[startID]
 	endID := con.Out
-	endX, endY := xPoses[endID], yPoses[endID]
-	c := uint8(255 * (con.Weight/2 + 0.5))
+	endX, endY := xPoses[endID]-r, yPoses[endID]
+	w := con.Weight
+	if w > 1 {
+		w = 1
+	} else if w < -1 {
+		w = -1
+	}
+	/*c := uint8(255 * (w/2 + 0.5))
 	ic := 255 - c
-	line(img, startX, startY, endX, endY, color.RGBA{ic, c / 2, c, 255})
+	col := color.RGBA{R: ic, B: c, A: 255}
+	if con.Recurrent && false {
+		col = color.RGBA{G: 255, A: 255}
+	}*/
+	var col color.Color
+	if w > 0 {
+		if con.Recurrent {
+			col = color.RGBA{G: 255, A: 255}
+		} else {
+			col = color.RGBA{B: 255, A: 255}
+		}
+	} else {
+		if con.Recurrent {
+			col = color.RGBA{G: 255, R: 255, A: 255}
+		} else {
+			col = color.RGBA{R: 255, A: 255}
+		}
+	}
+	width := int(math.Max(math.Min(math.Abs(w), 1)*10, 1))
+	thickLine(img, startX, startY, endX, endY, width, col)
 }
