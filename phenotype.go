@@ -16,6 +16,12 @@ type Phenotype struct {
 	OutputNodes []*PhenotypeNode
 }
 
+func (p *Phenotype) ResetRecurrent() {
+	for _, n := range p.Nodes {
+		n.RecurrentValue = 0
+	}
+}
+
 func (p *Phenotype) Calculate(inputs []float64) []float64 {
 	// Recurrent pass
 	for _, n := range p.Nodes {
