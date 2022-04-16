@@ -1,6 +1,8 @@
 package goevo
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 type GenotypeMutator struct {
 	MaxNewSynapseValue      float64
@@ -16,7 +18,23 @@ func (gm *GenotypeMutator) GrowRandomSynapse(g *Genotype, counter InnovationCoun
 			s = inps
 		}
 		rb := randRange(s, inps+hids+outs)
-		if g.CreateConnection(g.Layers[ra].ID, g.Layers[rb].ID, (rand.Float64()*2-1)*gm.MaxNewSynapseValue, counter) {
+		w := (rand.Float64()*2 - 1) * gm.MaxNewSynapseValue
+		if g.CreateConnection(g.Layers[ra].ID, g.Layers[rb].ID, w, counter) {
+			return
+		}
+	}
+}
+func (gm *GenotypeMutator) GrowRandomRecurrentSynapse(g *Genotype, counter InnovationCounter) {
+	inps, hids, outs := g.GetNodeTypeCounts()
+	for i := 0; i < 10; i++ {
+		ra := randRange(0, inps+hids)
+		s := ra + 1
+		if s < inps {
+			s = inps
+		}
+		rb := randRange(s, inps+hids+outs)
+		w := (rand.Float64()*2 - 1) * gm.MaxNewSynapseValue
+		if g.CreateRecurrentConnection(g.Layers[rb].ID, g.Layers[ra].ID, w, counter) {
 			return
 		}
 	}

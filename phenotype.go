@@ -54,7 +54,8 @@ func GrowPhenotype(g *Genotype) *Phenotype {
 	ic := 0
 	oc := 0
 	for i := range nodes {
-		nodes[i] = &PhenotypeNode{}
+		p := &PhenotypeNode{}
+		nodes[i] = p
 	}
 	for i := range nodes {
 		connections := make([]*PhenotypeNode, 0)
@@ -82,7 +83,7 @@ func GrowPhenotype(g *Genotype) *Phenotype {
 			onodes[oc] = nodes[i]
 			oc++
 		} else {
-			nodes[i].Activation = ReluActivation
+			nodes[i].Activation = LinearActivation
 		}
 		nodes[i].Weights = weights
 		nodes[i].Successors = connections
