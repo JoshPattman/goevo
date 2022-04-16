@@ -1,6 +1,5 @@
 package goevo
 
-
 import (
 	"image"
 	"image/color"
@@ -182,8 +181,13 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *Connecti
 	startX, startY := xPoses[startID], yPoses[startID]
 	endID := con.Out
 	endX, endY := xPoses[endID], yPoses[endID]
-	c := uint8(255 * (con.Weight/2 + 0.5))
+	w := con.Weight
+	if w > 1 {
+		w = 1
+	} else if w < -1 {
+		w = -1
+	}
+	c := uint8(255 * (w/2 + 0.5))
 	ic := 255 - c
-	line(img, startX, startY, endX, endY, color.RGBA{ic, c / 2, c, 255})
+	line(img, startX, startY, endX, endY, color.RGBA{ic, 0, c, 255})
 }
-
