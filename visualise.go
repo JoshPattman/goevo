@@ -23,7 +23,7 @@ func NewGenotypeVisualiser() GenotypeVisualiser {
 	return GenotypeVisualiser{
 		ImgSizeX:          800,
 		ImgSizeY:          800,
-		NeuronSize:        13,
+		NeuronSize:        15,
 		InputNeuronColor:  color.RGBA{0, 255, 0, 255},
 		HiddenNeuronColor: color.RGBA{255, 0, 255, 255},
 		OutputNeuronColor: color.RGBA{255, 255, 0, 255},
@@ -62,7 +62,7 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 	}
 	for i := range g.Connections {
 		if g.Connections[i].Enabled {
-			drawConnection(img, nodeXPosses, nodeYPosses, g.Connections[i])
+			drawConnection(img, nodeXPosses, nodeYPosses, g.Connections[i], v.NeuronSize)
 		}
 	}
 	return img
@@ -176,11 +176,11 @@ func line(img draw.Image, x0, y0, x1, y1 int, c color.Color) {
 
 }
 
-func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *ConnectionGene) {
+func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *ConnectionGene, r int) {
 	startID := con.In
-	startX, startY := xPoses[startID], yPoses[startID]
+	startX, startY := xPoses[startID]+r, yPoses[startID]
 	endID := con.Out
-	endX, endY := xPoses[endID], yPoses[endID]
+	endX, endY := xPoses[endID]-r, yPoses[endID]
 	w := con.Weight
 	if w > 1 {
 		w = 1
@@ -189,5 +189,9 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *Connecti
 	}
 	c := uint8(255 * (w/2 + 0.5))
 	ic := 255 - c
-	line(img, startX, startY, endX, endY, color.RGBA{ic, 0, c, 255})
+	col := color.RGBA{R: ic, B: c, A: 255}
+	if con.Recurrent && false {
+		col = color.RGBA{G: 255, A: 255}
+	}
+	line(img, startX, startY, endX, endY, col)
 }
