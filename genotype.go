@@ -25,11 +25,12 @@ type NodeGene struct {
 type ConnectionID int
 
 type ConnectionGene struct {
-	ID      ConnectionID
-	In      NodeID
-	Out     NodeID
-	Weight  float64
-	Enabled bool
+	ID        ConnectionID
+	In        NodeID
+	Out       NodeID
+	Weight    float64
+	Recurrent bool
+	Enabled   bool
 }
 
 type Genotype struct {
@@ -129,13 +130,42 @@ func (g *Genotype) CreateConnection(in, out NodeID, weight float64, counter Inno
 	g.Connections[con.ID] = con
 	return true
 }
+func (g *Genotype) CreateRecurrentConnection(in, out NodeID, weight float64, counter InnovationCounter) bool {
+	if g.IsConnected(in, out) {
+		return false
+	}
+	inNode := g.GetNode(in)
+	outNode := g.GetNode(out)
+	if inNode == nil || outNode == nil {
+		return false
+	}
+	if inNode.Function == InputNode || outNode.Function == OutputNode {
+		return false
+	}
+	if inNode.Layer < outNode.Layer {
+		return false
+	}
+	newID := ConnectionID(counter.Next())
+	con := &ConnectionGene{
+		ID:        newID,
+		In:        in,
+		Out:       out,
+		Weight:    weight,
+		Enabled:   true,
+		Recurrent: true,
+	}
+	g.Connections[con.ID] = con
+	return true
+}
 
 func (g *Genotype) CreateNode(conID ConnectionID, counter InnovationCounter) bool {
 	c := g.GetConnection(conID)
 	if c == nil {
 		return false
 	}
-
+	if c.Recurrent {
+		return false
+	}
 	na := g.GetNode(c.In)
 	nb := g.GetNode(c.Out)
 
