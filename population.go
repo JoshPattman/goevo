@@ -32,7 +32,7 @@ func (p Population) Repopulate(ratio float64, f func(g1 *GenotypeSlow, g2 *Genot
 			parent1I = c
 		}
 		gt := f(p[parent1I].GT, p[parent2I].GT)
-		pt := GrowPhenotype(gt)
+		pt := GrowPhenotypeLegacy(gt)
 		p[g] = &Agent{GT: gt, PT: pt}
 	}
 }
@@ -40,7 +40,7 @@ func (p Population) Repopulate(ratio float64, f func(g1 *GenotypeSlow, g2 *Genot
 func NewPopulation(gts []*GenotypeSlow) Population {
 	p := make(Population, len(gts))
 	for i := range p {
-		pt := GrowPhenotype(gts[i])
+		pt := GrowPhenotypeLegacy(gts[i])
 		p[i] = &Agent{GT: gts[i], PT: pt}
 	}
 	return p
