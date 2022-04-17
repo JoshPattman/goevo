@@ -228,5 +228,23 @@ func (g *GenotypeFast) IsConnectionRecurrent(cid ConnectionID) (bool, error) {
 }
 
 func (g *GenotypeFast) Copy() Genotype {
-	return &GenotypeFast{}
+	layers := make([]NodeID, len(g.Layers))
+	copy(layers, g.Layers)
+	nodes := make(map[NodeID]*FastNodeGene)
+	for nid, n := range g.Nodes {
+		copy := *n
+		nodes[nid] = &copy
+	}
+	cons := make(map[ConnectionID]*FastConnectionGene)
+	for cid, n := range g.Connections {
+		copy := *n
+		cons[cid] = &copy
+	}
+	return &GenotypeFast{
+		Layers:      layers,
+		Nodes:       nodes,
+		Connections: cons,
+		NumInputs:   g.NumInputs,
+		NumOutputs:  g.NumOutputs,
+	}
 }
