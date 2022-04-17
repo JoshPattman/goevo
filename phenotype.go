@@ -52,11 +52,12 @@ func (p *Phenotype) Calculate(inputs []float64) []float64 {
 	}
 	return outs
 }
-
-func GrowPhenotype(g *Genotype) *Phenotype {
-	nodes := make([]*PhenotypeNode, len(g.Nodes))
-	inodes := make([]*PhenotypeNode, len(g.Nodes))
-	onodes := make([]*PhenotypeNode, len(g.Nodes))
+func GrowPhenotype(g Genotype) *Phenotype {
+	numNodesIn, numNodesHid, numNodesOut := g.GetNumNodes()
+	numNodes := numNodesIn + numNodesHid + numNodesOut
+	nodes := make([]*PhenotypeNode, numNodes)
+	inodes := make([]*PhenotypeNode, numNodes)
+	onodes := make([]*PhenotypeNode, numNodes)
 	ic := 0
 	oc := 0
 	for i := range nodes {
@@ -68,23 +69,24 @@ func GrowPhenotype(g *Genotype) *Phenotype {
 		rConnections := make([]*PhenotypeNode, 0)
 		weights := make([]float64, 0)
 		rWeights := make([]float64, 0)
-		for _, c := range g.Connections {
-			if c.In == g.Layers[i].ID && c.Enabled {
-				oi := g.GetNode(c.Out)
-				if !c.Recurrent {
-					connections = append(connections, nodes[oi.Layer])
-					weights = append(weights, c.Weight)
-				} else {
-					rConnections = append(rConnections, nodes[oi.Layer])
-					rWeights = append(rWeights, c.Weight)
-				}
+		thisGNode, _ := g.GetNodeIDAtLayer(i)
+		for _, cid := range g.GetConnectionsFrom(thisGNode) {
+			_, outID, _ := g.GetConnectionEndpoints(cid)
+			outLayer, _ := g.GetLayerOfNode(outID)
+			w, _ := g.GetConnectionWeight(cid)
+			if r, _ := g.IsConnectionRecurrent(cid); !r {
+				connections = append(connections, nodes[outLayer])
+				weights = append(weights, w)
+			} else {
+				rConnections = append(rConnections, nodes[outLayer])
+				rWeights = append(rWeights, w)
 			}
 		}
-		if g.Layers[i].Function == InputNode {
+		if i < numNodesIn {
 			nodes[i].Activation = LinearActivation
 			inodes[ic] = nodes[i]
 			ic++
-		} else if g.Layers[i].Function == OutputNode {
+		} else if i >= numNodesIn+numNodesHid {
 			nodes[i].Activation = LinearActivation
 			onodes[oc] = nodes[i]
 			oc++

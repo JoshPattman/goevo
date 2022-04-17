@@ -30,40 +30,43 @@ func NewGenotypeVisualiser() GenotypeVisualiser {
 	}
 }
 
-func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
+func (v *GenotypeVisualiser) DrawImage(g Genotype) draw.Image {
 	nodeYPosses := make(map[NodeID]int)
 	nodeXPosses := make(map[NodeID]int)
 	img := image.NewRGBA(image.Rect(0, 0, v.ImgSizeX, v.ImgSizeY))
-	countsInp, countsHid, countsOut := g.GetNodeTypeCounts()
+	countsInp, countsHid, countsOut := g.GetNumNodes()
 	for i := 0; i < countsInp; i++ {
 		yPos := getPaddedPosition(i, countsInp, v.ImgSizeY, 0.8)
-		nodeYPosses[g.Layers[i].ID] = yPos
-		nodeXPosses[g.Layers[i].ID] = drawInputNeuron(img, v, yPos)
+		nid, _ := g.GetNodeIDAtLayer(i)
+		nodeXPosses[nid] = drawInputNeuron(img, v, yPos)
+		nodeYPosses[nid] = yPos
 	}
 	for i := 0; i < countsOut; i++ {
 		yPos := getPaddedPosition(i, countsOut, v.ImgSizeY, 0.8)
-		nodeXPosses[g.Layers[i+countsInp+countsHid].ID] = drawOutputNeuron(img, v, yPos)
-		nodeYPosses[g.Layers[i+countsHid+countsInp].ID] = yPos
+		nid, _ := g.GetNodeIDAtLayer(i + countsInp + countsHid)
+		nodeXPosses[nid] = drawOutputNeuron(img, v, yPos)
+		nodeYPosses[nid] = yPos
 	}
 	for i := 0; i < countsHid; i++ {
 		posX := getPaddedPosition(i+1, countsHid+2, v.ImgSizeX, 0.8)
 		avPos := 0
 		avPosN := 0
-		for c := range g.Connections {
-			if g.Connections[c].Out == g.Layers[i+countsInp].ID {
-				avPos += nodeYPosses[g.Connections[c].In]
-				avPosN++
-			}
+		nid, _ := g.GetNodeIDAtLayer(i + countsInp)
+		for _, cid := range g.GetConnectionsTo(nid) {
+			inNode, _, _ := g.GetConnectionEndpoints(cid)
+			avPos += nodeYPosses[inNode]
+			avPosN++
 		}
 		yPos := avPos/avPosN + randRange(-50, 50)
-		nodeYPosses[g.Layers[i+countsInp].ID] = yPos
-		nodeXPosses[g.Layers[i+countsInp].ID] = posX
+		nodeYPosses[nid] = yPos
+		nodeXPosses[nid] = posX
 		drawHiddenNeuron(img, v, posX, yPos)
 	}
-	for i := range g.Connections {
-		if g.Connections[i].Enabled {
-			drawConnection(img, nodeXPosses, nodeYPosses, g.Connections[i], v.NeuronSize)
-		}
+	for _, cid := range g.GetAllConnectionIDs() {
+		nida, nidb, _ := g.GetConnectionEndpoints(cid)
+		w, _ := g.GetConnectionWeight(cid)
+		r, _ := g.IsConnectionRecurrent(cid)
+		drawConnection(img, nodeXPosses, nodeYPosses, nida, nidb, w, r, v.NeuronSize)
 	}
 	return img
 }
@@ -78,7 +81,7 @@ func getPaddedPosition(n, max, width int, pad float64) int {
 	return i*n + p
 }
 
-func (v *GenotypeVisualiser) DrawImageToJPGFile(filename string, g *Genotype) {
+func (v *GenotypeVisualiser) DrawImageToJPGFile(filename string, g Genotype) {
 	img := v.DrawImage(g)
 	f, err := os.Create(filename)
 	if err != nil {
@@ -89,7 +92,7 @@ func (v *GenotypeVisualiser) DrawImageToJPGFile(filename string, g *Genotype) {
 		panic(any(err))
 	}
 }
-func (v *GenotypeVisualiser) DrawImageToPNGFile(filename string, g *Genotype) {
+func (v *GenotypeVisualiser) DrawImageToPNGFile(filename string, g Genotype) {
 	img := v.DrawImage(g)
 	f, err := os.Create(filename)
 	if err != nil {
@@ -210,12 +213,9 @@ func thickLine(img draw.Image, x0, y0, x1, y1, w int, c color.Color) {
 
 }
 
-func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *ConnectionGene, r int) {
-	startID := con.In
+func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, startID, endID NodeID, w float64, isRecurrent bool, r int) {
 	startX, startY := xPoses[startID]+r, yPoses[startID]
-	endID := con.Out
 	endX, endY := xPoses[endID]-r, yPoses[endID]
-	w := con.Weight
 	if w > 1 {
 		w = 1
 	} else if w < -1 {
@@ -229,13 +229,13 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, con *Connecti
 	}*/
 	var col color.Color
 	if w > 0 {
-		if con.Recurrent {
+		if isRecurrent {
 			col = color.RGBA{G: 255, A: 255}
 		} else {
 			col = color.RGBA{B: 255, A: 255}
 		}
 	} else {
-		if con.Recurrent {
+		if isRecurrent {
 			col = color.RGBA{G: 255, R: 255, A: 255}
 		} else {
 			col = color.RGBA{R: 255, A: 255}
