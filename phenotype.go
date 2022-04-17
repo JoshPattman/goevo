@@ -89,7 +89,7 @@ func GrowPhenotype(g *Genotype) *Phenotype {
 			onodes[oc] = nodes[i]
 			oc++
 		} else {
-			nodes[i].Activation = SigmoidActivation
+			nodes[i].Activation = g.Layers[i].Activation
 		}
 		nodes[i].Weights = weights
 		nodes[i].Successors = connections

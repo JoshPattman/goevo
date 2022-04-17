@@ -16,9 +16,10 @@ type NodeFunction int
 type NodeID int
 
 type NodeGene struct {
-	ID       NodeID
-	Function NodeFunction
-	Layer    int
+	ID         NodeID
+	Function   NodeFunction
+	Activation func(float64) float64
+	Layer      int
 }
 
 type ConnectionID int
@@ -44,16 +45,18 @@ func NewGenotype(numIn, numOut int, counter InnovationCounter) *Genotype {
 	nodes := make([]*NodeGene, numIn+numOut)
 	for i := 0; i < numIn; i++ {
 		nodes[i] = &NodeGene{
-			ID:       NodeID(counter.Next()),
-			Function: InputNode,
-			Layer:    i,
+			ID:         NodeID(counter.Next()),
+			Function:   InputNode,
+			Layer:      i,
+			Activation: LinearActivation,
 		}
 	}
 	for i := numIn; i < numIn+numOut; i++ {
 		nodes[i] = &NodeGene{
-			ID:       NodeID(counter.Next()),
-			Function: OutputNode,
-			Layer:    i,
+			ID:         NodeID(counter.Next()),
+			Function:   OutputNode,
+			Layer:      i,
+			Activation: LinearActivation,
 		}
 	}
 	nodesMap := make(map[NodeID]*NodeGene)
@@ -157,7 +160,7 @@ func (g *Genotype) CreateRecurrentConnection(in, out NodeID, weight float64, cou
 	return true
 }
 
-func (g *Genotype) CreateNode(conID ConnectionID, counter InnovationCounter) bool {
+func (g *Genotype) CreateNode(conID ConnectionID, act func(float64) float64, counter InnovationCounter) bool {
 	c := g.GetConnection(conID)
 	if c == nil {
 		return false
@@ -176,6 +179,7 @@ func (g *Genotype) CreateNode(conID ConnectionID, counter InnovationCounter) boo
 	n := &NodeGene{
 		NodeID(counter.Next()),
 		HiddenNode,
+		act,
 		insertionPoint,
 	}
 	g.Nodes[n.ID] = n

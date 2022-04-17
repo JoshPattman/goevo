@@ -7,6 +7,15 @@ import (
 type GenotypeMutator struct {
 	MaxNewSynapseValue      float64
 	MaxSynapseMutationValue float64
+	PossibleActivations     []func(float64) float64
+}
+
+func NewGenotypeMutator(MaxNewSynapseValue, MaxSynapseMutationValue float64) *GenotypeMutator {
+	return &GenotypeMutator{
+		MaxNewSynapseValue:      MaxNewSynapseValue,
+		MaxSynapseMutationValue: MaxSynapseMutationValue,
+		PossibleActivations:     []func(float64) float64{LinearActivation, ReluActivation, SigmoidActivation},
+	}
 }
 
 func (gm *GenotypeMutator) GrowRandomSynapse(g *Genotype, counter InnovationCounter) {
