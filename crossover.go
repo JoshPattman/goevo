@@ -4,7 +4,7 @@ import "math/rand"
 
 type GenotypeCrossover struct{}
 
-func (c *GenotypeCrossover) CrossoverSimple(g1, g2 *Genotype) *Genotype {
+func (c *GenotypeCrossover) CrossoverSimple(g1, g2 *GenotypeSlow) *GenotypeSlow {
 	g := CopyGenotype(g1)
 	for sid, _ := range g.Connections {
 		c2 := g2.GetConnection(sid)

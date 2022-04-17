@@ -5,23 +5,11 @@ import (
 	"strconv"
 )
 
-const (
-	InputNode NodeFunction = iota
-	HiddenNode
-	OutputNode
-)
-
-type NodeFunction int
-
-type NodeID int
-
 type NodeGene struct {
 	ID       NodeID
 	Function NodeFunction
 	Layer    int
 }
-
-type ConnectionID int
 
 type ConnectionGene struct {
 	ID        ConnectionID
@@ -32,7 +20,7 @@ type ConnectionGene struct {
 	Enabled   bool
 }
 
-type Genotype struct {
+type GenotypeSlow struct {
 	Nodes       map[NodeID]*NodeGene
 	Connections map[ConnectionID]*ConnectionGene
 	Layers      []*NodeGene
@@ -40,7 +28,7 @@ type Genotype struct {
 	numOutput   int
 }
 
-func NewGenotype(numIn, numOut int, counter InnovationCounter) *Genotype {
+func NewGenotype(numIn, numOut int, counter InnovationCounter) *GenotypeSlow {
 	nodes := make([]*NodeGene, numIn+numOut)
 	for i := 0; i < numIn; i++ {
 		nodes[i] = &NodeGene{
@@ -60,7 +48,7 @@ func NewGenotype(numIn, numOut int, counter InnovationCounter) *Genotype {
 	for _, n := range nodes {
 		nodesMap[n.ID] = n
 	}
-	g := &Genotype{
+	g := &GenotypeSlow{
 		Layers:      nodes,
 		Connections: make(map[ConnectionID]*ConnectionGene, 0),
 		Nodes:       nodesMap,
@@ -71,7 +59,7 @@ func NewGenotype(numIn, numOut int, counter InnovationCounter) *Genotype {
 }
 
 // TODO: Speed this up
-func (g *Genotype) GetConnectionByEndpoints(a, b NodeID) *ConnectionGene {
+func (g *GenotypeSlow) GetConnectionByEndpoints(a, b NodeID) *ConnectionGene {
 	for _, c := range g.Connections {
 		if c.In == a && c.Out == b {
 			return c
@@ -80,30 +68,30 @@ func (g *Genotype) GetConnectionByEndpoints(a, b NodeID) *ConnectionGene {
 	return nil
 }
 
-func (g *Genotype) GetNodeTypeCounts() (int, int, int) {
+func (g *GenotypeSlow) GetNodeTypeCounts() (int, int, int) {
 	return g.numInput, len(g.Nodes) - g.numInput - g.numOutput, g.numOutput
 }
 
-func (g *Genotype) IsConnected(a, b NodeID) bool {
+func (g *GenotypeSlow) IsConnected(a, b NodeID) bool {
 	c := g.GetConnectionByEndpoints(a, b)
 	return c != nil
 }
 
-func (g *Genotype) GetConnection(cid ConnectionID) *ConnectionGene {
+func (g *GenotypeSlow) GetConnection(cid ConnectionID) *ConnectionGene {
 	if v, ok := g.Connections[cid]; ok {
 		return v
 	}
 	return nil
 }
 
-func (g *Genotype) GetNode(nid NodeID) *NodeGene {
+func (g *GenotypeSlow) GetNode(nid NodeID) *NodeGene {
 	if v, ok := g.Nodes[nid]; ok {
 		return v
 	}
 	return nil
 }
 
-func (g *Genotype) CreateConnection(in, out NodeID, weight float64, counter InnovationCounter) bool {
+func (g *GenotypeSlow) CreateConnection(in, out NodeID, weight float64, counter InnovationCounter) bool {
 	if g.IsConnected(in, out) {
 		return false
 	}
@@ -129,7 +117,7 @@ func (g *Genotype) CreateConnection(in, out NodeID, weight float64, counter Inno
 	g.Connections[con.ID] = con
 	return true
 }
-func (g *Genotype) CreateRecurrentConnection(in, out NodeID, weight float64, counter InnovationCounter) bool {
+func (g *GenotypeSlow) CreateRecurrentConnection(in, out NodeID, weight float64, counter InnovationCounter) bool {
 	if g.IsConnected(in, out) {
 		return false
 	}
@@ -157,7 +145,7 @@ func (g *Genotype) CreateRecurrentConnection(in, out NodeID, weight float64, cou
 	return true
 }
 
-func (g *Genotype) CreateNode(conID ConnectionID, counter InnovationCounter) bool {
+func (g *GenotypeSlow) CreateNode(conID ConnectionID, counter InnovationCounter) bool {
 	c := g.GetConnection(conID)
 	if c == nil {
 		return false
@@ -192,7 +180,7 @@ func (g *Genotype) CreateNode(conID ConnectionID, counter InnovationCounter) boo
 	return true
 }
 
-func (g *Genotype) MutateConnectionBy(cid ConnectionID, v float64) bool {
+func (g *GenotypeSlow) MutateConnectionBy(cid ConnectionID, v float64) bool {
 	c := g.GetConnection(cid)
 	if c == nil {
 		return false
@@ -201,7 +189,7 @@ func (g *Genotype) MutateConnectionBy(cid ConnectionID, v float64) bool {
 	return true
 }
 
-func CopyGenotype(g *Genotype) *Genotype {
+func CopyGenotype(g *GenotypeSlow) *GenotypeSlow {
 	nodes := make(map[NodeID]*NodeGene)
 	layers := make([]*NodeGene, len(g.Layers))
 	cons := make(map[ConnectionID]*ConnectionGene)
@@ -217,7 +205,7 @@ func CopyGenotype(g *Genotype) *Genotype {
 		cons[c.ID] = &newCon
 	}
 
-	g1 := &Genotype{
+	g1 := &GenotypeSlow{
 		Nodes:       nodes,
 		Connections: cons,
 		Layers:      layers,
@@ -229,7 +217,7 @@ func CopyGenotype(g *Genotype) *Genotype {
 
 /*
 // ApproximateGeneticDistance : This is not the correct genetic difference, but rather a heuristic
-func (g *Genotype) ApproximateGeneticDistance(g1 *Genotype) float64 {
+func (g *GenotypeSlow) ApproximateGeneticDistance(g1 *GenotypeSlow) float64 {
 	weightDiff := 1.0
 	connDiff := 1.0
 	d := 0.0
@@ -253,7 +241,7 @@ func (g *Genotype) ApproximateGeneticDistance(g1 *Genotype) float64 {
 }
 */
 
-func (g *Genotype) String() string {
+func (g *GenotypeSlow) String() string {
 	s := "(["
 	for k, v := range g.Nodes {
 		s += strconv.Itoa(int(k)) + ":"

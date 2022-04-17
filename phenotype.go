@@ -53,7 +53,7 @@ func (p *Phenotype) Calculate(inputs []float64) []float64 {
 	return outs
 }
 
-func GrowPhenotype(g *Genotype) *Phenotype {
+func GrowPhenotype(g *GenotypeSlow) *Phenotype {
 	nodes := make([]*PhenotypeNode, len(g.Nodes))
 	inodes := make([]*PhenotypeNode, len(g.Nodes))
 	onodes := make([]*PhenotypeNode, len(g.Nodes))

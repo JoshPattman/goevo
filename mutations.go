@@ -9,7 +9,7 @@ type GenotypeMutator struct {
 	MaxSynapseMutationValue float64
 }
 
-func (gm *GenotypeMutator) GrowRandomSynapse(g *Genotype, counter InnovationCounter) {
+func (gm *GenotypeMutator) GrowRandomSynapse(g *GenotypeSlow, counter InnovationCounter) {
 	inps, hids, outs := g.GetNodeTypeCounts()
 	for i := 0; i < 10; i++ {
 		ra := randRange(0, inps+hids)
@@ -24,7 +24,7 @@ func (gm *GenotypeMutator) GrowRandomSynapse(g *Genotype, counter InnovationCoun
 		}
 	}
 }
-func (gm *GenotypeMutator) GrowRandomRecurrentSynapse(g *Genotype, counter InnovationCounter) {
+func (gm *GenotypeMutator) GrowRandomRecurrentSynapse(g *GenotypeSlow, counter InnovationCounter) {
 	inps, hids, outs := g.GetNodeTypeCounts()
 	for i := 0; i < 10; i++ {
 		ra := randRange(0, inps+hids)
@@ -40,7 +40,7 @@ func (gm *GenotypeMutator) GrowRandomRecurrentSynapse(g *Genotype, counter Innov
 	}
 }
 
-func (gm *GenotypeMutator) GrowRandomNode(g *Genotype, counter InnovationCounter) {
+func (gm *GenotypeMutator) GrowRandomNode(g *GenotypeSlow, counter InnovationCounter) {
 	cons := make([]*ConnectionGene, len(g.Connections))
 	consI := 0
 	for i := range g.Connections {
@@ -57,7 +57,7 @@ func (gm *GenotypeMutator) GrowRandomNode(g *Genotype, counter InnovationCounter
 	g.CreateNode(cons[si].ID, counter)
 }
 
-func (gm *GenotypeMutator) MutateRandomConnection(g *Genotype) {
+func (gm *GenotypeMutator) MutateRandomConnection(g *GenotypeSlow) {
 	cons := make([]*ConnectionGene, len(g.Connections))
 	consI := 0
 	for i := range g.Connections {

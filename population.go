@@ -6,7 +6,7 @@ import (
 )
 
 type Agent struct {
-	GT      *Genotype
+	GT      *GenotypeSlow
 	PT      *Phenotype
 	Fitness float64
 }
@@ -20,7 +20,7 @@ func (p Population) Order() {
 	})
 }
 
-func (p Population) Repopulate(ratio float64, f func(g1 *Genotype, g2 *Genotype) *Genotype) {
+func (p Population) Repopulate(ratio float64, f func(g1 *GenotypeSlow, g2 *GenotypeSlow) *GenotypeSlow) {
 	p.Order()
 	numberToKeep := int(ratio * float64(len(p)))
 	for g := numberToKeep; g < len(p); g++ {
@@ -37,7 +37,7 @@ func (p Population) Repopulate(ratio float64, f func(g1 *Genotype, g2 *Genotype)
 	}
 }
 
-func NewPopulation(gts []*Genotype) Population {
+func NewPopulation(gts []*GenotypeSlow) Population {
 	p := make(Population, len(gts))
 	for i := range p {
 		pt := GrowPhenotype(gts[i])
@@ -45,4 +45,3 @@ func NewPopulation(gts []*Genotype) Population {
 	}
 	return p
 }
-
