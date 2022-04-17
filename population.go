@@ -6,9 +6,9 @@ import (
 )
 
 type Agent struct {
-	GT      *GenotypeSlow
-	PT      *Phenotype
-	Fitness float64
+	Genotype  Genotype
+	Phenotype *Phenotype
+	Fitness   float64
 }
 
 type Population []*Agent
@@ -20,7 +20,7 @@ func (p Population) Order() {
 	})
 }
 
-func (p Population) Repopulate(ratio float64, f func(g1 *GenotypeSlow, g2 *GenotypeSlow) *GenotypeSlow) {
+func (p Population) Repopulate(ratio float64, f func(g1 Genotype, g2 Genotype) Genotype) {
 	p.Order()
 	numberToKeep := int(ratio * float64(len(p)))
 	for g := numberToKeep; g < len(p); g++ {
@@ -31,17 +31,17 @@ func (p Population) Repopulate(ratio float64, f func(g1 *GenotypeSlow, g2 *Genot
 			parent2I = parent1I
 			parent1I = c
 		}
-		gt := f(p[parent1I].GT, p[parent2I].GT)
-		pt := GrowPhenotypeLegacy(gt)
-		p[g] = &Agent{GT: gt, PT: pt}
+		gt := f(p[parent1I].Genotype, p[parent2I].Genotype)
+		pt := GrowPhenotype(gt)
+		p[g] = &Agent{Genotype: gt, Phenotype: pt}
 	}
 }
 
-func NewPopulation(gts []*GenotypeSlow) Population {
+func NewPopulation(gts []Genotype) Population {
 	p := make(Population, len(gts))
 	for i := range p {
-		pt := GrowPhenotypeLegacy(gts[i])
-		p[i] = &Agent{GT: gts[i], PT: pt}
+		pt := GrowPhenotype(gts[i])
+		p[i] = &Agent{Genotype: gts[i], Phenotype: pt}
 	}
 	return p
 }
