@@ -1,5 +1,7 @@
 package goevo
 
+const defaultActivation = "linear"
+
 type GenotypeFast struct {
 	Layers      []NodeID
 	Nodes       map[NodeID]*FastNodeGene
@@ -9,7 +11,8 @@ type GenotypeFast struct {
 }
 
 type FastNodeGene struct {
-	ID NodeID
+	ID         NodeID
+	Activation string
 }
 
 type FastConnectionGene struct {
@@ -25,7 +28,7 @@ func NewGenotypeFast(numIn, numOut int, counter InnovationCounter) *GenotypeFast
 	nodes := make(map[NodeID]*FastNodeGene)
 	for i := 0; i < numIn+numOut; i++ {
 		id := NodeID(counter.Next())
-		n := &FastNodeGene{id}
+		n := &FastNodeGene{id, defaultActivation}
 		nodes[id] = n
 		layers[i] = id
 	}
@@ -176,7 +179,7 @@ func (g *GenotypeFast) CreateNodeOn(cid ConnectionID, counter InnovationCounter)
 	newNodeID := NodeID(counter.Next())
 	newConID := ConnectionID(counter.Next())
 	// Create node
-	n := &FastNodeGene{newNodeID}
+	n := &FastNodeGene{newNodeID, defaultActivation}
 	g.Nodes[newNodeID] = n
 	// Create extra connection
 	c2 := &FastConnectionGene{
@@ -225,6 +228,22 @@ func (g *GenotypeFast) IsConnectionRecurrent(cid ConnectionID) (bool, error) {
 		return false, Error{"Connection does not exist"}
 	}
 	return c.IsRecurrent, nil
+}
+
+func (g *GenotypeFast) GetActivation(nid NodeID) (string, error) {
+	n, isIn := g.Nodes[nid]
+	if !isIn {
+		return "", Error{"Node does not exist"}
+	}
+	return n.Activation, nil
+}
+func (g *GenotypeFast) SetActivation(nid NodeID, s string) error {
+	n, isIn := g.Nodes[nid]
+	if !isIn {
+		return Error{"Node does not exist"}
+	}
+	n.Activation = s
+	return nil
 }
 
 func (g *GenotypeFast) Copy() Genotype {

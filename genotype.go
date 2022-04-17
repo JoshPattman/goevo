@@ -28,5 +28,7 @@ type Genotype interface {
 	GetConnectionsTo(NodeID) []ConnectionID
 	GetConnectionBetween(NodeID, NodeID) (ConnectionID, bool)
 	GetAllConnectionIDs() []ConnectionID
+	GetActivation(NodeID) (string, error)
+	SetActivation(NodeID, string) error
 	Copy() Genotype
 }

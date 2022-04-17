@@ -44,7 +44,15 @@ func (gm *GenotypeMutator) GrowRandomRecurrentSynapse(g Genotype, counter Innova
 	}
 }
 
-func (gm *GenotypeMutator) GrowRandomNode(g Genotype, counter InnovationCounter) {
+func (gm *GenotypeMutator) MutateRandomActivation(g Genotype, acs []string) {
+	a := acs[randRange(0, len(acs))]
+	in, hid, out := g.GetNumNodes()
+	n := randRange(0, in+out+hid)
+	nid, _ := g.GetNodeIDAtLayer(n)
+	g.SetActivation(nid, a)
+}
+
+func (gm *GenotypeMutator) GrowRandomNode(g Genotype, acs []string, counter InnovationCounter) {
 	gCons := g.GetAllConnectionIDs()
 	cons := make([]ConnectionID, len(gCons))
 	consI := 0
@@ -60,7 +68,8 @@ func (gm *GenotypeMutator) GrowRandomNode(g Genotype, counter InnovationCounter)
 		return
 	}
 	si := randRange(0, len(cons))
-	g.CreateNodeOn(cons[si], counter)
+	n, _, _ := g.CreateNodeOn(cons[si], counter)
+	g.SetActivation(n, acs[randRange(0, len(acs))])
 }
 
 func (gm *GenotypeMutator) MutateRandomConnection(g Genotype) {

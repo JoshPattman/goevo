@@ -52,7 +52,7 @@ func (p *Phenotype) Calculate(inputs []float64) []float64 {
 	}
 	return outs
 }
-func GrowPhenotype(g Genotype) *Phenotype {
+func GrowPhenotype(g Genotype, activations map[string]func(float64) float64) *Phenotype {
 	numNodesIn, numNodesHid, numNodesOut := g.GetNumNodes()
 	numNodes := numNodesIn + numNodesHid + numNodesOut
 	nodes := make([]*PhenotypeNode, numNodes)
@@ -82,16 +82,19 @@ func GrowPhenotype(g Genotype) *Phenotype {
 				rWeights = append(rWeights, w)
 			}
 		}
-		if i < numNodesIn {
+		acStr, _ := g.GetActivation(thisGNode)
+		ac, isIn := activations[acStr]
+		if isIn {
+			nodes[i].Activation = ac
+		} else {
 			nodes[i].Activation = LinearActivation
+		}
+		if i < numNodesIn {
 			inodes[ic] = nodes[i]
 			ic++
 		} else if i >= numNodesIn+numNodesHid {
-			nodes[i].Activation = LinearActivation
 			onodes[oc] = nodes[i]
 			oc++
-		} else {
-			nodes[i].Activation = SigmoidActivation
 		}
 		nodes[i].Weights = weights
 		nodes[i].Successors = connections
