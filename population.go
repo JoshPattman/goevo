@@ -20,7 +20,7 @@ func (p Population) Order() {
 	})
 }
 
-func (p Population) Repopulate(ratio float64, f func(g1 Genotype, g2 Genotype) Genotype) {
+func (p Population) Repopulate(ratio float64, f func(g1 Genotype, g2 Genotype) Genotype, info ActivationInfo) {
 	p.Order()
 	numberToKeep := int(ratio * float64(len(p)))
 	for g := numberToKeep; g < len(p); g++ {
@@ -32,15 +32,15 @@ func (p Population) Repopulate(ratio float64, f func(g1 Genotype, g2 Genotype) G
 			parent1I = c
 		}
 		gt := f(p[parent1I].Genotype, p[parent2I].Genotype)
-		pt := GrowPhenotype(gt)
+		pt := GrowPhenotype(gt, info)
 		p[g] = &Agent{Genotype: gt, Phenotype: pt}
 	}
 }
 
-func NewPopulation(gts []Genotype) Population {
+func NewPopulation(gts []Genotype, info ActivationInfo) Population {
 	p := make(Population, len(gts))
 	for i := range p {
-		pt := GrowPhenotype(gts[i])
+		pt := GrowPhenotype(gts[i], info)
 		p[i] = &Agent{Genotype: gts[i], Phenotype: pt}
 	}
 	return p

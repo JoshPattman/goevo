@@ -68,11 +68,8 @@ func (gm *GenotypeMutator) MutateRandomConnection(g Genotype) {
 	cons := make([]ConnectionID, len(gCons))
 	consI := 0
 	for i := range gCons {
-		r, _ := g.IsConnectionRecurrent(gCons[i])
-		if !r {
-			cons[consI] = gCons[i]
-			consI++
-		}
+		cons[consI] = gCons[i]
+		consI++
 	}
 	cons = cons[:consI]
 	if len(cons) == 0 {
