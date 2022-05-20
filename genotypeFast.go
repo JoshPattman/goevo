@@ -1,5 +1,7 @@
 package goevo
 
+import "errors"
+
 type GenotypeFast struct {
 	Layers      []NodeID
 	Nodes       map[NodeID]*FastNodeGene
@@ -39,24 +41,17 @@ func NewGenotypeFast(numIn, numOut int, counter InnovationCounter) *GenotypeFast
 	}
 }
 
-type Error struct {
-	s string
-}
-
-func (c Error) Error() string {
-	return c.s
-}
 func (g *GenotypeFast) GetConnectionWeight(cid ConnectionID) (float64, error) {
 	v, found := g.Connections[cid]
 	if !found {
-		return 0, Error{"Connection not found"}
+		return 0, errors.New("Connection not found")
 	}
 	return v.Weight, nil
 }
 func (g *GenotypeFast) MutateConnectionWeight(cid ConnectionID, w float64) error {
 	v, found := g.Connections[cid]
 	if !found {
-		return Error{"Connection not found"}
+		return errors.New("Connection not found")
 	}
 	g.Connections[cid].Weight = v.Weight + w
 	return nil
@@ -64,7 +59,7 @@ func (g *GenotypeFast) MutateConnectionWeight(cid ConnectionID, w float64) error
 func (g *GenotypeFast) SetConnectionWeight(cid ConnectionID, w float64) error {
 	_, found := g.Connections[cid]
 	if !found {
-		return Error{"Connection not found"}
+		return errors.New("Connection not found")
 	}
 	g.Connections[cid].Weight = w
 	return nil
@@ -75,21 +70,21 @@ func (g *GenotypeFast) GetNumNodes() (int, int, int) {
 }
 func (g *GenotypeFast) GetNodeIDAtLayer(l int) (NodeID, error) {
 	if l >= len(g.Layers) || l < 0 {
-		return 0, Error{"Layer out of range"}
+		return 0, errors.New("Layer out of range")
 	}
 	return g.Layers[l], nil
 }
 func (g *GenotypeFast) GetLayerOfNode(nid NodeID) (int, error) {
 	n, found := g.Nodes[nid]
 	if !found {
-		return 0, Error{"Could not find node"}
+		return 0, errors.New("Could not find node")
 	}
 	for l, n2id := range g.Layers {
 		if n2id == n.ID {
 			return l, nil
 		}
 	}
-	return 0, Error{"Malformed layer list"}
+	return 0, errors.New("Malformed layer list")
 }
 func (g *GenotypeFast) GetConnectionsFrom(nid NodeID) []ConnectionID {
 	cons := make([]ConnectionID, 0)
@@ -120,22 +115,22 @@ func (g *GenotypeFast) GetConnectionBetween(nida, nidb NodeID) (ConnectionID, bo
 
 func (g *GenotypeFast) ConnectNodes(nida, nidb NodeID, weight float64, counter InnovationCounter) (ConnectionID, error) {
 	if nida == nidb {
-		return 0, Error{"Those are the same node"}
+		return 0, errors.New("Those are the same node")
 	}
 	if _, isConnected := g.GetConnectionBetween(nida, nidb); isConnected {
-		return 0, Error{"Those nodes were already connected"}
+		return 0, errors.New("Those nodes were already connected")
 	}
 	la, err1 := g.GetLayerOfNode(nida)
 	lb, err2 := g.GetLayerOfNode(nidb)
 	if err1 != nil || err2 != nil {
-		return 0, Error{"Node did not exist"}
+		return 0, errors.New("Node did not exist")
 	}
 	if lb > la {
 		//not recurrent
 		if lb < g.NumInputs {
-			return 0, Error{"Cannot connect to an input"}
+			return 0, errors.New("Cannot connect to an input")
 		} else if la >= len(g.Nodes)-g.NumOutputs {
-			return 0, Error{"Cannot connect from an output"}
+			return 0, errors.New("Cannot connect from an output")
 		}
 		id := ConnectionID(counter.Next())
 		g.Connections[id] = &FastConnectionGene{
@@ -149,9 +144,9 @@ func (g *GenotypeFast) ConnectNodes(nida, nidb NodeID, weight float64, counter I
 	} else {
 		//recurrent
 		if la < g.NumInputs {
-			return 0, Error{"Cannot connect from an input on recurrent"}
+			return 0, errors.New("Cannot connect from an input on recurrent")
 		} else if lb >= len(g.Nodes)-g.NumOutputs {
-			return 0, Error{"Cannot connect to an output on recurrent"}
+			return 0, errors.New("Cannot connect to an output on recurrent")
 		}
 		id := ConnectionID(counter.Next())
 		g.Connections[id] = &FastConnectionGene{
@@ -167,10 +162,10 @@ func (g *GenotypeFast) ConnectNodes(nida, nidb NodeID, weight float64, counter I
 func (g *GenotypeFast) CreateNodeOn(cid ConnectionID, counter InnovationCounter) (NodeID, ConnectionID, error) {
 	c, exists := g.Connections[cid]
 	if !exists {
-		return 0, 0, Error{"Connection does not exist"}
+		return 0, 0, errors.New("Connection does not exist")
 	}
 	if c.IsRecurrent {
-		return 0, 0, Error{"Cannot create nodes on recurrent connection at the moment"}
+		return 0, 0, errors.New("Cannot create nodes on recurrent connection at the moment")
 	}
 	// Create IDs
 	newNodeID := NodeID(counter.Next())
@@ -204,7 +199,7 @@ func (g *GenotypeFast) CreateNodeOn(cid ConnectionID, counter InnovationCounter)
 func (g *GenotypeFast) GetConnectionEndpoints(cid ConnectionID) (NodeID, NodeID, error) {
 	c, isIn := g.Connections[cid]
 	if !isIn {
-		return 0, 0, Error{"Connection does not exist"}
+		return 0, 0, errors.New("Connection does not exist")
 	}
 	return c.FromID, c.ToID, nil
 }
@@ -222,7 +217,7 @@ func (g *GenotypeFast) GetAllConnectionIDs() []ConnectionID {
 func (g *GenotypeFast) IsConnectionRecurrent(cid ConnectionID) (bool, error) {
 	c, isIn := g.Connections[cid]
 	if !isIn {
-		return false, Error{"Connection does not exist"}
+		return false, errors.New("Connection does not exist")
 	}
 	return c.IsRecurrent, nil
 }
