@@ -2,13 +2,19 @@ package goevo
 
 import "math"
 
+// A string representing an activation function. It must be one of the consts that start with 'Activation...'
 type Activation string
 
 const (
-	ActivationLinear  Activation = "linear"
-	ActivationReLU    Activation = "relu"
-	ActivationTanh    Activation = "tanh"
-	ActivationReLn    Activation = "reln"
+	// y = x
+	ActivationLinear Activation = "linear"
+	// y = x {x > 0} | y = 0 {x <= 0}
+	ActivationReLU Activation = "relu"
+	// y = tanh(x)
+	ActivationTanh Activation = "tanh"
+	// y = ln(x) {x > 0} | y = 0 {x <= 0}. I have found this can benefit recurrent networks by not allowing the values to explode
+	ActivationReLn Activation = "reln"
+	// y = sigmoid(x)
 	ActivationSigmoid Activation = "sigmoid"
 )
 

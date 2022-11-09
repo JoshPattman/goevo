@@ -2,27 +2,37 @@ package goevo
 
 import "errors"
 
+// A type denoting the type of a neuron (input, hidden, output). Must be one of the consts that start with 'Neuron...'
 type NeuronType string
 
 const (
-	NeuronInput  NeuronType = "input"
+	// Input neuron
+	NeuronInput NeuronType = "input"
+	// Hidden neuron
 	NeuronHidden NeuronType = "hidden"
+	// Output neuron
 	NeuronOutput NeuronType = "output"
 )
 
+// A type represeting a genotype synapse
 type Synapse struct {
-	From   int     `json:"from_id"`
-	To     int     `json:"to_id"`
+	// The id of the neuron this comes from
+	From int `json:"from_id"`
+	// The id of the neuron this goes to
+	To int `json:"to_id"`
+	// The weight of this synapse
 	Weight float64 `json:"weight"`
 }
 
+// A type representing a genotype neuron
 type Neuron struct {
-	// -1 input, 0 hidden, 1 output
+	// The type of this neuron
 	Type NeuronType `json:"type"`
-	// relu, linear, tanh
+	// The activation of this neuron
 	Activation Activation `json:"activation"`
 }
 
+// A type representing a genotype (effectively DNA). DO NOT EDIT VALUES DIRECTLY; use functions such as NewSynapse and NewNeuron to add and remove neurons
 type Genotype struct {
 	NumIn       int              `json:"num_in"`
 	NumOut      int              `json:"num_out"`
@@ -31,6 +41,7 @@ type Genotype struct {
 	NeuronOrder []int            `json:"neuron_order"`
 }
 
+// Create a new genotype
 func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation Activation) *Genotype {
 	nodes := make(map[int]*Neuron)
 	nodeOrder := make([]int, numIn+numOut)
@@ -59,6 +70,7 @@ func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation
 	}
 }
 
+// Find the ID of the synapse that goes from 'from' to 'to'
 func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 	for ci, c := range n.Synapses {
 		if c.From == from && c.To == to {
@@ -68,7 +80,7 @@ func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 	return -1, errors.New("cannot find connection")
 }
 
-// TODO: stop input connecting to input and output connecting to output
+// Create a synapse between two neurons
 func (n *Genotype) NewSynapse(counter Counter, from, to int, weight float64) (int, error) {
 	if !(n.IsNeuron(from) && n.IsNeuron(to)) {
 		return -1, errors.New("ids are not both nodes")
@@ -94,6 +106,7 @@ func (n *Genotype) NewSynapse(counter Counter, from, to int, weight float64) (in
 	return id, nil
 }
 
+// Create a new hidden neuron on a synapse
 func (n *Genotype) NewNeuron(counter Counter, conn int, activation Activation) (int, int, error) {
 	if !n.IsSynapse(conn) {
 		return -1, -1, errors.New("id is not a connection")
@@ -130,6 +143,7 @@ func (n *Genotype) NewNeuron(counter Counter, conn int, activation Activation) (
 	return newNodeID, newConnID, nil
 }
 
+// Copy this genotype and return the copy
 func (g *Genotype) Copy() *Genotype {
 	neurons := make(map[int]*Neuron)
 	synapses := make(map[int]*Synapse)
@@ -150,18 +164,24 @@ func (g *Genotype) Copy() *Genotype {
 	}
 }
 
+// Get the number of input, hidden, and output neurons in this genotype
 func (n *Genotype) Topology() (int, int, int) {
 	return n.NumIn, len(n.NeuronOrder) - n.NumIn - n.NumOut, n.NumOut
 }
 
+// Check if a given id is a neuron in this genotype
 func (n *Genotype) IsNeuron(id int) bool {
 	_, ok := n.Neurons[id]
 	return ok
 }
+
+// Check if a given id is a synapse in this genotype
 func (n *Genotype) IsSynapse(id int) bool {
 	_, ok := n.Synapses[id]
 	return ok
 }
+
+// Gets the order (position in which the neurons are calculated) of a neuron ID
 func (n *Genotype) GetNeuronOrder(nid int) (int, error) {
 	if !n.IsNeuron(nid) {
 		return -1, errors.New("not a node")

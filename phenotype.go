@@ -1,9 +1,12 @@
 package goevo
 
+// Data type from a phenotype connection
 type PhenotypeConnection struct {
 	To     int
 	Weight float64
 }
+
+// Data type representing a phenotype (a bit like an instance of a genotype)
 type Phenotype struct {
 	memory      []float64
 	activations [](func(float64) float64)
@@ -12,6 +15,7 @@ type Phenotype struct {
 	numOut      int
 }
 
+// Create a phenotype from a genotype
 func NewPhenotype(g *Genotype) *Phenotype {
 	mem := make([]float64, len(g.Neurons))
 	acts := make([](func(float64) float64), len(g.Neurons))
@@ -36,6 +40,7 @@ func NewPhenotype(g *Genotype) *Phenotype {
 	}
 }
 
+// Do a forward pass with some input data for the phenotype, returning the output of the network
 func (p *Phenotype) Forward(inputs []float64) []float64 {
 	if len(inputs) != p.numIn {
 		panic("not correct number of inputs")

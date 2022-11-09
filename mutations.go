@@ -5,6 +5,7 @@ import (
 	"math/rand"
 )
 
+// Mutate a random synapses weight by normal distribution of standard deviation stddev
 func MutateRandomSynapse(g *Genotype, stddev float64) {
 	k := rand.Intn(len(g.Synapses))
 	for _, s := range g.Synapses {
@@ -17,7 +18,7 @@ func MutateRandomSynapse(g *Genotype, stddev float64) {
 	panic("unreachable")
 }
 
-// I don't knwo an efficient way to pick a deffo available random synapse to create so i just repeatedly try many times over
+// Add a random synapse with weight from normal distribution with standard deviation weightStddev
 func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, attempts int) error {
 	if attempts == 0 {
 		return errors.New("did not find new synapse slot within nuber of attempts")
@@ -35,6 +36,7 @@ func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, attemp
 	return nil
 }
 
+// Add a neuron on a random synapse
 func AddRandomNeuron(counter Counter, g *Genotype, activation Activation) error {
 	if len(g.Synapses) == 0 {
 		return errors.New("no synapses to create neuron on")
