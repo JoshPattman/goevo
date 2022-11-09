@@ -1,5 +1,6 @@
 package goevo
 
+/*
 import (
 	"image"
 	"image/color"
@@ -221,12 +222,12 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, startID, endI
 	} else if w < -1 {
 		w = -1
 	}
-	/*c := uint8(255 * (w/2 + 0.5))
-	ic := 255 - c
-	col := color.RGBA{R: ic, B: c, A: 255}
-	if con.Recurrent && false {
-		col = color.RGBA{G: 255, A: 255}
-	}*/
+	//c := uint8(255 * (w/2 + 0.5))
+	//ic := 255 - c
+	//col := color.RGBA{R: ic, B: c, A: 255}
+	//if con.Recurrent && false {
+		//col = color.RGBA{G: 255, A: 255}
+	//}
 	var col color.Color
 	if w > 0 {
 		if isRecurrent {
@@ -244,3 +245,4 @@ func drawConnection(img draw.Image, xPoses, yPoses map[NodeID]int, startID, endI
 	width := int(math.Max(math.Min(math.Abs(w), 1)*10, 1))
 	thickLine(img, startX, startY, endX, endY, width, col)
 }
+*/
