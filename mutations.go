@@ -1,80 +1,51 @@
 package goevo
 
 import (
+	"errors"
 	"math/rand"
 )
 
-type GenotypeMutator struct {
-	MaxNewSynapseValue      float64
-	MaxSynapseMutationValue float64
-}
-
-func (gm *GenotypeMutator) GrowRandomSynapse(g Genotype, counter InnovationCounter) {
-	inps, hids, outs := g.GetNumNodes()
-	for i := 0; i < 10; i++ {
-		ra := randRange(0, inps+hids)
-		s := ra + 1
-		if s < inps {
-			s = inps
-		}
-		rb := randRange(s, inps+hids+outs)
-		w := (rand.Float64()*2 - 1) * gm.MaxNewSynapseValue
-		nida, _ := g.GetNodeIDAtLayer(ra)
-		nidb, _ := g.GetNodeIDAtLayer(rb)
-		if _, err := g.ConnectNodes(nida, nidb, w, counter); err == nil {
+func MutateRandomSynapse(g *Genotype, stddev float64) {
+	k := rand.Intn(len(g.Synapses))
+	for _, s := range g.Synapses {
+		if k == 0 {
+			s.Weight += rand.NormFloat64() * stddev
 			return
 		}
+		k--
 	}
-}
-func (gm *GenotypeMutator) GrowRandomRecurrentSynapse(g Genotype, counter InnovationCounter) {
-	inps, hids, outs := g.GetNumNodes()
-	for i := 0; i < 10; i++ {
-		ra := randRange(0, inps+hids)
-		s := ra + 1
-		if s < inps {
-			s = inps
-		}
-		rb := randRange(s, inps+hids+outs)
-		w := (rand.Float64()*2 - 1) * gm.MaxNewSynapseValue
-		nida, _ := g.GetNodeIDAtLayer(ra)
-		nidb, _ := g.GetNodeIDAtLayer(rb)
-		if _, err := g.ConnectNodes(nidb, nida, w, counter); err == nil {
-			return
-		}
-	}
+	panic("unreachable")
 }
 
-func (gm *GenotypeMutator) GrowRandomNode(g Genotype, counter InnovationCounter) {
-	gCons := g.GetAllConnectionIDs()
-	cons := make([]ConnectionID, len(gCons))
-	consI := 0
-	for i := range gCons {
-		r, _ := g.IsConnectionRecurrent(gCons[i])
-		if !r {
-			cons[consI] = gCons[i]
-			consI++
-		}
+// I don't knwo an efficient way to pick a deffo available random synapse to create so i just repeatedly try many times over
+func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, attempts int) error {
+	if attempts == 0 {
+		return errors.New("did not find new synapse slot within nuber of attempts")
 	}
-	cons = cons[:consI]
-	if len(cons) == 0 {
-		return
+	nao := rand.Intn(len(g.Neurons) - g.NumOut)
+	start := g.NumIn
+	if start <= nao {
+		start = nao + 1
 	}
-	si := randRange(0, len(cons))
-	g.CreateNodeOn(cons[si], counter)
+	nbo := start + rand.Intn(len(g.Neurons)-start)
+	_, err := g.NewSynapse(counter, g.NeuronOrder[nao], g.NeuronOrder[nbo], rand.NormFloat64()*weightStddev)
+	if err != nil {
+		return AddRandomSynapse(counter, g, weightStddev, attempts-1)
+	}
+	return nil
 }
 
-func (gm *GenotypeMutator) MutateRandomConnection(g Genotype) {
-	gCons := g.GetAllConnectionIDs()
-	cons := make([]ConnectionID, len(gCons))
-	consI := 0
-	for i := range gCons {
-		cons[consI] = gCons[i]
-		consI++
+func AddRandomNeuron(counter Counter, g *Genotype, activation Activation) error {
+	if len(g.Synapses) == 0 {
+		return errors.New("no synapses to create neuron on")
 	}
-	cons = cons[:consI]
-	if len(cons) == 0 {
-		return
+	k := rand.Intn(len(g.Synapses))
+	for sid := range g.Synapses {
+		if k == 0 {
+			g.NewNeuron(counter, sid, activation)
+			return nil
+		}
+		k--
 	}
-	si := randRange(0, len(cons))
-	g.MutateConnectionWeight(cons[si], (rand.Float64()*2-1)*gm.MaxSynapseMutationValue)
+	panic("unreachable")
 }

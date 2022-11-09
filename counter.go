@@ -2,10 +2,9 @@ package goevo
 
 import "sync/atomic"
 
-type InnovationCounter interface {
+type Counter interface {
 	Next() int
 }
-
 type AtomicCounter struct {
 	I int64
 }
@@ -15,7 +14,7 @@ func (a *AtomicCounter) Next() int {
 	return int(v)
 }
 
-func NewAtomicCounter() InnovationCounter {
+func NewAtomicCounter() Counter {
 	return &AtomicCounter{
 		I: -1,
 	}
