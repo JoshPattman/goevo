@@ -150,6 +150,10 @@ func (g *Genotype) Copy() *Genotype {
 	}
 }
 
+func (n *Genotype) Topology() (int, int, int) {
+	return n.NumIn, len(n.NeuronOrder) - n.NumIn - n.NumOut, n.NumOut
+}
+
 func (n *Genotype) IsNeuron(id int) bool {
 	_, ok := n.Neurons[id]
 	return ok
