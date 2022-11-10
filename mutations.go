@@ -7,6 +7,9 @@ import (
 
 // Mutate a random synapses weight by normal distribution of standard deviation stddev
 func MutateRandomSynapse(g *Genotype, stddev float64) {
+	if len(g.Synapses) == 0 {
+		return
+	}
 	k := rand.Intn(len(g.Synapses))
 	for _, s := range g.Synapses {
 		if k == 0 {
