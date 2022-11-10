@@ -41,6 +41,16 @@ type Genotype struct {
 	NeuronOrder []int            `json:"neuron_order"`
 }
 
+func NewGenotypeEmpty() *Genotype {
+	return &Genotype{
+		NumIn:       -1,
+		NumOut:      -1,
+		Neurons:     make(map[int]*Neuron),
+		Synapses:    make(map[int]*Synapse),
+		NeuronOrder: make([]int, 0),
+	}
+}
+
 // Create a new genotype
 func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation Activation) *Genotype {
 	nodes := make(map[int]*Neuron)

@@ -105,28 +105,11 @@ func (v *GenotypeVisualiser) DrawImageToPNGFile(filename string, g *Genotype) {
 }
 
 func drawCircle(img draw.Image, x0, y0, r int, c color.Color) {
-	x, y, dx, dy := r-1, 0, 1, 1
-	err := dx - (r * 2)
-
-	for x > y {
-		img.Set(x0+x, y0+y, c)
-		img.Set(x0+y, y0+x, c)
-		img.Set(x0-y, y0+x, c)
-		img.Set(x0-x, y0+y, c)
-		img.Set(x0-x, y0-y, c)
-		img.Set(x0-y, y0-x, c)
-		img.Set(x0+y, y0-x, c)
-		img.Set(x0+x, y0-y, c)
-
-		if err <= 0 {
-			y++
-			err += dy
-			dy += 2
-		}
-		if err > 0 {
-			x--
-			dx += 2
-			err += dx - (r * 2)
+	for x := -r; x < r; x++ {
+		for y := -r; y < r; y++ {
+			if (x*x)+(y*y) <= r*r {
+				img.Set(x0+x, y0+y, c)
+			}
 		}
 	}
 }
@@ -150,34 +133,36 @@ func drawHiddenNeuron(img draw.Image, g *GenotypeVisualiser, posX, posY int) {
 	drawNeuron(img, g, posX, posY, g.HiddenNeuronColor)
 }
 
-/*func line(img draw.Image, x0, y0, x1, y1 int, c color.Color) {
-	var dx = math.Abs(float64(x1 - x0))
-	var dy = math.Abs(float64(y1 - y0))
-	var err = dx - dy
-	var sx, sy = 1, 1
+/*
+	func line(img draw.Image, x0, y0, x1, y1 int, c color.Color) {
+		var dx = math.Abs(float64(x1 - x0))
+		var dy = math.Abs(float64(y1 - y0))
+		var err = dx - dy
+		var sx, sy = 1, 1
 
-	if x0 > x1 {
-		sx = -1
-	}
-	if y0 > y1 {
-		sy = -1
-	}
+		if x0 > x1 {
+			sx = -1
+		}
+		if y0 > y1 {
+			sy = -1
+		}
 
-	img.Set(x0, y0, c)
-	for x0 != x1 || y0 != y1 {
-		var e2 = 2 * err
-		if e2 > -dy {
-			err -= dy
-			x0 += sx
-		}
-		if e2 < dx {
-			err += dx
-			y0 += sy
-		}
 		img.Set(x0, y0, c)
-	}
+		for x0 != x1 || y0 != y1 {
+			var e2 = 2 * err
+			if e2 > -dy {
+				err -= dy
+				x0 += sx
+			}
+			if e2 < dx {
+				err += dx
+				y0 += sy
+			}
+			img.Set(x0, y0, c)
+		}
 
-}*/
+}
+*/
 func thickLine(img draw.Image, x0, y0, x1, y1, w int, c color.Color) {
 	var dx = math.Abs(float64(x1 - x0))
 	var dy = math.Abs(float64(y1 - y0))
