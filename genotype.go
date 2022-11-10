@@ -105,11 +105,11 @@ func (n *Genotype) NewSynapse(counter Counter, from, to int, weight float64) (in
 	} else if nodeFrom.Type == NeuronInput && nodeTo.Type == NeuronInput {
 		return -1, errors.New("cannot create connection from input to input")
 	}
-	nodeFromOrder, _ := n.GetNeuronOrder(from)
+	/*nodeFromOrder, _ := n.GetNeuronOrder(from)
 	nodeToOrder, _ := n.GetNeuronOrder(to)
 	if nodeToOrder < nodeFromOrder {
 		return -1, errors.New("recursive connections are not supported right now")
-	}
+	}*/
 	c := &Synapse{from, to, weight}
 	id := counter.Next()
 	n.Synapses[id] = c
@@ -130,6 +130,9 @@ func (n *Genotype) NewNeuron(counter Counter, conn int, activation Activation) (
 	// Calculate and insert the order
 	fromNodeOrder, _ := n.GetNeuronOrder(fromNode)
 	toNodeOrder, _ := n.GetNeuronOrder(toNode)
+	if toNodeOrder < fromNodeOrder {
+		return -1, -1, errors.New("cannot create neuron on recursive connection")
+	}
 	var newNodeOrder int
 	if fromNodeOrder < toNodeOrder {
 		newNodeOrder = fromNodeOrder + 1
