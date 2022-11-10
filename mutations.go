@@ -22,7 +22,7 @@ func MutateRandomSynapse(g *Genotype, stddev float64) {
 }
 
 // Add a random synapse with weight from normal distribution with standard deviation weightStddev
-func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, attempts int) error {
+func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, isRecurrent bool, attempts int) error {
 	if attempts == 0 {
 		return errors.New("did not find new synapse slot within nuber of attempts")
 	}
@@ -32,9 +32,14 @@ func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, attemp
 		start = nao + 1
 	}
 	nbo := start + rand.Intn(len(g.Neurons)-start)
-	_, err := g.NewSynapse(counter, g.NeuronOrder[nao], g.NeuronOrder[nbo], rand.NormFloat64()*weightStddev)
+	if isRecurrent {
+		temp := nao
+		nao = nbo
+		nbo = temp
+	}
+	_, err := g.AddSynapse(counter, g.NeuronOrder[nao], g.NeuronOrder[nbo], rand.NormFloat64()*weightStddev)
 	if err != nil {
-		return AddRandomSynapse(counter, g, weightStddev, attempts-1)
+		return AddRandomSynapse(counter, g, weightStddev, isRecurrent, attempts-1)
 	}
 	return nil
 }
@@ -51,7 +56,7 @@ func AddRandomNeuron(counter Counter, g *Genotype, activation Activation) error 
 			of, _ := g.GetNeuronOrder(g.Synapses[sid].From)
 			ot, _ := g.GetNeuronOrder(g.Synapses[sid].To)
 			if of < ot {
-				g.NewNeuron(counter, sid, activation)
+				g.AddNeuron(counter, sid, activation)
 				return nil
 			}
 		}

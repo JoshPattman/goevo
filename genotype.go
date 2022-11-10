@@ -91,7 +91,7 @@ func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 }
 
 // Create a synapse between two neurons
-func (n *Genotype) NewSynapse(counter Counter, from, to int, weight float64) (int, error) {
+func (n *Genotype) AddSynapse(counter Counter, from, to int, weight float64) (int, error) {
 	if !(n.IsNeuron(from) && n.IsNeuron(to)) {
 		return -1, errors.New("ids are not both nodes")
 	}
@@ -104,6 +104,8 @@ func (n *Genotype) NewSynapse(counter Counter, from, to int, weight float64) (in
 		return -1, errors.New("cannot create connection from output to output")
 	} else if nodeFrom.Type == NeuronInput && nodeTo.Type == NeuronInput {
 		return -1, errors.New("cannot create connection from input to input")
+	} else if from == to {
+		return -1, errors.New("cannot connect neuron to itself")
 	}
 	/*nodeFromOrder, _ := n.GetNeuronOrder(from)
 	nodeToOrder, _ := n.GetNeuronOrder(to)
@@ -117,7 +119,7 @@ func (n *Genotype) NewSynapse(counter Counter, from, to int, weight float64) (in
 }
 
 // Create a new hidden neuron on a synapse
-func (n *Genotype) NewNeuron(counter Counter, conn int, activation Activation) (int, int, error) {
+func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (int, int, error) {
 	if !n.IsSynapse(conn) {
 		return -1, -1, errors.New("id is not a connection")
 	}
