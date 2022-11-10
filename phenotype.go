@@ -1,7 +1,5 @@
 package goevo
 
-import "fmt"
-
 // Data type for a phenotype connection
 type PhenotypeConnection struct {
 	To     int
@@ -65,7 +63,6 @@ func NewPhenotype(g *Genotype) *Phenotype {
 
 // Do a forward pass with some input data for the phenotype, returning the output of the network
 func (p *Phenotype) Forward(inputs []float64) []float64 {
-	fmt.Println(p.memory)
 	if len(inputs) != p.numIn {
 		panic("not correct number of inputs")
 	}
