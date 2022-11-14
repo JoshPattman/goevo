@@ -51,7 +51,7 @@ func AddRandomNeuron(counter Counter, g *Genotype, activation Activation) error 
 	}
 	k := rand.Intn(len(g.Synapses))
 	for sid := range g.Synapses {
-		if k == 0 {
+		if k <= 0 {
 			// Only create on non recurrent synapse
 			of, _ := g.GetNeuronOrder(g.Synapses[sid].From)
 			ot, _ := g.GetNeuronOrder(g.Synapses[sid].To)
