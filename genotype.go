@@ -34,49 +34,55 @@ type Neuron struct {
 
 // A type representing a genotype (effectively DNA). DO NOT EDIT VALUES DIRECTLY; use functions such as NewSynapse and NewNeuron to add and remove neurons
 type Genotype struct {
-	NumIn       int              `json:"num_in"`
-	NumOut      int              `json:"num_out"`
-	Neurons     map[int]*Neuron  `json:"neurons"`
-	Synapses    map[int]*Synapse `json:"synapses"`
-	NeuronOrder []int            `json:"neuron_order"`
+	NumIn              int              `json:"num_in"`
+	NumOut             int              `json:"num_out"`
+	Neurons            map[int]*Neuron  `json:"neurons"`
+	Synapses           map[int]*Synapse `json:"synapses"`
+	NeuronOrder        []int            `json:"neuron_order"`
+	InverseNeuronOrder map[int]int      `json:"inverse_neuron_order"`
 }
 
 func NewGenotypeEmpty() *Genotype {
 	return &Genotype{
-		NumIn:       -1,
-		NumOut:      -1,
-		Neurons:     make(map[int]*Neuron),
-		Synapses:    make(map[int]*Synapse),
-		NeuronOrder: make([]int, 0),
+		NumIn:              -1,
+		NumOut:             -1,
+		Neurons:            make(map[int]*Neuron),
+		Synapses:           make(map[int]*Synapse),
+		NeuronOrder:        make([]int, 0),
+		InverseNeuronOrder: make(map[int]int),
 	}
 }
 
 // Create a new genotype
 func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation Activation) *Genotype {
-	nodes := make(map[int]*Neuron)
-	nodeOrder := make([]int, numIn+numOut)
+	neurons := make(map[int]*Neuron)
+	neuronOrder := make([]int, numIn+numOut)
+	inverseNeuronOrder := make(map[int]int)
 	for i := 0; i < numIn; i++ {
 		id := counter.Next()
-		nodes[id] = &Neuron{
+		neurons[id] = &Neuron{
 			Type:       NeuronInput,
 			Activation: inActivation,
 		}
-		nodeOrder[i] = id
+		neuronOrder[i] = id
+		inverseNeuronOrder[id] = i
 	}
 	for i := numIn; i < numIn+numOut; i++ {
 		id := counter.Next()
-		nodes[id] = &Neuron{
+		neurons[id] = &Neuron{
 			Type:       NeuronOutput,
 			Activation: outActivation,
 		}
-		nodeOrder[i] = id
+		neuronOrder[i] = id
+		inverseNeuronOrder[id] = i
 	}
 	return &Genotype{
-		NumIn:       numIn,
-		NumOut:      numOut,
-		Neurons:     nodes,
-		Synapses:    make(map[int]*Synapse),
-		NeuronOrder: nodeOrder,
+		NumIn:              numIn,
+		NumOut:             numOut,
+		Neurons:            neurons,
+		Synapses:           make(map[int]*Synapse),
+		NeuronOrder:        neuronOrder,
+		InverseNeuronOrder: inverseNeuronOrder,
 	}
 }
 
@@ -85,6 +91,7 @@ func NewGenotypeCopy(g *Genotype) *Genotype {
 	neurons := make(map[int]*Neuron)
 	synapses := make(map[int]*Synapse)
 	neuronOrder := make([]int, len(g.NeuronOrder))
+	inverseNeuronOrder := make(map[int]int)
 	copy(neuronOrder, g.NeuronOrder)
 	for nid, n := range g.Neurons {
 		neurons[nid] = &Neuron{n.Type, n.Activation}
@@ -92,12 +99,16 @@ func NewGenotypeCopy(g *Genotype) *Genotype {
 	for sid, s := range g.Synapses {
 		synapses[sid] = &Synapse{s.From, s.To, s.Weight}
 	}
+	for nid, no := range g.InverseNeuronOrder {
+		inverseNeuronOrder[nid] = no
+	}
 	return &Genotype{
-		NumIn:       g.NumIn,
-		NumOut:      g.NumOut,
-		Neurons:     neurons,
-		Synapses:    synapses,
-		NeuronOrder: neuronOrder,
+		NumIn:              g.NumIn,
+		NumOut:             g.NumOut,
+		Neurons:            neurons,
+		Synapses:           synapses,
+		NeuronOrder:        neuronOrder,
+		InverseNeuronOrder: inverseNeuronOrder,
 	}
 }
 
@@ -169,6 +180,11 @@ func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (
 		newNodeOrder = len(n.NeuronOrder) - n.NumOut + 1
 	}
 	n.NeuronOrder = insert(n.NeuronOrder, newNodeOrder, newNodeID)
+	n.InverseNeuronOrder[newNodeID] = newNodeOrder
+	// Ensure the inverse is kept updated too
+	for no := newNodeOrder + 1; no < len(n.NeuronOrder); no++ {
+		n.InverseNeuronOrder[n.NeuronOrder[no]] = no
+	}
 	// Set the existing conn.to to our new node
 	connPtr.To = newNodeID
 	// Add the new node
@@ -201,12 +217,13 @@ func (n *Genotype) GetNeuronOrder(nid int) (int, error) {
 	if !n.IsNeuron(nid) {
 		return -1, errors.New("not a node")
 	}
-	for norder := range n.NeuronOrder {
+	return n.InverseNeuronOrder[nid], nil
+	/*for norder := range n.NeuronOrder {
 		if n.NeuronOrder[norder] == nid {
 			return norder, nil
 		}
 	}
-	panic("node order list has become desynced. this should not have happened")
+	panic("node order list has become desynced. this should not have happened")*/
 }
 
 func insert[T any](a []T, index int, value T) []T {
