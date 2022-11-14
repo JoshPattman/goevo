@@ -28,28 +28,21 @@ func NewPhenotype(g *Genotype) *Phenotype {
 	acts := make([](func(float64) float64), len(g.Neurons))
 	conns := make([][]PhenotypeConnection, len(g.Neurons))
 	recurrentConns := make([][]RecurrentPhenotypeConnection, len(g.Neurons))
-	for o, oid := range g.NeuronOrder {
-		connectedNeurons := make([]PhenotypeConnection, 0)
-		recurrentConnectedNeurons := make([]RecurrentPhenotypeConnection, 0)
-		for _, s := range g.Synapses {
-			if s.From == oid {
-				fromOrder, _ := g.GetNeuronOrder(s.From)
-				toOrder, _ := g.GetNeuronOrder(s.To)
-				if fromOrder < toOrder {
-					connectedNeurons = append(connectedNeurons, PhenotypeConnection{toOrder, s.Weight})
-				}
-			} else if s.To == oid {
-				fromOrder, _ := g.GetNeuronOrder(s.From)
-				toOrder, _ := g.GetNeuronOrder(s.To)
-				if fromOrder > toOrder {
-					//recurrent
-					recurrentConnectedNeurons = append(recurrentConnectedNeurons, RecurrentPhenotypeConnection{fromOrder, s.Weight})
-				}
-			}
+
+	for n := range conns {
+		conns[n] = make([]PhenotypeConnection, 0)
+		recurrentConns[n] = make([]RecurrentPhenotypeConnection, 0)
+		acts[n] = activationMap[g.Neurons[g.NeuronOrder[n]].Activation]
+	}
+
+	for _, s := range g.Synapses {
+		fromOrder, _ := g.GetNeuronOrder(s.From)
+		toOrder, _ := g.GetNeuronOrder(s.To)
+		if fromOrder < toOrder {
+			conns[fromOrder] = append(conns[fromOrder], PhenotypeConnection{toOrder, s.Weight})
+		} else {
+			recurrentConns[toOrder] = append(recurrentConns[toOrder], RecurrentPhenotypeConnection{fromOrder, s.Weight})
 		}
-		conns[o] = connectedNeurons
-		recurrentConns[o] = recurrentConnectedNeurons
-		acts[o] = activationMap[g.Neurons[oid].Activation]
 	}
 	return &Phenotype{
 		memory:         mem,
