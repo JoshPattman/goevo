@@ -35,9 +35,23 @@ func NewPhenotype(g *Genotype) *Phenotype {
 		acts[n] = activationMap[g.Neurons[g.NeuronOrder[n]].Activation]
 	}
 
+	neuronOrderCache := make(map[int]int)
+
 	for _, s := range g.Synapses {
-		fromOrder, _ := g.GetNeuronOrder(s.From)
-		toOrder, _ := g.GetNeuronOrder(s.To)
+		var fromOrder int
+		var toOrder int
+		if val, ok := neuronOrderCache[s.From]; ok {
+			fromOrder = val
+		} else {
+			fromOrder, _ = g.GetNeuronOrder(s.From)
+			neuronOrderCache[s.From] = fromOrder
+		}
+		if val, ok := neuronOrderCache[s.To]; ok {
+			toOrder = val
+		} else {
+			toOrder, _ = g.GetNeuronOrder(s.To)
+			neuronOrderCache[s.To] = toOrder
+		}
 		if fromOrder < toOrder {
 			conns[fromOrder] = append(conns[fromOrder], PhenotypeConnection{toOrder, s.Weight})
 		} else {
