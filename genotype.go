@@ -80,6 +80,27 @@ func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation
 	}
 }
 
+// Copy this genotype and return the copy
+func NewGenotypeCopy(g *Genotype) *Genotype {
+	neurons := make(map[int]*Neuron)
+	synapses := make(map[int]*Synapse)
+	neuronOrder := make([]int, len(g.NeuronOrder))
+	copy(neuronOrder, g.NeuronOrder)
+	for nid, n := range g.Neurons {
+		neurons[nid] = &Neuron{n.Type, n.Activation}
+	}
+	for sid, s := range g.Synapses {
+		synapses[sid] = &Synapse{s.From, s.To, s.Weight}
+	}
+	return &Genotype{
+		NumIn:       g.NumIn,
+		NumOut:      g.NumOut,
+		Neurons:     neurons,
+		Synapses:    synapses,
+		NeuronOrder: neuronOrder,
+	}
+}
+
 // Find the ID of the synapse that goes from 'from' to 'to'
 func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 	for ci, c := range n.Synapses {
@@ -156,27 +177,6 @@ func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (
 	newConn := &Synapse{newNodeID, toNode, 1}
 	n.Synapses[newConnID] = newConn
 	return newNodeID, newConnID, nil
-}
-
-// Copy this genotype and return the copy
-func (g *Genotype) Copy() *Genotype {
-	neurons := make(map[int]*Neuron)
-	synapses := make(map[int]*Synapse)
-	neuronOrder := make([]int, len(g.NeuronOrder))
-	copy(neuronOrder, g.NeuronOrder)
-	for nid, n := range g.Neurons {
-		neurons[nid] = &Neuron{n.Type, n.Activation}
-	}
-	for sid, s := range g.Synapses {
-		synapses[sid] = &Synapse{s.From, s.To, s.Weight}
-	}
-	return &Genotype{
-		NumIn:       g.NumIn,
-		NumOut:      g.NumOut,
-		Neurons:     neurons,
-		Synapses:    synapses,
-		NeuronOrder: neuronOrder,
-	}
 }
 
 // Get the number of input, hidden, and output neurons in this genotype
