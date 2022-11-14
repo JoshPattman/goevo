@@ -1,6 +1,8 @@
 package goevo
 
-import "errors"
+import (
+	"errors"
+)
 
 // A type denoting the type of a neuron (input, hidden, output). Must be one of the consts that start with 'Neuron...'
 type NeuronType string
@@ -193,6 +195,64 @@ func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (
 	newConn := &Synapse{newNodeID, toNode, 1}
 	n.Synapses[newConnID] = newConn
 	return newNodeID, newConnID, nil
+}
+
+// This function prunes the synapse. Then it checks to see if it has made any neurons invalid, then prunes those neurons, then all their synapses, recursively
+func (n *Genotype) PruneSynapse(sid int) error {
+	if !n.IsSynapse(sid) {
+		return errors.New("not a synapse")
+	}
+	syn := n.Synapses[sid]
+	from, to := syn.From, syn.To
+	delete(n.Synapses, sid)
+	if n.IsNeuron(from) && n.Neurons[from].Type == NeuronHidden && !n.hasNeuronOut(from) {
+		delete(n.Neurons, from)
+		order := n.InverseNeuronOrder[from]
+		delete(n.InverseNeuronOrder, from)
+		n.NeuronOrder = append(n.NeuronOrder[:order], n.NeuronOrder[order+1:]...)
+		// reindex everything after the node that was deleted
+		for no := order; no < len(n.NeuronOrder); no++ {
+			n.InverseNeuronOrder[n.NeuronOrder[no]] = no
+		}
+		for sid, s := range n.Synapses {
+			if s.To == from {
+				n.PruneSynapse(sid)
+			}
+		}
+	}
+	if n.IsNeuron(to) && n.Neurons[to].Type == NeuronHidden && !n.hasNeuronIn(to) {
+		delete(n.Neurons, to)
+		order := n.InverseNeuronOrder[to]
+		delete(n.InverseNeuronOrder, to)
+		n.NeuronOrder = append(n.NeuronOrder[:order], n.NeuronOrder[order+1:]...)
+		// reindex everything after the node that was deleted
+		for no := order; no < len(n.NeuronOrder); no++ {
+			n.InverseNeuronOrder[n.NeuronOrder[no]] = no
+		}
+		for sid, s := range n.Synapses {
+			if s.From == to {
+				n.PruneSynapse(sid)
+			}
+		}
+	}
+	return nil
+}
+
+func (n *Genotype) hasNeuronOut(nid int) bool {
+	for _, s := range n.Synapses {
+		if s.From == nid {
+			return true
+		}
+	}
+	return false
+}
+func (n *Genotype) hasNeuronIn(nid int) bool {
+	for _, s := range n.Synapses {
+		if s.To == nid {
+			return true
+		}
+	}
+	return false
 }
 
 // Get the number of input, hidden, and output neurons in this genotype
