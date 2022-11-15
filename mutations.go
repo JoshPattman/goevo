@@ -21,6 +21,22 @@ func MutateRandomSynapse(g *Genotype, stddev float64) {
 	panic("unreachable")
 }
 
+// Mutate a random synapses weight by normal distribution of standard deviation stddev
+func PruneRandomSynapse(g *Genotype) {
+	if len(g.Synapses) == 0 {
+		return
+	}
+	k := rand.Intn(len(g.Synapses))
+	for s, _ := range g.Synapses {
+		if k == 0 {
+			g.PruneSynapse(s)
+			return
+		}
+		k--
+	}
+	panic("unreachable")
+}
+
 // Add a random synapse with weight from normal distribution with standard deviation weightStddev
 func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, isRecurrent bool, attempts int) error {
 	if attempts == 0 {
