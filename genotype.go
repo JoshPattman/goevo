@@ -181,16 +181,8 @@ func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (
 	if newNodeOrder > len(n.NeuronOrder)-n.NumOut+1 {
 		newNodeOrder = len(n.NeuronOrder) - n.NumOut + 1
 	}
-	n.NeuronOrder = insert(n.NeuronOrder, newNodeOrder, newNodeID)
-	n.InverseNeuronOrder[newNodeID] = newNodeOrder
-	// Ensure the inverse is kept updated too
-	for no := newNodeOrder + 1; no < len(n.NeuronOrder); no++ {
-		n.InverseNeuronOrder[n.NeuronOrder[no]] = no
-	}
-	// Set the existing conn.to to our new node
 	connPtr.To = newNodeID
-	// Add the new node
-	n.Neurons[newNodeID] = &Neuron{Type: NeuronHidden, Activation: activation}
+	n.insertNeuron(newNodeID, newNodeOrder, &Neuron{Type: NeuronHidden, Activation: activation})
 	// Create a new conn from new node to the old endpoint
 	newConn := &Synapse{newNodeID, toNode, 1}
 	n.Synapses[newConnID] = newConn
@@ -206,14 +198,7 @@ func (n *Genotype) PruneSynapse(sid int) error {
 	from, to := syn.From, syn.To
 	delete(n.Synapses, sid)
 	if n.IsNeuron(from) && n.Neurons[from].Type == NeuronHidden && !n.hasNeuronOut(from) {
-		delete(n.Neurons, from)
-		order := n.InverseNeuronOrder[from]
-		delete(n.InverseNeuronOrder, from)
-		n.NeuronOrder = append(n.NeuronOrder[:order], n.NeuronOrder[order+1:]...)
-		// reindex everything after the node that was deleted
-		for no := order; no < len(n.NeuronOrder); no++ {
-			n.InverseNeuronOrder[n.NeuronOrder[no]] = no
-		}
+		n.removeNeuron(from)
 		for sid, s := range n.Synapses {
 			if s.To == from {
 				n.PruneSynapse(sid)
@@ -221,14 +206,7 @@ func (n *Genotype) PruneSynapse(sid int) error {
 		}
 	}
 	if n.IsNeuron(to) && n.Neurons[to].Type == NeuronHidden && !n.hasNeuronIn(to) {
-		delete(n.Neurons, to)
-		order := n.InverseNeuronOrder[to]
-		delete(n.InverseNeuronOrder, to)
-		n.NeuronOrder = append(n.NeuronOrder[:order], n.NeuronOrder[order+1:]...)
-		// reindex everything after the node that was deleted
-		for no := order; no < len(n.NeuronOrder); no++ {
-			n.InverseNeuronOrder[n.NeuronOrder[no]] = no
-		}
+		n.removeNeuron(to)
 		for sid, s := range n.Synapses {
 			if s.From == to {
 				n.PruneSynapse(sid)
@@ -293,4 +271,25 @@ func insert[T any](a []T, index int, value T) []T {
 	a = append(a[:index+1], a[index:]...) // index < len(a)
 	a[index] = value
 	return a
+}
+
+func (g *Genotype) removeNeuron(nid int) {
+	if g.Neurons[nid].Type != NeuronHidden {
+		panic("oof")
+	}
+	o := g.InverseNeuronOrder[nid]
+	delete(g.Neurons, nid)
+	delete(g.InverseNeuronOrder, nid)
+	g.NeuronOrder = append(g.NeuronOrder[:o], g.NeuronOrder[o+1:]...)
+	for i := range g.NeuronOrder {
+		g.InverseNeuronOrder[g.NeuronOrder[i]] = i
+	}
+}
+
+func (g *Genotype) insertNeuron(nid, order int, n *Neuron) {
+	g.Neurons[nid] = n
+	g.NeuronOrder = insert(g.NeuronOrder, order, nid)
+	for i := range g.NeuronOrder {
+		g.InverseNeuronOrder[g.NeuronOrder[i]] = i
+	}
 }
