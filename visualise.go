@@ -66,7 +66,8 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 	}
 	for cid := range g.Synapses {
 		w := g.Synapses[cid].Weight
-		drawConnection(img, nodeXPosses, nodeYPosses, g.Synapses[cid].From, g.Synapses[cid].To, w, v.NeuronSize)
+		isRecurrent := g.InverseNeuronOrder[g.Synapses[cid].From] > g.InverseNeuronOrder[g.Synapses[cid].To]
+		drawConnection(img, nodeXPosses, nodeYPosses, g.Synapses[cid].From, g.Synapses[cid].To, w, v.NeuronSize, isRecurrent)
 	}
 	return img
 }
@@ -198,7 +199,7 @@ func thickLine(img draw.Image, x0, y0, x1, y1, w int, c color.Color) {
 
 }
 
-func drawConnection(img draw.Image, xPoses, yPoses map[int]int, startID, endID int, w float64, r int) {
+func drawConnection(img draw.Image, xPoses, yPoses map[int]int, startID, endID int, w float64, r int, isRecurrent bool) {
 	startX, startY := xPoses[startID]+r, yPoses[startID]
 	endX, endY := xPoses[endID]-r, yPoses[endID]
 	if w > 1 {
@@ -206,7 +207,7 @@ func drawConnection(img draw.Image, xPoses, yPoses map[int]int, startID, endID i
 	} else if w < -1 {
 		w = -1
 	}
-	isRecurrent := startX > endX
+	//isRecurrent := startX > endX
 	var col color.Color
 	if w > 0 {
 		if isRecurrent {

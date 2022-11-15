@@ -27,7 +27,7 @@ func PruneRandomSynapse(g *Genotype) {
 		return
 	}
 	k := rand.Intn(len(g.Synapses))
-	for s, _ := range g.Synapses {
+	for s := range g.Synapses {
 		if k == 0 {
 			g.PruneSynapse(s)
 			return
