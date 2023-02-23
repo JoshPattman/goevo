@@ -34,14 +34,20 @@ type Neuron struct {
 	Activation Activation `json:"activation"`
 }
 
-// A type representing a genotype (effectively DNA). DO NOT EDIT VALUES DIRECTLY; use functions such as NewSynapse and NewNeuron to add and remove neurons
+// A type representing a genotype (effectively DNA) used in the NEAT algorithm
 type Genotype struct {
-	NumIn              int              `json:"num_in"`
-	NumOut             int              `json:"num_out"`
-	Neurons            map[int]*Neuron  `json:"neurons"`
-	Synapses           map[int]*Synapse `json:"synapses"`
-	NeuronOrder        []int            `json:"neuron_order"`
-	InverseNeuronOrder map[int]int      `json:"inverse_neuron_order"`
+	// The number of input neurons. READONLY
+	NumIn int `json:"num_in"`
+	// The number of output neurons. READONLY
+	NumOut int `json:"num_out"`
+	// A record of all neurons stored according to their id. READONLY
+	Neurons map[int]*Neuron `json:"neurons"`
+	// A record of all synapses stored according to their id. READONLY
+	Synapses map[int]*Synapse `json:"synapses"`
+	// A record of all neurons ids stored in execution order. READONLY
+	NeuronOrder []int `json:"neuron_order"`
+	// A record of all neurons orders stored according to neuron id. READONLY
+	InverseNeuronOrder map[int]int `json:"inverse_neuron_order"`
 }
 
 func NewGenotypeEmpty() *Genotype {
@@ -55,7 +61,9 @@ func NewGenotypeEmpty() *Genotype {
 	}
 }
 
-// Create a new genotype
+// Create a new Genotype. Create all new innovation IDs with the provided Counter `counter`.
+// The genotype will have `numIn` input nodes and `numOut` output nodes.
+// The input nodes will have activation `inActivation` and the output nodes will have activation `outActivation`
 func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation Activation) *Genotype {
 	neurons := make(map[int]*Neuron)
 	neuronOrder := make([]int, numIn+numOut)
@@ -88,7 +96,7 @@ func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation
 	}
 }
 
-// Copy this genotype and return the copy
+// Create a new Genotype which is a clone of `g`
 func NewGenotypeCopy(g *Genotype) *Genotype {
 	neurons := make(map[int]*Neuron)
 	synapses := make(map[int]*Synapse)
@@ -114,7 +122,8 @@ func NewGenotypeCopy(g *Genotype) *Genotype {
 	}
 }
 
-// Find the ID of the synapse that goes from 'from' to 'to'
+// Find the ID of the synapse that goes from `from` to `to`.
+// Will return `synapseID, error`, where error might be caused by the connection not existing
 func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 	for ci, c := range n.Synapses {
 		if c.From == from && c.To == to {
@@ -124,7 +133,10 @@ func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 	return -1, errors.New("cannot find connection")
 }
 
-// Create a synapse between two neurons
+// Create a synapse between two neurons using the provided Counter, with weight `weight`.
+// `from` and `to` are the innovation IDs of two neurons.
+// If `from` is ordered after `to` then the connection is recurrent.
+// Will return `synapseID, error`
 func (n *Genotype) AddSynapse(counter Counter, from, to int, weight float64) (int, error) {
 	if !(n.IsNeuron(from) && n.IsNeuron(to)) {
 		return -1, errors.New("ids are not both nodes")
@@ -152,7 +164,10 @@ func (n *Genotype) AddSynapse(counter Counter, from, to int, weight float64) (in
 	return id, nil
 }
 
-// Create a new hidden neuron on a synapse
+// Create a hidden neuron on a synapse using the provided Counter, with activation function `activation`.
+// `conn` is the ID of the synapse to create the neuron on, and `conn` must not refer to a recurrent connection.
+// Will return `neuronID, synapseID, error`, where synapseID is the id of the synapse that was created due to the original synapse being split.
+// This synapse connects the new neuron to the old synapses endpoint, and the old synapses endpoint is moved to the new neuron
 func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (int, int, error) {
 	if !n.IsSynapse(conn) {
 		return -1, -1, errors.New("id is not a connection")
@@ -189,7 +204,7 @@ func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (
 	return newNodeID, newConnID, nil
 }
 
-// This function prunes the synapse. Then it checks to see if it has made any neurons invalid, then prunes those neurons, then all their synapses, recursively
+// Prune the synapse with id `sid` from the genotype. Then recursively check to see if this has made any other synapses or neurons redundant, and remove those too.
 func (n *Genotype) PruneSynapse(sid int) error {
 	if !n.IsSynapse(sid) {
 		return errors.New("not a synapse")
@@ -233,7 +248,7 @@ func (n *Genotype) hasNeuronIn(nid int) bool {
 	return false
 }
 
-// Get the number of input, hidden, and output neurons in this genotype
+// Return the number of input, hidden, and output neurons in this genotype
 func (n *Genotype) Topology() (int, int, int) {
 	return n.NumIn, len(n.NeuronOrder) - n.NumIn - n.NumOut, n.NumOut
 }

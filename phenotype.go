@@ -12,7 +12,7 @@ type RecurrentPhenotypeConnection struct {
 	Weight float64
 }
 
-// Data type representing a phenotype (a bit like an instance of a genotype)
+// Data type representing a phenotype, a sort of compiled genotype
 type Phenotype struct {
 	memory         []float64
 	activations    [](func(float64) float64)
@@ -22,7 +22,7 @@ type Phenotype struct {
 	numOut         int
 }
 
-// Create a phenotype from a genotype
+// Create a phenotype from genotype `g`
 func NewPhenotype(g *Genotype) *Phenotype {
 	mem := make([]float64, len(g.Neurons))
 	acts := make([](func(float64) float64), len(g.Neurons))
@@ -68,7 +68,7 @@ func NewPhenotype(g *Genotype) *Phenotype {
 	}
 }
 
-// Do a forward pass with some input data for the phenotype, returning the output of the network
+// Do a forward pass with some input data for the phenotype, returning the output of the network. This also will take into account any memory left over from previous calls
 func (p *Phenotype) Forward(inputs []float64) []float64 {
 	if len(inputs) != p.numIn {
 		panic("not correct number of inputs")
@@ -95,6 +95,7 @@ func (p *Phenotype) Forward(inputs []float64) []float64 {
 	return output
 }
 
+// Clear any memory retained from previous calls to `p.Forward`
 func (p *Phenotype) ClearRecurrentMemory() {
 	for i := range p.memory {
 		p.memory[i] = 0

@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-// Mutate a random synapses weight by normal distribution of standard deviation stddev
+// Mutate the weight of a random synapse in `g` by sampling the normal distribution with standard deviation `stddev“
 func MutateRandomSynapse(g *Genotype, stddev float64) {
 	if len(g.Synapses) == 0 {
 		return
@@ -21,7 +21,7 @@ func MutateRandomSynapse(g *Genotype, stddev float64) {
 	panic("unreachable")
 }
 
-// Mutate a random synapses weight by normal distribution of standard deviation stddev
+// Prune a random synapse from `g`. This has the capability to prun more than one synapse and neuron as it also removes redundant neurons and synapses.
 func PruneRandomSynapse(g *Genotype) {
 	if len(g.Synapses) == 0 {
 		return
@@ -37,7 +37,10 @@ func PruneRandomSynapse(g *Genotype) {
 	panic("unreachable")
 }
 
-// Add a random synapse with weight from normal distribution with standard deviation weightStddev
+// Add a new synapse to `g` with weight sampled from normal distribution with standard deviation `stddev`.
+// `isRecurrent` specifies if the synapse should be recurrent or forward-facing.
+// `attempts` is the maximum number of random combinations of neurons to try before deciding there is no more space for synapses.
+// A good value for `attempts` is 5
 func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, isRecurrent bool, attempts int) error {
 	if attempts == 0 {
 		return errors.New("did not find new synapse slot within nuber of attempts")
@@ -60,7 +63,7 @@ func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, isRecu
 	return nil
 }
 
-// Add a neuron on a random synapse
+// Add a neuron on a random synapse of `g` with activation function `activation`
 func AddRandomNeuron(counter Counter, g *Genotype, activation Activation) error {
 	if len(g.Synapses) == 0 {
 		return errors.New("no synapses to create neuron on")
