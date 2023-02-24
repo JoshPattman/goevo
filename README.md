@@ -20,7 +20,7 @@ neuronID, secondSynapseID, _ := genotype.AddNeuron(counter, synapseID, goevo.Act
 genotype.AddSynapse(counter, 1, neuronID, -0.5)
 ```
 ### Visualising a `Genotype`
-It is quite hard to deduce the topology by looking its list of neurons and synapses. `goevo` supports drawing a picture of a genotype either to a `draw.Image` or a `png` or `jpg` file.
+It is quite hard to deduce the topology of a genotype by looking at a list of its neurons and synapses. `goevo` supports drawing a picture of a genotype either to a `draw.Image` or a `png` or `jpg` file.
 ```go
 vis := goevo.NewGenotypeVisualiser()
 vis.DrawImageToPNGFile("example_1.png", genotype)
