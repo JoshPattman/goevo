@@ -30,7 +30,7 @@ Below is the image in the generated file `example_1.png`. The green cirlces are 
 <img src="README_ASSETS/example_1.png" width="400">
 
 ### Pruning Synapses
-One way to prevent the networks getting too big is to prune synapses (delete synapses). Pruning will remove the given synapse then remove all neurons and synapses that become redundant due to the pruning.
+One way to prevent the networks getting too big is to prune synapses (delete synapses). Pruning will remove the given synapse, then remove all neurons and synapses that become redundant due to the pruning.
 ```go
 // Prune the synapse that connects the hidden neuron to the output neuron. This makes the hidden neuron nedundant so it is therefor removed too, along with its other synapses.
 genotypePrunedA := goevo.NewGenotypeCopy(genotype)
@@ -68,7 +68,7 @@ Output:
 ```
 
 ### Saving and Loading `Genotype`
-If you have just trained a genotype, you may wish to save it. Genotypes can be json marshalled und unmarshalled with go's build in json parser.
+If you have just trained a genotype, you may wish to save it. Genotypes can be json marshalled und unmarshalled with go's built-in json parser.
 ```go
 // Convert the genotype to a json []byte
 jsBytes, _ := json.Marshal(genotype)
@@ -81,9 +81,9 @@ json.Unmarshal(jsBytes, genotypeLoaded)
 In this example, a population of agents attempts to create a genotype that can do XOR logic. The generational loop for this example is as follows:
 1) Every agents fitness is evaluated
 2) The best agent is picked, all others are discarded
-3) The population is filled with clones on the best agent, who may have mutations
+3) The population is filled with clones of the best agent, who may have mutations
 
-This a a very primative training loop, and ignores many of the key features of the NEAT paper such as speciation and crossover. However, I have not implemented those yet. Despite this, the algorithm still performs quite well, reaching a mean squared error of less than 0.001 in around 60 generations with a population size of 100.
+This a a very primative training loop, and ignores many of the key features of the NEAT paper such as speciation and crossover. However, I have not implemented those yet (see TODO at the bottom of the README). Despite this, the algorithm still performs quite well, reaching a mean squared error of less than 0.001 in around 60 generations with a population size of 100.
 
 ```go
 // Define the dataset. In this exmaple this data corresponds to XOR.
@@ -182,3 +182,11 @@ X [1 1 1] Y [0] YP [0.012205476415211636]
 The final network is rather large compared to the minimal network required for XOR. However, the algorithm can be made to create smaller networks by adding a penalty for large networks in the training function. This is a very good idea to do if you plan to use NEAT, as the whole purpose of it is to create optimal topologies.
 
 <img src="README_ASSETS/xor.png" width="400">
+
+## TODO
+- Add speciation
+- Add crossover
+- Figure out how to fully implement the NEAT algorithm without taking away too much control
+- Add a function to remove a neuron and re-route its synapses
+- Add a function to change a neurons activation
+- For the above two, add functions to randomly perform those actions
