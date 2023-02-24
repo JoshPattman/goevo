@@ -81,5 +81,6 @@ func AddRandomNeuron(counter Counter, g *Genotype, activation Activation) error 
 		}
 		k--
 	}
-	panic("unreachable")
+	// If there are only recurrent synapses, this will be the result
+	return errors.New("no synapses to create neuron on") //panic("unreachable")
 }
