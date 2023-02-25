@@ -18,6 +18,8 @@ const (
 	ActivationSigmoid Activation = "sigmoid"
 	// y = x {1 > x > 0} | y = 0 {x <= 0} | y = 1 {x >= 1}
 	ActivationReLUMax Activation = "relumax"
+	// y = 0 {x < 0.5} | y = 1 {x >= 0.5}
+	ActivationStep Activation = "step"
 )
 
 var activationMap = map[Activation](func(float64) float64){
@@ -27,6 +29,7 @@ var activationMap = map[Activation](func(float64) float64){
 	ActivationReLn:    relnActivation,
 	ActivationSigmoid: sigmoidActivation,
 	ActivationReLUMax: relumaxActivation,
+	ActivationStep:    stepActivation,
 }
 
 func linearActivation(x float64) float64 {
@@ -38,6 +41,12 @@ func reluActivation(x float64) float64 {
 		return 0
 	}
 	return x
+}
+func stepActivation(x float64) float64 {
+	if x < 0.5 {
+		return 0
+	}
+	return 1
 }
 
 func relumaxActivation(x float64) float64 {
