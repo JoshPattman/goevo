@@ -2,6 +2,7 @@ package goevo
 
 import (
 	"errors"
+	"math/rand"
 )
 
 // A type denoting the type of a neuron (input, hidden, output). Must be one of the consts that start with 'Neuron...'
@@ -106,15 +107,57 @@ func NewGenotypeCopy(g *Genotype) *Genotype {
 	for nid, n := range g.Neurons {
 		neurons[nid] = &Neuron{n.Type, n.Activation}
 	}
-	for sid, s := range g.Synapses {
-		synapses[sid] = &Synapse{s.From, s.To, s.Weight}
-	}
 	for nid, no := range g.InverseNeuronOrder {
 		inverseNeuronOrder[nid] = no
+	}
+	for sid, s := range g.Synapses {
+		synapses[sid] = &Synapse{s.From, s.To, s.Weight}
 	}
 	return &Genotype{
 		NumIn:              g.NumIn,
 		NumOut:             g.NumOut,
+		Neurons:            neurons,
+		Synapses:           synapses,
+		NeuronOrder:        neuronOrder,
+		InverseNeuronOrder: inverseNeuronOrder,
+	}
+}
+
+// Creates a new Genotype which is a clone of g1, but with 50% of the weights of matching synapses from g2.
+// g1 should be the fitter parent
+func NewGenotypeCrossover(g1 *Genotype, g2 *Genotype) *Genotype {
+	neurons := make(map[int]*Neuron)
+	synapses := make(map[int]*Synapse)
+	neuronOrder := make([]int, len(g1.NeuronOrder))
+	inverseNeuronOrder := make(map[int]int)
+	// Copy neurons from g1. Currently all activations are copied too and not crossed over
+	copy(neuronOrder, g1.NeuronOrder)
+	for nid, n := range g1.Neurons {
+		neurons[nid] = &Neuron{n.Type, n.Activation}
+	}
+	for nid, no := range g1.InverseNeuronOrder {
+		inverseNeuronOrder[nid] = no
+	}
+	for sid1, s1 := range g1.Synapses {
+		found := false
+		for sid2, s2 := range g2.Synapses {
+			if !found && sid1 == sid2 {
+				if rand.Float64() > 0.5 {
+					synapses[sid1] = &Synapse{s1.From, s1.To, s1.Weight}
+				} else {
+					// For now only copy weight, not endpoints. If we copied endpoints then differing structures could mean the weights are useless
+					synapses[sid1] = &Synapse{s1.From, s1.To, s2.Weight}
+				}
+				found = true
+			}
+		}
+		if !found {
+			synapses[sid1] = &Synapse{s1.From, s1.To, s1.Weight}
+		}
+	}
+	return &Genotype{
+		NumIn:              g1.NumIn,
+		NumOut:             g1.NumOut,
 		Neurons:            neurons,
 		Synapses:           synapses,
 		NeuronOrder:        neuronOrder,
