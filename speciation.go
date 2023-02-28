@@ -10,19 +10,22 @@ import (
 // Computes the genetic distance between the two genotypes.
 // This is disjoint * number_of_disjoint_genes + matching * total_matching_synapse_weight_diff.
 // The values used in the original paper are disjoint=1, matching=0.4
-func GeneticDistance(g1, g2 *Genotype, disjoint, matching float64) float64 {
-	numMatching := 0.0
-	totalWDiff := 0.0
-	for sid1, s1 := range g1.Synapses {
-		if s2, ok := g2.Synapses[sid1]; ok {
-			// Matching
-			numMatching++
-			totalWDiff += math.Abs(s1.Weight - s2.Weight)
-		}
-	}
-	numDisjoint := (float64(len(g1.Synapses)) - numMatching) + (float64(len(g2.Synapses)) - numMatching)
 
-	return disjoint*numDisjoint + matching*totalWDiff
+func GeneticDistance(disjoint, matching float64) func(*Genotype, *Genotype) float64 {
+	return func(g1, g2 *Genotype) float64 {
+		numMatching := 0.0
+		totalWDiff := 0.0
+		for sid1, s1 := range g1.Synapses {
+			if s2, ok := g2.Synapses[sid1]; ok {
+				// Matching
+				numMatching++
+				totalWDiff += math.Abs(s1.Weight - s2.Weight)
+			}
+		}
+		numDisjoint := (float64(len(g1.Synapses)) - numMatching) + (float64(len(g2.Synapses)) - numMatching)
+
+		return disjoint*numDisjoint + matching*totalWDiff
+	}
 }
 
 type Agent struct {
@@ -37,7 +40,7 @@ func NewAgent(g *Genotype) *Agent {
 	}
 }
 
-func Speciate(newSpeciesCounter Counter, agents []*Agent, distanceThreshold float64, keepExistingSpecies bool) map[int][]*Agent {
+func Speciate(newSpeciesCounter Counter, agents []*Agent, distanceThreshold float64, keepExistingSpecies bool, distance func(a, b *Genotype) float64) map[int][]*Agent {
 	if distanceThreshold < 0 {
 		distanceThreshold = 0
 	}
@@ -49,7 +52,7 @@ func Speciate(newSpeciesCounter Counter, agents []*Agent, distanceThreshold floa
 		agentsNewPool := make([]*Agent, 0)
 		template := agentsPool[rand.Intn(len(agentsPool))]
 		for _, a := range agentsPool {
-			if GeneticDistance(template.Genotype, a.Genotype, 1, 0.4) <= distanceThreshold {
+			if distance(template.Genotype, a.Genotype) <= distanceThreshold {
 				// Same species
 				newSpecies = append(newSpecies, a)
 			} else {
@@ -121,7 +124,7 @@ func CalculateOffspring(speciatedPopulation map[int][]*Agent, targetCount int) m
 }
 
 // Create a new population by picking parents from each species and creating a child from them. Fitnesses must be assigned to the agents before calling this function and they must be > 0
-func Repopulate(speciatedPopulation map[int][]*Agent, allowedOffspringCounts map[int]int, reproduction func(g1, g2 *Genotype) *Genotype) []*Agent {
+func Repopulate(speciatedPopulation map[int][]*Agent, allowedOffspringCounts map[int]int, reproduction func(g1, g2 *Genotype) *Genotype, selection func([]*Agent) *Agent) []*Agent {
 	// Define new population to fill
 	population := make([]*Agent, 0)
 	// For every species
@@ -131,8 +134,8 @@ func Repopulate(speciatedPopulation map[int][]*Agent, allowedOffspringCounts map
 		// Add the new agent to the new population
 		for i := 0; i < allowedOffspringCounts[sid]; i++ {
 			// Pick two parents
-			parent1 := spec[probabilisticSelection(spec)]
-			parent2 := spec[probabilisticSelection(spec)]
+			parent1 := selection(spec)
+			parent2 := selection(spec)
 			// Ensure parent1 is the more fit one
 			if parent1.Fitness < parent2.Fitness {
 				parent1, parent2 = parent2, parent1
@@ -148,7 +151,7 @@ func Repopulate(speciatedPopulation map[int][]*Agent, allowedOffspringCounts map
 }
 
 // function to perform roulette wheel selection
-func rouletteWheelSelection(agents []*Agent) int {
+func RouletteWheelSelection(agents []*Agent) *Agent {
 	// calculate total fitness
 	totalFitness := 0.0
 	for _, agent := range agents {
@@ -167,17 +170,17 @@ func rouletteWheelSelection(agents []*Agent) int {
 			fitness := agent.Fitness
 			runningSum += fitness
 			if r <= runningSum {
-				return i
+				return agents[i]
 			}
 		}
 		panic("Somthing went wrong with roulette wheel selection")
 	} else {
-		return rand.Intn(len(agents))
+		return agents[rand.Intn(len(agents))]
 	}
 }
 
 // function to take a slice of agents and return a chosen agent picked probabilistically based on their position when sorted by fitness
-func probabilisticSelection(agents []*Agent) int {
+func ProbabilisticSelection(agents []*Agent) *Agent {
 	// sort agents by fitness
 	sort.Slice(agents, func(i, j int) bool {
 		return agents[i].Fitness > agents[j].Fitness
@@ -185,5 +188,5 @@ func probabilisticSelection(agents []*Agent) int {
 	// generate random number
 	r := math.Pow(rand.Float64(), 3)
 	// find index of selected agent
-	return int(math.Floor(r * float64(len(agents))))
+	return agents[int(math.Floor(r*float64(len(agents))))]
 }
