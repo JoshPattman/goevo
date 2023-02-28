@@ -138,21 +138,17 @@ func NewGenotypeCrossover(g1 *Genotype, g2 *Genotype) *Genotype {
 	for nid, no := range g1.InverseNeuronOrder {
 		inverseNeuronOrder[nid] = no
 	}
-	for sid1, s1 := range g1.Synapses {
-		found := false
-		for sid2, s2 := range g2.Synapses {
-			if !found && sid1 == sid2 {
-				if rand.Float64() > 0.5 {
-					synapses[sid1] = &Synapse{s1.From, s1.To, s1.Weight}
-				} else {
-					// For now only copy weight, not endpoints. If we copied endpoints then differing structures could mean the weights are useless
-					synapses[sid1] = &Synapse{s1.From, s1.To, s2.Weight}
-				}
-				found = true
+	for sid, s1 := range g1.Synapses {
+		s2, ok := g2.Synapses[sid]
+		if ok {
+			//50% chance to pick a weight from s2
+			if rand.Intn(2) == 0 {
+				synapses[sid] = &Synapse{s1.From, s1.To, s2.Weight}
+			} else {
+				synapses[sid] = &Synapse{s1.From, s1.To, s1.Weight}
 			}
-		}
-		if !found {
-			synapses[sid1] = &Synapse{s1.From, s1.To, s1.Weight}
+		} else {
+			synapses[sid] = &Synapse{s1.From, s1.To, s1.Weight}
 		}
 	}
 	return &Genotype{
