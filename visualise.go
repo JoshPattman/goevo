@@ -87,7 +87,6 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 	if maxPos-minPos > 0 {
 		sf = float64(v.ImgSizeY) / (1.5 * float64(maxPos-minPos))
 	}
-	print(sf)
 	for nid := range nodeYPosses {
 		order := g.InverseNeuronOrder[nid]
 		if order >= countsInp && order < countsInp+countsHid {
