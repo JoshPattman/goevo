@@ -62,8 +62,45 @@ func (v *GenotypeVisualiser) DrawImage(g *Genotype) draw.Image {
 		yPos := avPos/avPosN + rand.Intn(100) - 50
 		nodeYPosses[nid] = yPos
 		nodeXPosses[nid] = posX
-		drawHiddenNeuron(img, v, posX, yPos)
+
 	}
+	// Find the mean y pos of all hidden neurons
+	avPos := 0.0
+	avPosN := 0.0
+	minPos, maxPos := 1000000, -1000000
+	for nid := range nodeYPosses {
+		order := g.InverseNeuronOrder[nid]
+		if order >= countsInp && order < countsInp+countsHid {
+			avPos += float64(nodeYPosses[nid])
+			avPosN++
+			if nodeYPosses[nid] < minPos {
+				minPos = nodeYPosses[nid]
+			}
+			if nodeYPosses[nid] > maxPos {
+				maxPos = nodeYPosses[nid]
+			}
+		}
+	}
+	avPos /= avPosN
+	// Subtract the mean from all hidden neurons, then add half the height
+	sf := 1.0
+	if maxPos-minPos > 0 {
+		sf = float64(v.ImgSizeY) / (1.5 * float64(maxPos-minPos))
+	}
+	print(sf)
+	for nid := range nodeYPosses {
+		order := g.InverseNeuronOrder[nid]
+		if order >= countsInp && order < countsInp+countsHid {
+			nodeYPosses[nid] = int((float64(nodeYPosses[nid])-avPos)*sf) + v.ImgSizeY/2
+		}
+	}
+	// Draw hiddens
+	for i := 0; i < countsHid; i++ {
+		nid := g.NeuronOrder[i+countsInp]
+		drawHiddenNeuron(img, v, nodeXPosses[nid], nodeYPosses[nid])
+	}
+
+	// Draw
 	for cid := range g.Synapses {
 		w := g.Synapses[cid].Weight
 		isRecurrent := g.InverseNeuronOrder[g.Synapses[cid].From] > g.InverseNeuronOrder[g.Synapses[cid].To]
@@ -134,36 +171,6 @@ func drawHiddenNeuron(img draw.Image, g *GenotypeVisualiser, posX, posY int) {
 	drawNeuron(img, g, posX, posY, g.HiddenNeuronColor)
 }
 
-/*
-	func line(img draw.Image, x0, y0, x1, y1 int, c color.Color) {
-		var dx = math.Abs(float64(x1 - x0))
-		var dy = math.Abs(float64(y1 - y0))
-		var err = dx - dy
-		var sx, sy = 1, 1
-
-		if x0 > x1 {
-			sx = -1
-		}
-		if y0 > y1 {
-			sy = -1
-		}
-
-		img.Set(x0, y0, c)
-		for x0 != x1 || y0 != y1 {
-			var e2 = 2 * err
-			if e2 > -dy {
-				err -= dy
-				x0 += sx
-			}
-			if e2 < dx {
-				err += dx
-				y0 += sy
-			}
-			img.Set(x0, y0, c)
-		}
-
-}
-*/
 func thickLine(img draw.Image, x0, y0, x1, y1, w int, c color.Color) {
 	var dx = math.Abs(float64(x1 - x0))
 	var dy = math.Abs(float64(y1 - y0))
