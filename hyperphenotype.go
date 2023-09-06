@@ -5,13 +5,18 @@ import (
 )
 
 type HyperPhenotype struct {
-	Weights []*mat.Dense
+	Weights     []*mat.Dense
+	Activations []func(float64) float64
 }
 
 // Creates a hyperneat phenotype which has the same structure as a standard dene neural net
 // The cppn should have 5 inputs: (la, ia, lb, ib, bias)
-func NewFlatHyperPhenotype(dimensions []int, cppn *Phenotype) *HyperPhenotype {
+func NewFlatHyperPhenotype(dimensions []int, activations []Activation, cppn *Phenotype) *HyperPhenotype {
 	weights := make([]*mat.Dense, len(dimensions)-1)
+	acfuncs := make([]func(float64) float64, len(dimensions))
+	for i, a := range activations {
+		acfuncs[i] = activationMap[a]
+	}
 	for layer := 0; layer < len(dimensions)-1; layer++ {
 		weights[layer] = mat.NewDense(dimensions[layer+1], dimensions[layer]+1, nil)
 		for out := 0; out < dimensions[layer+1]; out++ {
@@ -28,7 +33,8 @@ func NewFlatHyperPhenotype(dimensions []int, cppn *Phenotype) *HyperPhenotype {
 		}
 	}
 	return &HyperPhenotype{
-		Weights: weights,
+		Weights:     weights,
+		Activations: acfuncs,
 	}
 }
 
@@ -38,6 +44,9 @@ func (p *HyperPhenotype) Forward(inputs []float64) []float64 {
 		eouts, _ := p.Weights[l].Dims()
 		temp := mat.NewVecDense(eouts, nil)
 		temp.MulVec(p.Weights[l], buf)
+		for i := 0; i < eouts; i++ {
+			temp.SetVec(i, p.Activations[l](temp.AtVec(i)))
+		}
 		if l == len(p.Weights)-1 {
 			// Dont add a bias node on the last layer
 			buf = temp
