@@ -20,6 +20,10 @@ const (
 	ActivationReLUMax Activation = "relumax"
 	// y = 0 {x < 0.5} | y = 1 {x >= 0.5}
 	ActivationStep Activation = "step"
+	// y = sin(x)
+	ActivationSin Activation = "sin"
+	// y = cos(x)
+	ActivationCos Activation = "cos"
 )
 
 var activationMap = map[Activation](func(float64) float64){
@@ -30,6 +34,8 @@ var activationMap = map[Activation](func(float64) float64){
 	ActivationSigmoid: sigmoidActivation,
 	ActivationReLUMax: relumaxActivation,
 	ActivationStep:    stepActivation,
+	ActivationSin:     sinActivation,
+	ActivationCos:     cosActivation,
 }
 
 func linearActivation(x float64) float64 {
@@ -72,4 +78,12 @@ func relnActivation(x float64) float64 {
 		return 0
 	}
 	return math.Log(x + 1)
+}
+
+func sinActivation(x float64) float64 {
+	return math.Sin(x)
+}
+
+func cosActivation(x float64) float64 {
+	return math.Cos(x)
 }
