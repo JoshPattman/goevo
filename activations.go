@@ -42,6 +42,10 @@ const (
 	AcReLUM = ActivationReLUMax
 	// ActivationStep
 	AcStep = ActivationStep
+	// ActivationSin
+	AcSin = ActivationSin
+	// ActivationCos
+	AcCos = ActivationCos
 )
 
 var activationMap = map[Activation](func(float64) float64){
