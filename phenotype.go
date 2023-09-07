@@ -1,5 +1,7 @@
 package goevo
 
+import "math"
+
 // Data type for a phenotype connection
 type PhenotypeConnection struct {
 	To     int
@@ -72,6 +74,11 @@ func NewPhenotype(g *Genotype) *Phenotype {
 func (p *Phenotype) Forward(inputs []float64) []float64 {
 	if len(inputs) != p.numIn {
 		panic("not correct number of inputs")
+	}
+	for _, x := range inputs {
+		if math.IsNaN(x) {
+			panic("input to phenotype contains nan")
+		}
 	}
 	for i := range p.memory {
 		if i < p.numIn {

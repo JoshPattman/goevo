@@ -1,8 +1,14 @@
 package goevo
 
 import (
+	"math"
+
 	"gonum.org/v1/gonum/mat"
 )
+
+type Forwarder interface {
+	Forward(inputs []float64) []float64
+}
 
 type HyperPhenotype struct {
 	Weights     []*mat.Dense
@@ -22,12 +28,15 @@ func NewFlatHyperPhenotype(dimensions []int, activations []Activation, cppn *Phe
 		for out := 0; out < dimensions[layer+1]; out++ {
 			for inp := 0; inp < dimensions[layer]+1; inp++ {
 				layerDivisor := float64(len(dimensions) - 1)
-				inpDivisor, outDivisor := float64(dimensions[layer]), float64(dimensions[layer+1]-1) // -1 for both of these to mean that the first node is 0, and the last is 1
+				inpDivisor, outDivisor := float64(dimensions[layer]+1), float64(dimensions[layer+1])
 				weight := cppn.Forward([]float64{
 					float64(layer) / layerDivisor, float64(inp) / inpDivisor,
 					float64(layer+1) / layerDivisor, float64(out) / outDivisor,
 					1,
 				})[0]
+				if math.IsNaN(weight) {
+					panic("cppn generated a nan value")
+				}
 				weights[layer].Set(out, inp, weight)
 			}
 		}
@@ -38,6 +47,7 @@ func NewFlatHyperPhenotype(dimensions []int, activations []Activation, cppn *Phe
 	}
 }
 
+// TODO: need to activate first layer
 func (p *HyperPhenotype) Forward(inputs []float64) []float64 {
 	buf := mat.NewVecDense(len(inputs)+1, append(inputs, 1))
 	for l := range p.Weights {
@@ -45,7 +55,7 @@ func (p *HyperPhenotype) Forward(inputs []float64) []float64 {
 		temp := mat.NewVecDense(eouts, nil)
 		temp.MulVec(p.Weights[l], buf)
 		for i := 0; i < eouts; i++ {
-			temp.SetVec(i, p.Activations[l](temp.AtVec(i)))
+			temp.SetVec(i, p.Activations[l+1](temp.AtVec(i)))
 		}
 		if l == len(p.Weights)-1 {
 			// Dont add a bias node on the last layer
