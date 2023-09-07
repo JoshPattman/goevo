@@ -26,6 +26,24 @@ const (
 	ActivationCos Activation = "cos"
 )
 
+const (
+	// These are just aliases for the above consts
+	// ActivationLinear
+	AcLin = ActivationLinear
+	// ActivationReLU
+	AcReLU = ActivationReLU
+	// ActivationTanh
+	AcTanh = ActivationTanh
+	// ActivationReLn
+	AcReLn = ActivationReLn
+	// ActivationSigmoid
+	AcSig = ActivationSigmoid
+	// ActivationReLUMax
+	AcReLUM = ActivationReLUMax
+	// ActivationStep
+	AcStep = ActivationStep
+)
+
 var activationMap = map[Activation](func(float64) float64){
 	ActivationLinear:  linearActivation,
 	ActivationReLU:    reluActivation,
