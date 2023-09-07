@@ -12,26 +12,33 @@ type Forwarder interface {
 	Forward(inputs []float64) []float64
 }
 
+// Stores the information about a hyperneat substrate.
+// It can be json marshalled and unmarshalled.
+type HyperSubstrate struct {
+	Dimensions  []int        `json:"dimensions"`
+	Activations []Activation `json:"activations"`
+}
+
 // HyperPhenotype is a phenotype that is generated from a cppn
 type HyperPhenotype struct {
 	Weights     []*mat.Dense
 	Activations []func(float64) float64
 }
 
-// Creates a hyperneat phenotype which has the same structure as a standard dene neural net
-// The cppn should have 5 inputs: (la, ia, lb, ib, bias)
-func NewFlatHyperPhenotype(dimensions []int, activations []Activation, cppn *Phenotype) *HyperPhenotype {
-	weights := make([]*mat.Dense, len(dimensions)-1)
-	acfuncs := make([]func(float64) float64, len(dimensions))
-	for i, a := range activations {
+// Creates a hyperneat phenotype which has the same structure as a standard dense neural net.
+// The cppn should have 5 inputs: (la, ia, lb, ib, bias).
+func NewFlatHyperPhenotype(substrate *HyperSubstrate, cppn *Phenotype) *HyperPhenotype {
+	weights := make([]*mat.Dense, len(substrate.Dimensions)-1)
+	acfuncs := make([]func(float64) float64, len(substrate.Dimensions))
+	for i, a := range substrate.Activations {
 		acfuncs[i] = activationMap[a]
 	}
-	for layer := 0; layer < len(dimensions)-1; layer++ {
-		weights[layer] = mat.NewDense(dimensions[layer+1], dimensions[layer]+1, nil)
-		for out := 0; out < dimensions[layer+1]; out++ {
-			for inp := 0; inp < dimensions[layer]+1; inp++ {
-				layerDivisor := float64(len(dimensions) - 1)
-				inpDivisor, outDivisor := float64(dimensions[layer]+1), float64(dimensions[layer+1])
+	for layer := 0; layer < len(substrate.Dimensions)-1; layer++ {
+		weights[layer] = mat.NewDense(substrate.Dimensions[layer+1], substrate.Dimensions[layer]+1, nil)
+		for out := 0; out < substrate.Dimensions[layer+1]; out++ {
+			for inp := 0; inp < substrate.Dimensions[layer]+1; inp++ {
+				layerDivisor := float64(len(substrate.Dimensions) - 1)
+				inpDivisor, outDivisor := float64(substrate.Dimensions[layer]+1), float64(substrate.Dimensions[layer+1])
 				weight := cppn.Forward([]float64{
 					float64(layer) / layerDivisor, float64(inp) / inpDivisor,
 					float64(layer+1) / layerDivisor, float64(out) / outDivisor,
