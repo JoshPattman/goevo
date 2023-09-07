@@ -1,5 +1,5 @@
-# `goevo` - work-in-progress NEAT implementation in Golang
-GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. It is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
+# `goevo` - NEAT implementation in Golang
+GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. I have built the package with customisability in mind, so it is trivial to modify the algorithm or add your own components. In the future, HyperNEAT witll also be supported (see TODO at the bottom of this page). The package is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
 To learn more about the NEAT algorithm, here is the original paper: [Stanley, K. O., & Miikkulainen, R. (2002). Evolving neural networks through augmenting topologies. Evolutionary computation, 10(2), 99-127.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
 ## Usage
 ### Creating and Modifying a `Genotype`
