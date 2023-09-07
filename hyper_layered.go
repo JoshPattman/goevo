@@ -1,19 +1,16 @@
 package goevo
 
-// This file contains the implementation of a hyperneat phenotype that is flattened into a standard dense neural net.
-// You can create a LayeredHyperPhenotype from either a LayeredSubstrate1D or a LayeredSubstrateND.
-// I plan to add more implementations of different HyperNEAT phenotypes in the future.
-
 import (
 	"math"
 
 	"gonum.org/v1/gonum/mat"
 )
 
-// LayeredSubstrate1D stores information about a substrate for a LayeredHyperPhenotype.
+// LayeredSubstrateScattered stores information about a substrate for a LayeredHyperPhenotype.
 // It follows the structure of a dense neural network, where there are multiple layers, each layer having an activation and a number of nodes.
-type LayeredSubstrate1D struct {
-	Dimensions  []int        `json:"dimensions"`
+// However, when using the CPPN, the nodes are not arranged in a array, but rather are scattered throughout the substrate in user specified positions.
+type LayeredSubstrate struct {
+	Neurons     [][]Pos      `json:"neurons"`
 	Activations []Activation `json:"activations"`
 }
 
@@ -23,26 +20,25 @@ type LayeredHyperPhenotype struct {
 	activations []func(float64) float64
 }
 
-// NewLayeredHyperPhenotype1D creates a new LayeredHyperPhenotype from a LayeredSubstrate1D and a CPPN.
+// NewLayeredHyperPhenotype creates a new LayeredHyperPhenotype from a LayeredSubstrate and a CPPN.
 // The CPPN should have 5 inputs, the first two being the layer and node of the input, the second two being the layer and node of the output, and the last being a bias node.
 // The CPPN should have 1 output, the weight of the connection.
-func NewLayeredHyperPhenotype1D(substrate *LayeredSubstrate1D, cppn *Phenotype) *LayeredHyperPhenotype {
-	weights := make([]*mat.Dense, len(substrate.Dimensions)-1)
-	acfuncs := make([]func(float64) float64, len(substrate.Dimensions))
-	for i, a := range substrate.activations {
+func NewLayeredHyperPhenotype(substrate *LayeredSubstrate, cppn *Phenotype) *LayeredHyperPhenotype {
+	weights := make([]*mat.Dense, len(substrate.Neurons)-1)
+	acfuncs := make([]func(float64) float64, len(substrate.Neurons))
+	for i, a := range substrate.Activations {
 		acfuncs[i] = activationMap[a]
 	}
-	for layer := 0; layer < len(substrate.Dimensions)-1; layer++ {
-		weights[layer] = mat.NewDense(substrate.Dimensions[layer+1], substrate.Dimensions[layer]+1, nil)
-		for out := 0; out < substrate.Dimensions[layer+1]; out++ {
-			for inp := 0; inp < substrate.Dimensions[layer]+1; inp++ {
-				layerDivisor := float64(len(substrate.Dimensions) - 1)
-				inpDivisor, outDivisor := float64(substrate.Dimensions[layer]+1), float64(substrate.Dimensions[layer+1])
-				weight := cppn.Forward([]float64{
-					float64(layer) / layerDivisor, float64(inp) / inpDivisor,
-					float64(layer+1) / layerDivisor, float64(out) / outDivisor,
-					1,
-				})[0]
+	for layer := 0; layer < len(substrate.Neurons)-1; layer++ {
+		weights[layer] = mat.NewDense(len(substrate.Neurons[layer+1]), len(substrate.Neurons[layer])+1, nil)
+		for out := 0; out < len(substrate.Neurons[layer+1]); out++ {
+			for inp := 0; inp < len(substrate.Neurons[layer])+1; inp++ {
+				layerDivisor := float64(len(substrate.Neurons) - 1)
+				cppnInputs := []float64{float64(layer) / layerDivisor, float64(layer+1) / layerDivisor}
+				cppnInputs = append(cppnInputs, substrate.Neurons[layer][inp]...)
+				cppnInputs = append(cppnInputs, substrate.Neurons[layer+1][out]...)
+				cppnInputs = append(cppnInputs, 1)
+				weight := cppn.Forward(cppnInputs)[0]
 				if math.IsNaN(weight) {
 					panic("cppn generated a nan value")
 				}
