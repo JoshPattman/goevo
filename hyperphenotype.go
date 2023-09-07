@@ -6,10 +6,13 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// Forwarder is an interface for a thing that has a Forward function.
+// Both Phenotype and HyperPhenotype implement this interface.
 type Forwarder interface {
 	Forward(inputs []float64) []float64
 }
 
+// HyperPhenotype is a phenotype that is generated from a cppn
 type HyperPhenotype struct {
 	Weights     []*mat.Dense
 	Activations []func(float64) float64
@@ -47,9 +50,12 @@ func NewFlatHyperPhenotype(dimensions []int, activations []Activation, cppn *Phe
 	}
 }
 
-// TODO: need to activate first layer
+// Perform a Forward pass on the hyperneat phenotype.
 func (p *HyperPhenotype) Forward(inputs []float64) []float64 {
 	buf := mat.NewVecDense(len(inputs)+1, append(inputs, 1))
+	for i := 0; i < buf.Len(); i++ {
+		buf.SetVec(i, p.Activations[0](buf.AtVec(i)))
+	}
 	for l := range p.Weights {
 		eouts, _ := p.Weights[l].Dims()
 		temp := mat.NewVecDense(eouts, nil)
