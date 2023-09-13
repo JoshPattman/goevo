@@ -1,6 +1,10 @@
 # `goevo` - NEAT implementation in Golang
-GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. I have built the package with customisability in mind, so it is trivial to modify the algorithm or add your own components. In the future, HyperNEAT witll also be supported (see TODO at the bottom of this page). The package is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
-To learn more about the NEAT algorithm, here is the original paper: [Stanley, K. O., & Miikkulainen, R. (2002). Evolving neural networks through augmenting topologies. Evolutionary computation, 10(2), 99-127.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
+GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. I have built the package with customizability in mind, so it is trivial to modify the algorithm or add your own components. In the future, HyperNEAT will also be supported (see TODO at the bottom of this page). The package is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
+To learn more about the NEAT algorithm, here is the original paper: [Stanley, K. O., & Miikkulainen, R. (2002). Evolving neural networks through augmenting topologies. Evolutionary computation, 10(2), 99-127.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) \
+<br>
+Below are some repos in which I have used this package:
+* Using the full goevo NEAT algorithm to train sailing boats: [neat-sail](https://github.com/JoshPattman/neat-sail)
+* Using just some of the goevo features to run continuous evolution: [ocean](https://github.com/JoshPattman/ocean)
 ## Usage
 ### Creating and Modifying a `Genotype`
 A Genotype is a bit like DNA - it encodes all the information to build the network.
@@ -25,14 +29,14 @@ It is quite hard to deduce the topology of a genotype by looking at a list of it
 vis := goevo.NewGenotypeVisualiser()
 vis.DrawImageToPNGFile("example_1.png", genotype)
 ```
-Below is the image in the generated file `example_1.png`. The green cirlces are input neurons, pink circles are hidden neurons, and yellow circles are output neurons. A blue line is a positive weight and a red line is a negative weight. The thicker the line, the stronger the weight.
+Below is the image in the generated file `example_1.png`. The green circles are input neurons, the pink circles are hidden neurons, and the yellow circles are output neurons. A blue line is a positive weight and a red line is a negative weight. The thicker the line, the stronger the weight.
 
 <img src="README_ASSETS/example_1.png" width="400">
 
 ### Pruning Synapses
-One way to prevent the networks getting too big is to prune synapses (delete synapses). Pruning will remove the given synapse, then remove all neurons and synapses that become redundant due to the pruning.
+One way to prevent the networks from getting too big is to prune synapses (delete synapses). Pruning will remove the given synapse, and then remove all neurons and synapses that become redundant due to the pruning.
 ```go
-// Prune the synapse that connects the hidden neuron to the output neuron. This makes the hidden neuron nedundant so it is therefor removed too, along with its other synapses.
+// Prune the synapse that connects the hidden neuron to the output neuron. This makes the hidden neuron redundant so it is therefore removed too, along with its other synapses.
 genotypePrunedA := goevo.NewGenotypeCopy(genotype)
 genotypePrunedA.PruneSynapse(secondSynapseID)
 vis.DrawImageToPNGFile("example_2.png", genotypePrunedA)
@@ -68,7 +72,7 @@ Output:
 ```
 
 ### Saving and Loading `Genotype`
-If you have just trained a genotype, you may wish to save it. Genotypes can be json marshalled und unmarshalled with go's built-in json parser.
+If you have just trained a genotype, you may wish to save it. Genotypes can be json marshalled and unmarshalled with go's built-in json parser.
 ```go
 // Convert the genotype to a json []byte
 jsBytes, _ := json.Marshal(genotype)
@@ -78,7 +82,7 @@ json.Unmarshal(jsBytes, genotypeLoaded)
 ```
 
 ## Example - XOR
-In this example, a population of agents attempts to create a genotype that can do XOR logic. Note that each part of the NEAT algorithm is run seperately, meaning that the training loop is very easy to customise to your desires.
+In this example, a population of agents attempts to create a genotype that can do XOR logic. Note that each part of the NEAT algorithm is run separately, meaning that the training loop is very easy to customise to your desires.
 
 ```go
 // Define a counter (for counting new neurons and synapses), and a species counter (for new species)
