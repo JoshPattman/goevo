@@ -1,6 +1,8 @@
 # `goevo` - NEAT implementation in Golang
-GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. I have built the package with customizability in mind, so it is trivial to modify the algorithm or add your own components. In the future, HyperNEAT will also be supported (see TODO at the bottom of this page). The package is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
-To learn more about the NEAT algorithm, here is the original paper: [Stanley, K. O., & Miikkulainen, R. (2002). Evolving neural networks through augmenting topologies. Evolutionary computation, 10(2), 99-127.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) \
+GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. I have built the package with customizability in mind, so it is trivial to modify the algorithm or add your own components. HyperNEAT is now supported in a simple form (only dense, feed-forward networks allowed at this time), but it is still quite a new feature that I have not been able to extensively test. The package is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
+To learn more about the NEAT algorithm, here is the original paper: [Evolving neural networks through augmenting topologies.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) \
+To learn about HyperNEAT, have a look at this paper: [A Hypercube-Based Indirect Encoding for Evolving Large-Scale
+Neural Networks](https://axon.cs.byu.edu/~dan/778/papers/NeuroEvolution/stanley3**.pdf) \
 <br>
 Below are some repos in which I have used this package:
 * Using the full goevo NEAT algorithm to train sailing boats: [neat-sail](https://github.com/JoshPattman/neat-sail)
@@ -224,8 +226,194 @@ The final network is rather large compared to the minimal network required for X
 
 <img src="README_ASSETS/xor.png" width="400">
 
+## Example - XOR with HyperNEAT support
+This is a very similar example to the above one, except it uses my somewhat experimental HyperNEAT features. There is a boolean which selects whether to use HyperNEAT or basic NEAT. I have done this to show that in my implementation, it should be very easy to switch between the two with minimal code changes required. You might notice that in this example, the HyperNEAT version actually takes longer to train, which I think is due to the very simple nature of the problem. In theory, HyperNEAT should be much more efficient at performing large and complex problems, such as a quadrupedal walking algorithm.
+
+
+```go
+// When this is true, we will use HyperNEAT with LayeredHyperPhenotype.
+// When this is false, we will just use a basic NEAT Phenotype.
+useHyperNEAT := true
+
+// Create a counter for tracking innovation numbers, and one for tracking species.
+counter, specCounter := E.NewAtomicCounter(), E.NewAtomicCounter()
+
+var possibleActivations []E.Activation
+if useHyperNEAT {
+    // Define all the possible activations that the CPPN can use.
+    possibleActivations = []E.Activation{
+        E.ActivationReLU,
+        E.ActivationSigmoid,
+        E.ActivationSin,
+        E.ActivationCos,
+        E.ActivationStep,
+    }
+} else {
+    // Define all the possible activations that the neurons in base NEAT can use.
+    possibleActivations = []E.Activation{
+        E.ActivationReLU,
+        E.ActivationSigmoid,
+    }
+}
+
+// Define the substrate that we will use for HyperNEAT (if enabled)
+hyperSubstrate := E.NewLayeredSubstrate(
+    [][]E.Pos{
+        {E.P(0), E.P(1)},
+        {E.P(0), E.P(0.125), E.P(0.25), E.P(0.5), E.P(0.75), E.P(1)},
+        {E.P(0), E.P(0.125), E.P(0.25), E.P(0.5), E.P(0.75), E.P(1)},
+        {E.P(0)},
+    },
+    []E.Activation{
+        E.ActivationLinear,
+        E.ActivationReLU,
+        E.ActivationReLU,
+        E.ActivationReLUMax,
+    },
+    E.P(-1),
+)
+
+// Define the training data (XOR)
+X := [][]float64{
+    {0, 0},
+    {0, 1},
+    {1, 0},
+    {1, 1},
+}
+Y := [][]float64{
+    {0},
+    {1},
+    {1},
+    {0},
+}
+
+// Defing the fitness function. This can be run on either a HyperNEAT or NEAT phenotype, as they both implement Forwarder.
+fitness := func(f E.Forwarder) float64 {
+    loss := 0.0
+    min := math.MaxFloat64
+    max := -math.MaxFloat64
+    for i := range X {
+        pred := f.Forward(X[i])
+        e := pred[0] - Y[i][0]
+        loss += e * e
+        min = math.Min(min, pred[0])
+        max = math.Max(max, pred[0])
+    }
+    return (1 - loss/4) // + (max - min)
+}
+
+// Define the reproduction function. This can be run on either a HyperNEAT or NEAT genotype, as they use Genotype as their DNA.
+reproduction := func(g1, g2 *E.Genotype) *E.Genotype {
+    g := E.NewGenotypeCrossover(g1, g2)
+    if rand.Float64() > 0.9 {
+        E.AddRandomSynapse(counter, g, 0.1, false, 5)
+    }
+    if rand.Float64() > 0.95 && len(g.Neurons) < 10 {
+        E.AddRandomNeuron(counter, g, E.ChooseActivationFrom(possibleActivations))
+    }
+    if rand.Float64() > 0.95 {
+        E.PruneRandomSynapse(g)
+    }
+    for i := 0; i < 3; i++ {
+        if rand.Float64() > 0.85 {
+            E.MutateRandomSynapse(g, 0.1)
+        }
+    }
+    return g
+}
+
+// Define the initial population, which is 100 clones of an empty genotype.
+// If we are using HyperNEAT, we need to use the number of inputs and outputs that the CPPN should have for this substrate.
+// Otherwise, if we are using NEAT, we can just use 2 inputs and 1 output.
+targetPopSize := 100
+population := make([]*E.Agent, targetPopSize)
+var initialGenotype *E.Genotype
+if useHyperNEAT {
+    numIn, numOut := hyperSubstrate.CPNNInputsOutputs()
+    initialGenotype = E.NewGenotype(counter, numIn, numOut, E.ActivationLinear, E.ActivationLinear)
+} else {
+    initialGenotype = E.NewGenotype(counter, 2, 1, E.ActivationLinear, E.ActivationSigmoid)
+}
+for p := range population {
+    population[p] = E.NewAgent(E.NewGenotypeCopy(initialGenotype))
+}
+
+// Define some more values for NEAT algorithm.
+distanceThreshold := 1.0
+targetSpecies := 10
+var bestNet *E.Genotype
+
+// Generational loop
+for gen := 0; gen < 2000; gen++ {
+    // Calculate the fitness for all agents, keeping track of the best one.
+    bestFitness := -math.MaxFloat64
+    for _, a := range population {
+        // If we are just using NEAT, we can just use the phenotype directly.
+        // If we are using HyperNEAT, we need to create a HyperNEAT phenotype from the CPPN.
+        var phenotype E.Forwarder
+        phenotype = E.NewPhenotype(a.Genotype)
+        if useHyperNEAT {
+            phenotype = hyperSubstrate.NewPhenotype(phenotype)
+        }
+        a.Fitness = fitness(phenotype)
+        if a.Fitness > bestFitness {
+            bestFitness = a.Fitness
+            bestNet = a.Genotype
+        }
+    }
+
+    // Speciate the population, and adjust the future target species threshold based on the number of species.
+    specPop := E.Speciate(specCounter, population, distanceThreshold, false, E.GeneticDistance(1, 1))
+    if len(specPop) > targetSpecies {
+        distanceThreshold *= 1.2
+    } else if len(specPop) < targetSpecies {
+        distanceThreshold /= 1.2
+    }
+
+    // Calculate the number of offspring each species is allowed to have, and repopulate the population.
+    allowedOffspring := E.CalculateOffspring(specPop, targetPopSize)
+    population = E.Repopulate(specPop, allowedOffspring, reproduction, E.ProbabilisticSelection)
+
+    // Print out some stats
+    if gen%20 == 0 {
+        fmt.Println("Gen", gen, ", most fit", bestFitness, ", num spec", len(specPop))
+    }
+}
+
+// Print out the best networks results
+var bestP E.Forwarder
+bestP = E.NewPhenotype(bestNet)
+if useHyperNEAT {
+    bestP = hyperSubstrate.NewPhenotype(bestP)
+}
+for i := range X {
+    pred := bestP.Forward(X[i])
+    fmt.Println(X[i], pred[0], Y[i][0])
+}
+
+// Draw the network to a PNG file
+vis := E.NewGenotypeVisualiser()
+vis.DrawImageToPNGFile("xor.png", bestNet)
+
+// Json marshall the best genotype to a file
+fileGenotype, _ := os.Create("xor.json")
+defer fileGenotype.Close()
+json.NewEncoder(fileGenotype).Encode(bestNet)
+
+// If using hyoerneat, json marshall the substrate to a file
+if useHyperNEAT {
+    fileSubstrate, _ := os.Create("xor_substrate.json")
+    defer fileSubstrate.Close()
+    json.NewEncoder(fileSubstrate).Encode(hyperSubstrate)
+}
+```
+<br>
+
+Here is a visualization of the CPPN that this code generated when using HyperNEAT. You can't tell from the diagram, but the CPPN uses some of the newer activations such as `sin`.
+
+<img src="README_ASSETS/xor_hyper.png" width="400">
+
 ## TODO
 - Add a function to remove a neuron and re-route its synapses
 - Add a function to change a neurons activation
 - For the above two, add functions to randomly perform those actions
-- Finish and merge the HyperNEAT branch. It currently somewhat works, but it does not have all of the features that I would like yet.
