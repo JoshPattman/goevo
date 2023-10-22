@@ -1,6 +1,10 @@
-# `goevo` - work-in-progress NEAT implementation in Golang
-GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. It is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
-To learn more about the NEAT algorithm, here is the original paper: [Stanley, K. O., & Miikkulainen, R. (2002). Evolving neural networks through augmenting topologies. Evolutionary computation, 10(2), 99-127.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
+# `goevo` - NEAT implementation in Golang
+GoEVO is designed to be a fast but easy-to-understand package that implements the NEAT algorithm. I have built the package with customizability in mind, so it is trivial to modify the algorithm or add your own components. In the future, HyperNEAT will also be supported (see TODO at the bottom of this page). The package is still in development and has not had a major release yet, so stability is not guaranteed. If you find a bug or have any suggestions, please do raise an issue and i'll try to fix it. \
+To learn more about the NEAT algorithm, here is the original paper: [Stanley, K. O., & Miikkulainen, R. (2002). Evolving neural networks through augmenting topologies. Evolutionary computation, 10(2), 99-127.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) \
+<br>
+Below are some repos in which I have used this package:
+* Using the full goevo NEAT algorithm to train sailing boats: [neat-sail](https://github.com/JoshPattman/neat-sail)
+* Using just some of the goevo features to run continuous evolution: [ocean](https://github.com/JoshPattman/ocean)
 ## Usage
 ### Creating and Modifying a `Genotype`
 A Genotype is a bit like DNA - it encodes all the information to build the network.
@@ -25,14 +29,14 @@ It is quite hard to deduce the topology of a genotype by looking at a list of it
 vis := goevo.NewGenotypeVisualiser()
 vis.DrawImageToPNGFile("example_1.png", genotype)
 ```
-Below is the image in the generated file `example_1.png`. The green cirlces are input neurons, pink circles are hidden neurons, and yellow circles are output neurons. A blue line is a positive weight and a red line is a negative weight. The thicker the line, the stronger the weight.
+Below is the image in the generated file `example_1.png`. The green circles are input neurons, the pink circles are hidden neurons, and the yellow circles are output neurons. A blue line is a positive weight and a red line is a negative weight. The thicker the line, the stronger the weight.
 
 <img src="README_ASSETS/example_1.png" width="400">
 
 ### Pruning Synapses
-One way to prevent the networks getting too big is to prune synapses (delete synapses). Pruning will remove the given synapse, then remove all neurons and synapses that become redundant due to the pruning.
+One way to prevent the networks from getting too big is to prune synapses (delete synapses). Pruning will remove the given synapse, and then remove all neurons and synapses that become redundant due to the pruning.
 ```go
-// Prune the synapse that connects the hidden neuron to the output neuron. This makes the hidden neuron nedundant so it is therefor removed too, along with its other synapses.
+// Prune the synapse that connects the hidden neuron to the output neuron. This makes the hidden neuron redundant so it is therefore removed too, along with its other synapses.
 genotypePrunedA := goevo.NewGenotypeCopy(genotype)
 genotypePrunedA.PruneSynapse(secondSynapseID)
 vis.DrawImageToPNGFile("example_2.png", genotypePrunedA)
@@ -68,7 +72,7 @@ Output:
 ```
 
 ### Saving and Loading `Genotype`
-If you have just trained a genotype, you may wish to save it. Genotypes can be json marshalled und unmarshalled with go's built-in json parser.
+If you have just trained a genotype, you may wish to save it. Genotypes can be json marshalled and unmarshalled with go's built-in json parser.
 ```go
 // Convert the genotype to a json []byte
 jsBytes, _ := json.Marshal(genotype)
@@ -78,105 +82,142 @@ json.Unmarshal(jsBytes, genotypeLoaded)
 ```
 
 ## Example - XOR
-In this example, a population of agents attempts to create a genotype that can do XOR logic. The generational loop for this example is as follows:
-1) Every agents fitness is evaluated
-2) The best agent is picked, all others are discarded
-3) The population is filled with clones of the best agent, who may have mutations
-
-This a a very primative training loop, and ignores many of the key features of the NEAT paper such as speciation and crossover. However, I have not implemented those yet (see TODO at the bottom of the README). Despite this, the algorithm still performs quite well, reaching a mean squared error of less than 0.001 in around 60 generations with a population size of 100.
+In this example, a population of agents attempts to create a genotype that can do XOR logic. Note that each part of the NEAT algorithm is run separately, meaning that the training loop is very easy to customise to your desires.
 
 ```go
-// Define the dataset. In this exmaple this data corresponds to XOR.
-// The third index of each X datapoint is the bias, which is important because each neuron does not have its own bias
-X := [][]float64{{0, 0, 1}, {0, 1, 1}, {1, 0, 1}, {1, 1, 1}}
-Y := [][]float64{{0}, {1}, {1}, {0}}
+// Define a counter (for counting new neurons and synapses), and a species counter (for new species)
+counter, specCounter := goevo.NewAtomicCounter(), goevo.NewAtomicCounter()
 
-// Define the fitness function. The algorithm will try to maximise fitness. In this particular function the best score a network can get is 0 and the worst is -infinity
-fitness := func(g *goevo.Genotype) float64 {
-    p := goevo.NewPhenotype(g)
-    totalSqaredError := 0.0
+// Define all of the possible activations that can be used
+possibleActivations := []goevo.Activation{
+    goevo.ActivationReLU,
+    goevo.ActivationSigmoid,
+    goevo.ActivationStep,
+}
+
+// This is our input and output
+X := [][]float64{
+    {0, 0},
+    {0, 1},
+    {1, 0},
+    {1, 1},
+}
+Y := [][]float64{
+    {0},
+    {1},
+    {1},
+    {0},
+}
+
+// Our fitness function calculates the mean squared error between the predictions and the actual values.
+fitness := func(f *goevo.Phenotype) float64 {
+    loss := 0.0
     for i := range X {
-        totalSqaredError += math.Pow(Y[i][0]-p.Forward(X[i])[0], 2)
+        pred := f.Forward(X[i])
+        e := pred[0] - Y[i][0]
+        loss += e * e
     }
-    return -totalSqaredError / float64(len(X))
+    return (1 - loss/4)
 }
 
-// Create a counter. This is used to keep track of new neurons and synapses
-counter := goevo.NewAtomicCounter()
-
-// Create the initial genotype. All other genotypes in the population will start as offspring from this.
-// It is important to create a single genotype as a commom ancestor because then the input and output neurons of the whole population will have the same ids from the counter
-genotypeAncestor := goevo.NewGenotype(counter, 3, 1, goevo.ActivationLinear, goevo.ActivationSigmoid)
-// To start off easy, we will manually connect all inputs to the output, which gives the network a head start
-genotypeAncestor.AddSynapse(counter, 0, 3, 0.5)
-genotypeAncestor.AddSynapse(counter, 1, 3, 0.5)
-genotypeAncestor.AddSynapse(counter, 2, 3, 0.5)
-
-// Create a population of 100 genotypes
-population := make([]*goevo.Genotype, 100)
-for pi := range population {
-    population[pi] = goevo.NewGenotypeCopy(genotypeAncestor)
+// Our reproduction function takes two parent genotypes (DNA) and creates a child genotype.
+reproduction := func(g1, g2 *goevo.Genotype) *goevo.Genotype {
+    // Perform crossover on the two parents to get a child genotype.
+    g := goevo.NewGenotypeCrossover(g1, g2)
+    // 10% of the time, add a random synapse to the child. We are not using any recurrent synapses
+    if rand.Float64() > 0.9 {
+        goevo.AddRandomSynapse(counter, g, 0.1, false, 5)
+    }
+    // 5% of the time, add a random neuron with one of our previously specified activation functions
+    if rand.Float64() > 0.95 {
+        goevo.AddRandomNeuron(counter, g, goevo.ChooseActivationFrom(possibleActivations))
+    }
+    // 5% of the time, delete a random synapse. This will then recursively delete neurons and synapses that have no inputs or outputs.
+    if rand.Float64() > 0.95 {
+        goevo.PruneRandomSynapse(g)
+    }
+    // 3 times, with a 15% chance each, mutate the weight of a random synapse
+    for i := 0; i < 3; i++ {
+        if rand.Float64() > 0.85 {
+            goevo.MutateRandomSynapse(g, 0.1)
+        }
+    }
+    return g
 }
 
-// Do a maximum of 5000 generations
-for generation := 0; generation < 5000; generation++ {
-    // Find the agent with the best fitness
-    bestFitness := math.Inf(-1)
-    bestFitnessIndex := -1
-    for i := range population {
-        f := fitness(population[i])
-        if f > bestFitness {
-            bestFitness = f
-            bestFitnessIndex = i
+// The target population size will be 100
+targetPopSize := 100
+// Create a population of 100 agents that are all empty genotypes. An agent contains a genotype, fitness, and species ID
+population := make([]*goevo.Agent, targetPopSize)
+// Fill the population with the same initial genotype.
+// It is very important that all genotypes start from one initial one, as this means their input and output nodes all have the same IDs.
+// This immidiately makes crossover feasable.
+initialGenotype := goevo.NewGenotype(counter, 2, 1, goevo.ActivationLinear, goevo.ActivationSigmoid)
+for p := range population {
+    population[p] = goevo.NewAgent(goevo.NewGenotypeCopy(initialGenotype))
+}
+
+// Distance threshold is the maximum distance two genotypes can be from each other before being considered different species.
+// During the generational loop, we will change this to hit the target species number.
+distanceThreshold := 1.0
+// The target number of species we want in a generation
+targetSpecies := 10
+
+// Used to remember the best network up to this point
+var bestNet *goevo.Genotype
+var bestFitness float64
+
+// For 500 generations
+for gen := 0; gen < 500; gen++ {
+    // Calculate the fitness of each agent, while keeping track of the best
+    bestFitness = -math.MaxFloat64
+    for _, a := range population {
+        pheno := goevo.NewPhenotype(a.Genotype)
+        a.Fitness = fitness(pheno)
+        if a.Fitness > bestFitness {
+            bestFitness = a.Fitness
+            bestNet = a.Genotype
         }
     }
-    bestGenotype := population[bestFitnessIndex]
-
-    // Repopulate the population with offspring of the best agent
-    for i := 0; i < len(population); i++ {
-        population[i] = goevo.NewGenotypeCopy(bestGenotype)
-        // Synapse creation
-        if rand.Float64() > 0.8 {
-            goevo.AddRandomSynapse(counter, population[i], 0.2, false, 5)
-        }
-        // Synapse mutations
-        if rand.Float64() > 0.8 {
-            goevo.MutateRandomSynapse(population[i], 0.5)
-        }
-        if rand.Float64() > 0.4 {
-            goevo.MutateRandomSynapse(population[i], 0.1)
-        }
-        // New neuron creation
-        if rand.Float64() > 0.9 {
-            goevo.AddRandomNeuron(counter, population[i], goevo.ActivationReLU)
-        }
+    // Split the population into species. We will use the genetic distance function to calculate the distance between two agents.
+    // The weightings are the same as in the original paper.
+    specPop := goevo.Speciate(specCounter, population, distanceThreshold, false, goevo.GeneticDistance(1, 0.4))
+    // Change the distance threshold so that next generation, there should be closer to the target species number of species
+    if len(specPop) > targetSpecies {
+        distanceThreshold *= 1.2
+    } else if len(specPop) < targetSpecies {
+        distanceThreshold /= 1.2
     }
-    population[0] = bestGenotype
+    // Calculate how many offspring each species is allowed
+    allowedOffspring := goevo.CalculateOffspring(specPop, targetPopSize)
+    // Using the previous speciated population, the number of allowed offspring, and ProbabilisticSelection, create a new generation
+    population = goevo.Repopulate(specPop, allowedOffspring, reproduction, goevo.ProbabilisticSelection)
 
-    // Check to see if we have reached our target fitness. If we have, stop looping
-    if bestFitness > -0.001 {
-        fmt.Println("Reached target fitness in", generation, "generations")
-        break
+    // Print some info
+    if gen%20 == 0 {
+        fmt.Println("Gen", gen, ", most fit", bestFitness, ", num spec", len(specPop))
     }
 }
 
-// Create a phenotype from the best network and calculate what its predictions for the dataset are
-p := goevo.NewPhenotype(population[0])
+// Print out the best network and its results
+bestP := goevo.NewPhenotype(bestNet)
 for i := range X {
-    fmt.Println("X", X[i], "Y", Y[i], "YP", p.Forward(X[i]))
+    var pred []float64
+    pred = bestP.Forward(X[i])
+    fmt.Println("X", X[i], "YP", pred[0], "Y", Y[i][0])
 }
-// Visualise what the genotype looks like
-v := goevo.NewGenotypeVisualiser()
-v.DrawImageToPNGFile("xor.png", population[0])
+
+// Draw the network to a file
+vis := goevo.NewGenotypeVisualiser()
+vis.DrawImageToPNGFile("xor.png", bestNet)
 ```
 
 Here is the ouput from running this once:
 ```
-Reached target fitness in 56 generations
-X [0 0 1] Y [0] YP [0.041903360177595196]
-X [0 1 1] Y [1] YP [0.9803748834155143]
-X [1 0 1] Y [1] YP [0.9598753334944649]
-X [1 1 1] Y [0] YP [0.012205476415211636]
+X [0 0] YP 0.0024126496048012813 Y 0
+X [0 1] YP 0.9999999999951001 Y 1
+X [1 0] YP 0.9996491462464224 Y 1
+X [1 1] YP 1.9287480105160926e-05 Y 0
 ```
 
 The final network is rather large compared to the minimal network required for XOR. However, the algorithm can be made to create smaller networks by adding a penalty for large networks in the training function. This is a very good idea to do if you plan to use NEAT, as the whole purpose of it is to create optimal topologies.
@@ -184,9 +225,7 @@ The final network is rather large compared to the minimal network required for X
 <img src="README_ASSETS/xor.png" width="400">
 
 ## TODO
-- Add speciation
-- Add crossover
-- Figure out how to fully implement the NEAT algorithm without taking away too much control
 - Add a function to remove a neuron and re-route its synapses
 - Add a function to change a neurons activation
 - For the above two, add functions to randomly perform those actions
+- Finish and merge the HyperNEAT branch. It currently somewhat works, but it does not have all of the features that I would like yet.
