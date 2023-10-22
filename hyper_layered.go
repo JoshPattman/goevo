@@ -1,17 +1,64 @@
 package goevo
 
 import (
-	"math"
-
 	"gonum.org/v1/gonum/mat"
 )
 
 // LayeredSubstrateScattered stores information about a substrate for a LayeredHyperPhenotype.
 // It follows the structure of a dense neural network, where there are multiple layers, each layer having an activation and a number of nodes.
 // However, when using the CPPN, the nodes are not arranged in a array, but rather are scattered throughout the substrate in user specified positions.
+// When adding the bias, the bias neuron is always at the position given but in the previous layer.
 type LayeredSubstrate struct {
+	Dimensions  int          `json:"dimensions"`
 	Neurons     [][]Pos      `json:"neurons"`
+	BiasNeuron  Pos          `json:"bias_neuron"`
 	Activations []Activation `json:"activations"`
+}
+
+func (s *LayeredSubstrate) CPNNInputsOutputs() (int, int) {
+	return (s.Dimensions+1)*2 + 1, 1
+}
+
+func (s *LayeredSubstrate) NewPhenotype(cppn Forwarder) *LayeredHyperPhenotype {
+	numLayers := len(s.Neurons)
+	weights := make([]*mat.Dense, numLayers-1)
+	activations := make([]func(float64) float64, numLayers)
+
+	for layer := range activations {
+		activations[layer] = activationMap[s.Activations[layer]]
+	}
+
+	for srcLayer := 0; srcLayer < numLayers-1; srcLayer++ {
+		tarLayer := srcLayer + 1
+		srcNum, tarNum := len(s.Neurons[srcLayer])+1, len(s.Neurons[tarLayer]) // Add one to srcNum for bias
+		weights[srcLayer] = mat.NewDense(tarNum, srcNum, nil)
+		for src := 0; src < srcNum; src++ {
+			var srcPos Pos
+			if src == srcNum-1 {
+				srcPos = s.BiasNeuron
+			} else {
+				srcPos = s.Neurons[srcLayer][src]
+			}
+			for tar := 0; tar < tarNum; tar++ {
+				tarPos := s.Neurons[tarLayer][tar]
+				srcPosWithLayer, tarPosWithLayer := append(srcPos, float64(srcLayer)), append(tarPos, float64(tarLayer))
+				cppnInputs := make([]float64, (s.Dimensions+1)*2+1)
+				for i := 0; i < s.Dimensions+1; i++ { // add one to dimensions as dimensions does not include layer
+					cppnInputs[i] = srcPosWithLayer[i]
+					cppnInputs[i+s.Dimensions+1] = tarPosWithLayer[i]
+				}
+				cppnInputs[(s.Dimensions+1)*2] = 1 // Bias
+				// The structure of cppnInputs is (srcPos.X, srcPos.Y, tarPos.X, tarPos.Y, bias) but can be more or less than just X and Y
+				// The output of the CPPN is the weight of the synapse
+				weight := cppn.Forward(cppnInputs)[0]
+				weights[srcLayer].Set(tar, src, weight)
+			}
+		}
+	}
+	return &LayeredHyperPhenotype{
+		weights:     weights,
+		activations: activations,
+	}
 }
 
 // LayeredHyperPhenotype is a HyperNEAT phenotype created with a substrate composed of a number of n dimensional layers.
@@ -20,42 +67,10 @@ type LayeredHyperPhenotype struct {
 	activations []func(float64) float64
 }
 
-// NewLayeredHyperPhenotype creates a new LayeredHyperPhenotype from a LayeredSubstrate and a CPPN.
-// The CPPN should have 5 inputs, the first two being the layer and node of the input, the second two being the layer and node of the output, and the last being a bias node.
-// The CPPN should have 1 output, the weight of the connection.
-func NewLayeredHyperPhenotype(substrate *LayeredSubstrate, cppn *Phenotype) *LayeredHyperPhenotype {
-	weights := make([]*mat.Dense, len(substrate.Neurons)-1)
-	acfuncs := make([]func(float64) float64, len(substrate.Neurons))
-	for i, a := range substrate.Activations {
-		acfuncs[i] = activationMap[a]
-	}
-	for layer := 0; layer < len(substrate.Neurons)-1; layer++ {
-		weights[layer] = mat.NewDense(len(substrate.Neurons[layer+1]), len(substrate.Neurons[layer])+1, nil)
-		for out := 0; out < len(substrate.Neurons[layer+1]); out++ {
-			for inp := 0; inp < len(substrate.Neurons[layer])+1; inp++ {
-				layerDivisor := float64(len(substrate.Neurons) - 1)
-				cppnInputs := []float64{float64(layer) / layerDivisor, float64(layer+1) / layerDivisor}
-				cppnInputs = append(cppnInputs, substrate.Neurons[layer][inp]...)
-				cppnInputs = append(cppnInputs, substrate.Neurons[layer+1][out]...)
-				cppnInputs = append(cppnInputs, 1)
-				weight := cppn.Forward(cppnInputs)[0]
-				if math.IsNaN(weight) {
-					panic("cppn generated a nan value")
-				}
-				weights[layer].Set(out, inp, weight)
-			}
-		}
-	}
-	return &LayeredHyperPhenotype{
-		weights:     weights,
-		activations: acfuncs,
-	}
-}
-
 // Forward performs a forward pass on the LayeredHyperPhenotype, returning the output of the network.
 func (p *LayeredHyperPhenotype) Forward(inputs []float64) []float64 {
 	buf := mat.NewVecDense(len(inputs)+1, append(inputs, 1))
-	for i := 0; i < buf.Len(); i++ {
+	for i := 0; i < buf.Len()-1; i++ { // Dont want to activate the bias node
 		buf.SetVec(i, p.activations[0](buf.AtVec(i)))
 	}
 	for l := range p.weights {
