@@ -4,6 +4,10 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+func NewLayeredSubstrateEmpty() *LayeredSubstrate {
+	return &LayeredSubstrate{}
+}
+
 // NewLayeredSubstrate creates a new LayeredSubstrate with the given parameters.
 // layeredNeuronPositions is a slice of slices of positions, where each slice of positions represents a layer.
 // biasNeuronPosition is the position of the bias neuron, which is placed in the previous layer. It should have same ndims as each position in the layerNeuronPositions.
