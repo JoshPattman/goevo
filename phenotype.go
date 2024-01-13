@@ -1,6 +1,9 @@
 package goevo
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 // Data type for a phenotype connection
 type PhenotypeConnection struct {
@@ -73,7 +76,7 @@ func NewPhenotype(g *Genotype) *Phenotype {
 // Do a forward pass with some input data for the phenotype, returning the output of the network. This also will take into account any memory left over from previous calls
 func (p *Phenotype) Forward(inputs []float64) []float64 {
 	if len(inputs) != p.numIn {
-		panic("not correct number of inputs")
+		panic(fmt.Errorf("not correct number of inputs: expected %v but got %v", p.numIn, len(inputs)))
 	}
 	for _, x := range inputs {
 		if math.IsNaN(x) {

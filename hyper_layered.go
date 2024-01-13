@@ -1,6 +1,8 @@
 package goevo
 
 import (
+	"math"
+
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -41,6 +43,34 @@ func NewLayeredSubstrate(layeredNeuronPositions [][]Pos, layerActivations []Acti
 		BiasNeuronPosition:     biasNeuronPosition,
 		LayerActivations:       layerActivations,
 	}
+}
+
+func positionalEncoding(p float64, maximumMult float64, dims int, offset float64) []float64 {
+	mult := math.Pow(maximumMult, 1/float64(dims-1))
+	totalOffset := 0.0
+	v := 1.0
+	encoding := make([]float64, dims)
+	for i := 0; i < dims; i++ {
+		encoding[i] = math.Sin(v*p*2*math.Pi + totalOffset)
+		v *= mult
+		totalOffset += offset
+	}
+	return encoding
+}
+
+// NewProceduralSinLayeredSubstrate creates a new LayeredSubstrate with the given parameters.
+// Instead of the programmer manually placing nodes in ndimensional space, this function procedurally generates the positions of the nodes, using a sin-based positional encoding.
+func NewProceduralSinLayeredSubstrate(layerNeuronCounts []int, layerActivations []Activation, layerEncodingDim, nodeEncodingDim int, layerEncodingMaxFreq, nodeEncodingMaxFreq float64) *LayeredSubstrate {
+	layerPosses := make([][]Pos, len(layerNeuronCounts))
+	for l := range layerNeuronCounts {
+		layerEncoding := positionalEncoding(float64(l)/float64(len(layerNeuronCounts)), layerEncodingMaxFreq, layerEncodingDim, 0.5) // 0.5 is a good offset for all uses i think
+		layerPosses[l] = make([]Pos, layerNeuronCounts[l])
+		for n := range layerPosses[l] {
+			nodeEncoding := positionalEncoding(float64(n)/float64(layerNeuronCounts[l]), nodeEncodingMaxFreq, nodeEncodingDim, 0.5)
+			layerPosses[l][n] = append(nodeEncoding, layerEncoding...)
+		}
+	}
+	return NewLayeredSubstrate(layerPosses, layerActivations, make(Pos, nodeEncodingDim+layerEncodingDim))
 }
 
 // LayeredSubstrate stores information about a substrate for a LayeredHyperPhenotype.
