@@ -2,20 +2,22 @@ package goevo
 
 import "sync/atomic"
 
-// An implementation of the Counter interface which is goroutine safe
+// Counter is a type which counts up.
+// It is used to generate unique species IDs and innovation IDs
 type Counter struct {
-	I int64
+	i int64
 }
 
-// Get the next innovation id
+// Next gets the next ID, and increments it for the future.
+// It is thread-safe.
 func (a *Counter) Next() int {
-	v := atomic.AddInt64(&a.I, 1)
+	v := atomic.AddInt64(&a.i, 1)
 	return int(v)
 }
 
-// Create a new AtomicCounter which starts from id 0
+// NewCounter creates a new Counter, starting from id 0
 func NewCounter() *Counter {
 	return &Counter{
-		I: -1,
+		i: -1,
 	}
 }

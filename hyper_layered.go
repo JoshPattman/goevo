@@ -6,43 +6,79 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+// LayeredSubstrate stores information about a substrate for a LayeredHyperPhenotype.
+// It follows the structure of a dense neural network, where there are multiple layers, each layer having an activation and a number of nodes.
+// However, when generation of weights using the CPPN, the nodes are not arranged in a array, but rather are scattered throughout the substrate in user specified positions.
+// When adding the bias, the bias neuron is always placed at the position of BiasNeuronPosition but in the previous layer.
+type LayeredSubstrate struct {
+	NodeLateralPositions [][]Pos      `json:"node_lateral_positions"`
+	LayerPositions       []Pos        `json:"layer_positions"`
+	BiasLateralPosition  Pos          `json:"bias_lateral_position"`
+	LayerActivations     []Activation `json:"layer_activations"`
+}
+
 func NewLayeredSubstrateEmpty() *LayeredSubstrate {
 	return &LayeredSubstrate{}
 }
 
-// NewLayeredSubstrate creates a new LayeredSubstrate with the given parameters.
-// layeredNeuronPositions is a slice of slices of positions, where each slice of positions represents a layer.
-// biasNeuronPosition is the position of the bias neuron, which is placed in the previous layer. It should have same ndims as each position in the layerNeuronPositions.
-// It will panic on invalid input.
-func NewLayeredSubstrate(layeredNeuronPositions [][]Pos, layerActivations []Activation, biasNeuronPosition Pos) *LayeredSubstrate {
-	if len(layeredNeuronPositions) < 2 {
+// NewLayeredSubstrate creates a new substrate for creating a layered hyper phenotype, using a the manually provided node positions.
+//
+//   - nodeLateralPositions: The lateral positions of each neuron in each layer
+//   - layerPositions: The position of each layer, will be appended onto the end of each node pos
+//   - layerActivations: An activation for each layer
+//   - biasLateralPosition: The lateral position of the bias neuron, bias neuron for each layer will always be placed in th eprevious layer
+func NewLayeredSubstrate(nodeLateralPositions [][]Pos, layerPositions []Pos, layerActivations []Activation, biasLateralPosition Pos) *LayeredSubstrate {
+	if len(nodeLateralPositions) < 2 {
 		panic("LayeredSubstrate must have at least an input and ouput layer")
 	}
-	for l := range layeredNeuronPositions {
-		if len(layeredNeuronPositions[l]) == 0 {
+	if len(nodeLateralPositions) != len(layerPositions) || len(nodeLateralPositions) != len(layerActivations) {
+		panic("incorrect lengths. p.s. write better error message")
+	}
+	for l := range nodeLateralPositions {
+		if len(nodeLateralPositions[l]) == 0 {
 			panic("all layers must have at least one neuron")
 		}
 	}
-	dims := len(layeredNeuronPositions[0][0])
-	for l := range layeredNeuronPositions {
-		for p := range layeredNeuronPositions[l] {
-			if len(layeredNeuronPositions[l][p]) != dims {
+	dims := len(nodeLateralPositions[0][0]) + len(layerPositions[0])
+	for l := range nodeLateralPositions {
+		for p := range nodeLateralPositions[l] {
+			if len(nodeLateralPositions[l][p])+len(layerPositions[l]) != dims {
 				panic("all posses must have the same ndims")
 			}
 		}
 	}
-	if len(biasNeuronPosition) != dims {
-		panic("bias neuraon must have same ndims as other neurons")
-	}
-	if len(layeredNeuronPositions) != len(layerActivations) {
-		panic("there must be exactly one activation for each layer")
+	if len(biasLateralPosition)+len(layerPositions[0]) != dims {
+		panic("bias neuron must have same ndims as other neurons")
 	}
 
 	return &LayeredSubstrate{
-		LayeredNeuronPositions: layeredNeuronPositions,
-		BiasNeuronPosition:     biasNeuronPosition,
-		LayerActivations:       layerActivations,
+		NodeLateralPositions: nodeLateralPositions,
+		LayerPositions:       layerPositions,
+		BiasLateralPosition:  biasLateralPosition,
+		LayerActivations:     layerActivations,
 	}
+}
+
+// NewProceduralSinLayeredSubstrate creates a new substrate for creating a layered hyper phenotype, using generated positions for nodes.
+// Instead of the programmer manually placing nodes in ndimensional space, this function procedurally generates the positions of the nodes, using a sin-based positional encoding.
+//
+//   - layerNeuronCounts: The topology of the network. E.g. [3, 5, 4, 1] would give 3 input, 5 hidden1, 4 hidden2, and 1 output
+//   - layerActivations: An activation for each layer
+//   - nodeEncodingDim: The dimension of the lateral position of each node
+//   - layerEncodingDim: The dinension of the layer position
+//   - nodeEncodingMaxFreq: The max frequency of sin waves for the node encoding, 4 seems to work well
+//   - layerEncodingMaxFreq: The max frequency of sin waves for the layer encoding, 4 seems to work well
+func NewProceduralSinLayeredSubstrate(layerNeuronCounts []int, layerActivations []Activation, nodeEncodingDim, layerEncodingDim int, nodeEncodingMaxFreq, layerEncodingMaxFreq float64) *LayeredSubstrate {
+	lateralPosses := make([][]Pos, len(layerNeuronCounts))
+	layerPosses := make([]Pos, len(layerActivations))
+	for l := range lateralPosses {
+		layerPosses[l] = positionalEncoding(float64(l)/float64(len(layerNeuronCounts)), layerEncodingMaxFreq, layerEncodingDim, 0.5) // 0.5 is a good offset for all uses i think
+		lateralPosses[l] = make([]Pos, layerNeuronCounts[l])
+		for n := range lateralPosses[l] {
+			lateralPosses[l][n] = positionalEncoding(float64(n)/float64(layerNeuronCounts[l]), nodeEncodingMaxFreq, nodeEncodingDim, 0.5)
+		}
+	}
+	return NewLayeredSubstrate(lateralPosses, layerPosses, layerActivations, make(Pos, nodeEncodingDim))
 }
 
 func positionalEncoding(p float64, maximumMult float64, dims int, offset float64) []float64 {
@@ -58,31 +94,6 @@ func positionalEncoding(p float64, maximumMult float64, dims int, offset float64
 	return encoding
 }
 
-// NewProceduralSinLayeredSubstrate creates a new LayeredSubstrate with the given parameters.
-// Instead of the programmer manually placing nodes in ndimensional space, this function procedurally generates the positions of the nodes, using a sin-based positional encoding.
-func NewProceduralSinLayeredSubstrate(layerNeuronCounts []int, layerActivations []Activation, layerEncodingDim, nodeEncodingDim int, layerEncodingMaxFreq, nodeEncodingMaxFreq float64) *LayeredSubstrate {
-	layerPosses := make([][]Pos, len(layerNeuronCounts))
-	for l := range layerNeuronCounts {
-		layerEncoding := positionalEncoding(float64(l)/float64(len(layerNeuronCounts)), layerEncodingMaxFreq, layerEncodingDim, 0.5) // 0.5 is a good offset for all uses i think
-		layerPosses[l] = make([]Pos, layerNeuronCounts[l])
-		for n := range layerPosses[l] {
-			nodeEncoding := positionalEncoding(float64(n)/float64(layerNeuronCounts[l]), nodeEncodingMaxFreq, nodeEncodingDim, 0.5)
-			layerPosses[l][n] = append(nodeEncoding, layerEncoding...)
-		}
-	}
-	return NewLayeredSubstrate(layerPosses, layerActivations, make(Pos, nodeEncodingDim+layerEncodingDim))
-}
-
-// LayeredSubstrate stores information about a substrate for a LayeredHyperPhenotype.
-// It follows the structure of a dense neural network, where there are multiple layers, each layer having an activation and a number of nodes.
-// However, when generation of weights using the CPPN, the nodes are not arranged in a array, but rather are scattered throughout the substrate in user specified positions.
-// When adding the bias, the bias neuron is always placed at the position of BiasNeuronPosition but in the previous layer.
-type LayeredSubstrate struct {
-	LayeredNeuronPositions [][]Pos      `json:"layered_neuron_positions"`
-	BiasNeuronPosition     Pos          `json:"bias_neuron_position"`
-	LayerActivations       []Activation `json:"layer_activations"`
-}
-
 // CPNNInputsOutputs returns the number of inputs and outputs the CPPN should have for this substrate.
 func (s *LayeredSubstrate) CPNNInputsOutputs() (int, int) {
 	return (s.Dimensions()+1)*2 + 1, 1
@@ -90,7 +101,7 @@ func (s *LayeredSubstrate) CPNNInputsOutputs() (int, int) {
 
 // BuildPhenotype creates a new LayeredHyperPhenotype from the CPPN using this substrate.
 func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype {
-	numLayers := len(s.LayeredNeuronPositions)
+	numLayers := len(s.NodeLateralPositions)
 	weights := make([]*mat.Dense, numLayers-1)
 	activations := make([]func(float64) float64, numLayers)
 
@@ -100,22 +111,21 @@ func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype
 
 	for srcLayer := 0; srcLayer < numLayers-1; srcLayer++ {
 		tarLayer := srcLayer + 1
-		srcNum, tarNum := len(s.LayeredNeuronPositions[srcLayer])+1, len(s.LayeredNeuronPositions[tarLayer]) // Add one to srcNum for bias
+		srcNum, tarNum := len(s.NodeLateralPositions[srcLayer])+1, len(s.NodeLateralPositions[tarLayer]) // Add one to srcNum for bias
 		weights[srcLayer] = mat.NewDense(tarNum, srcNum, nil)
 		for src := 0; src < srcNum; src++ {
 			var srcPos Pos
 			if src == srcNum-1 {
-				srcPos = s.BiasNeuronPosition
+				srcPos = append(append(Pos{}, s.BiasLateralPosition...), s.LayerPositions[srcLayer]...)
 			} else {
-				srcPos = s.LayeredNeuronPositions[srcLayer][src]
+				srcPos = append(append(Pos{}, s.NodeLateralPositions[srcLayer][src]...), s.LayerPositions[srcLayer]...)
 			}
 			for tar := 0; tar < tarNum; tar++ {
-				tarPos := s.LayeredNeuronPositions[tarLayer][tar]
-				srcPosWithLayer, tarPosWithLayer := append(srcPos, float64(srcLayer)), append(tarPos, float64(tarLayer))
+				tarPos := append(append(Pos{}, s.NodeLateralPositions[tarLayer][tar]...), s.LayerPositions[tarLayer]...)
 				cppnInputs := make([]float64, (s.Dimensions()+1)*2+1)
 				for i := 0; i < s.Dimensions()+1; i++ { // add one to dimensions as dimensions does not include layer
-					cppnInputs[i] = srcPosWithLayer[i]
-					cppnInputs[i+s.Dimensions()+1] = tarPosWithLayer[i]
+					cppnInputs[i] = srcPos[i]
+					cppnInputs[i+s.Dimensions()+1] = tarPos[i]
 				}
 				cppnInputs[(s.Dimensions()+1)*2] = 1 // Bias
 				// The structure of cppnInputs is (srcPos.X, srcPos.Y, tarPos.X, tarPos.Y, bias) but can be more or less than just X and Y
@@ -133,7 +143,7 @@ func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype
 
 // Dimensions returns the number of dimensions each layer has. If each layer has one axis (P(0.5)), this will return 1
 func (s *LayeredSubstrate) Dimensions() int {
-	return len(s.LayeredNeuronPositions[0][0])
+	return len(s.NodeLateralPositions[0][0])
 }
 
 // LayeredHyperPhenotype is a HyperNEAT phenotype created with a substrate composed of a number of n dimensional layers.

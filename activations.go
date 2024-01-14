@@ -2,49 +2,48 @@ package goevo
 
 import "math"
 
-// A string representing an activation function. It must be one of the consts that start with 'Activation...'
+// Activation is a string representing an activation function.
 type Activation string
 
 const (
-	// y = x
+	// ActivationFunction representing [y = x]
 	ActivationLinear Activation = "linear"
-	// y = x {x > 0} | y = 0 {x <= 0}
+	// ActivationFunction representing [y = x {x > 0} | y = 0 {x <= 0}]
 	ActivationReLU Activation = "relu"
-	// y = tanh(x)
+	// ActivationFunction representing [y = tanh(x)]
 	ActivationTanh Activation = "tanh"
-	// y = ln(x) {x > 0} | y = 0 {x <= 0}. I have found this can benefit recurrent networks by not allowing the values to explode
+	// ActivationFunction representing [y = ln(x) {x > 0} | y = 0 {x <= 0}]. I have found this can benefit recurrent networks by not allowing the values to explode
 	ActivationReLn Activation = "reln"
-	// y = sigmoid(x)
+	// ActivationFunction representing [y = sigmoid(x)]
 	ActivationSigmoid Activation = "sigmoid"
-	// y = x {1 > x > 0} | y = 0 {x <= 0} | y = 1 {x >= 1}
+	// ActivationFunction representing [y = x {1 > x > 0} | y = 0 {x <= 0} | y = 1 {x >= 1}]
 	ActivationReLUMax Activation = "relumax"
-	// y = 0 {x < 0.5} | y = 1 {x >= 0.5}
+	// ActivationFunction representing [y = 0 {x < 0.5} | y = 1 {x >= 0.5}]
 	ActivationStep Activation = "step"
-	// y = sin(x)
+	// ActivationFunction representing [y = sin(x)]
 	ActivationSin Activation = "sin"
-	// y = cos(x)
+	// ActivationFunction representing [y = cos(x)]
 	ActivationCos Activation = "cos"
 )
 
 const (
-	// These are just aliases for the above consts
-	// ActivationLinear
+	// Alias for ActivationLinear
 	AcLin = ActivationLinear
-	// ActivationReLU
+	// Alias for ActivationReLU
 	AcReLU = ActivationReLU
-	// ActivationTanh
+	// Alias for ActivationTanh
 	AcTanh = ActivationTanh
-	// ActivationReLn
+	// Alias for ActivationReLn
 	AcReLn = ActivationReLn
-	// ActivationSigmoid
+	// Alias for ActivationSigmoid
 	AcSig = ActivationSigmoid
-	// ActivationReLUMax
+	// Alias for ActivationReLUMax
 	AcReLUM = ActivationReLUMax
-	// ActivationStep
+	// Alias for ActivationStep
 	AcStep = ActivationStep
-	// ActivationSin
+	// Alias for ActivationSin
 	AcSin = ActivationSin
-	// ActivationCos
+	// Alias for ActivationCos
 	AcCos = ActivationCos
 )
 

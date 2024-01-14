@@ -8,19 +8,19 @@ import (
 	"os"
 )
 
-// A type denoting the type of a neuron (input, hidden, output). Must be one of the consts that start with 'Neuron...'
+// NeuronType is a type denoting the type of a neuron (input, hidden, output). Must be one of the constants that start with 'Neuron...'
 type NeuronType string
 
 const (
-	// Input neuron
+	// NeuronInput is an input neuron
 	NeuronInput NeuronType = "input"
-	// Hidden neuron
+	// NeuronHidden is a hidden neuron
 	NeuronHidden NeuronType = "hidden"
-	// Output neuron
+	// NeuronOutput is an output neuron
 	NeuronOutput NeuronType = "output"
 )
 
-// A type represeting a genotype synapse
+// Synapse is a type represeting a connection between two nodes in a Genotype.
 type Synapse struct {
 	// The id of the neuron this comes from
 	From int `json:"from_id"`
@@ -30,7 +30,7 @@ type Synapse struct {
 	Weight float64 `json:"weight"`
 }
 
-// A type representing a genotype neuron
+// Neuron is a type representing a neuron (node) in a genotype.
 type Neuron struct {
 	// The type of this neuron
 	Type NeuronType `json:"type"`
@@ -38,7 +38,9 @@ type Neuron struct {
 	Activation Activation `json:"activation"`
 }
 
-// A type representing a genotype (effectively DNA) used in the NEAT algorithm
+// Genotype is a type representing a genotype used in the NEAT algorithm.
+// Genotypes are effectively like DNA: they encode how to build the neural network,
+// but they cannot directly perform the calculations - that is the job of the Phenotype
 type Genotype struct {
 	// The number of input neurons. READONLY
 	NumIn int `json:"num_in"`
@@ -54,7 +56,8 @@ type Genotype struct {
 	InverseNeuronOrder map[int]int `json:"inverse_neuron_order"`
 }
 
-// Should only be used for loading
+// NewEmptyGenotype creates a new empty Genotype.
+// This Genotype is invalid, and you should only use this constructor if you immidiately load data into it (e.g. load from file).
 func NewEmptyGenotype() *Genotype {
 	return &Genotype{
 		NumIn:              -1,
@@ -66,9 +69,13 @@ func NewEmptyGenotype() *Genotype {
 	}
 }
 
-// Create a new Genotype. Create all new innovation IDs with the provided Counter `counter`.
-// The genotype will have `numIn` input nodes and `numOut` output nodes.
-// The input nodes will have activation `inActivation` and the output nodes will have activation `outActivation`
+// NewGenotype creates a new Genotype.
+//
+//   - counter: Used to create new innovation IDs for any new nodes
+//   - numIn: The number of inputs to the network
+//   - numOut: The number of outputs from the network
+//   - inActivation: The activation of the input layer, usually this is set to ActivationLinear
+//   - outActivation: The activaition of the final layer
 func NewGenotype(counter *Counter, numIn, numOut int, inActivation, outActivation Activation) *Genotype {
 	neurons := make(map[int]*Neuron)
 	neuronOrder := make([]int, numIn+numOut)
@@ -101,7 +108,8 @@ func NewGenotype(counter *Counter, numIn, numOut int, inActivation, outActivatio
 	}
 }
 
-// Create a new Genotype which is a clone of `g`
+// CloneGenotype creates a cloned version of the provided Genotype.
+// The new genotype is deep-copied, and shares no underlying data.
 func CloneGenotype(g *Genotype) *Genotype {
 	neurons := make(map[int]*Neuron)
 	synapses := make(map[int]*Synapse)
@@ -127,8 +135,8 @@ func CloneGenotype(g *Genotype) *Genotype {
 	}
 }
 
-// Creates a new Genotype which is a clone of g1, but with 50% of the weights of matching synapses from g2.
-// g1 should be the fitter parent
+// CrossoverGenotypes creates a new Genotype which is a clone of g1, but with 50% of the weights of matching synapses from g2.
+// Because only the structure of g1 is copied, g1 should be the fitter parent.
 func CrossoverGenotypes(g1 *Genotype, g2 *Genotype) *Genotype {
 	neurons := make(map[int]*Neuron)
 	synapses := make(map[int]*Synapse)
@@ -165,7 +173,7 @@ func CrossoverGenotypes(g1 *Genotype, g2 *Genotype) *Genotype {
 	}
 }
 
-// Find the ID of the synapse that goes from `from` to `to`.
+// LookupSynapse finds the ID of the synapse that goes from `from` to `to`.
 // Will return `synapseID, error`, where error might be caused by the connection not existing
 func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 	for ci, c := range n.Synapses {
@@ -176,7 +184,7 @@ func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 	return -1, errors.New("cannot find connection")
 }
 
-// Create a synapse between two neurons using the provided Counter, with weight `weight`.
+// AddSynapse creates a synapse between two neurons using the provided Counter, with weight `weight`.
 // `from` and `to` are the innovation IDs of two neurons.
 // If `from` is ordered after `to` then the connection is recurrent.
 // Will return `synapseID, error`
@@ -207,7 +215,7 @@ func (n *Genotype) AddSynapse(counter *Counter, from, to int, weight float64) (i
 	return id, nil
 }
 
-// Create a hidden neuron on a synapse using the provided Counter, with activation function `activation`.
+// AddNeuron creates a hidden neuron on a synapse using the provided Counter, with activation function `activation`.
 // `conn` is the ID of the synapse to create the neuron on, and `conn` must not refer to a recurrent connection.
 // Will return `neuronID, synapseID, error`, where synapseID is the id of the synapse that was created due to the original synapse being split.
 // This synapse connects the new neuron to the old synapses endpoint, and the old synapses endpoint is moved to the new neuron
@@ -247,7 +255,7 @@ func (n *Genotype) AddNeuron(counter *Counter, conn int, activation Activation) 
 	return newNodeID, newConnID, nil
 }
 
-// Prune the synapse with id `sid` from the genotype. Then recursively check to see if this has made any other synapses or neurons redundant, and remove those too.
+// PruneSynapse prunes the synapse with id `sid` from the genotype. Then recursively check to see if this has made any other synapses or neurons redundant, and remove those too.
 func (n *Genotype) PruneSynapse(sid int) error {
 	if !n.IsSynapse(sid) {
 		return errors.New("not a synapse")
@@ -291,24 +299,24 @@ func (n *Genotype) hasNeuronIn(nid int) bool {
 	return false
 }
 
-// Return the number of input, hidden, and output neurons in this genotype
+// Topology returns the number of input, hidden, and output neurons in this genotype
 func (n *Genotype) Topology() (int, int, int) {
 	return n.NumIn, len(n.NeuronOrder) - n.NumIn - n.NumOut, n.NumOut
 }
 
-// Check if a given id is a neuron in this genotype
+// IsNeuron checks if a given id is a neuron in this genotype
 func (n *Genotype) IsNeuron(id int) bool {
 	_, ok := n.Neurons[id]
 	return ok
 }
 
-// Check if a given id is a synapse in this genotype
+// IsSynapse checks if a given id is a synapse in this genotype
 func (n *Genotype) IsSynapse(id int) bool {
 	_, ok := n.Synapses[id]
 	return ok
 }
 
-// Gets the order (position in which the neurons are calculated) of a neuron ID
+// GetNeuronOrder gets the order (position in which the neurons are calculated) of a neuron ID
 func (n *Genotype) GetNeuronOrder(nid int) (int, error) {
 	if !n.IsNeuron(nid) {
 		return -1, errors.New("not a node")
@@ -352,17 +360,20 @@ func (g *Genotype) insertNeuron(nid, order int, n *Neuron) {
 	}
 }
 
+// WriteJson writes a JSON representation of this Genotype to an io.Writer.
 func (g *Genotype) WriteJson(w io.Writer) error {
 	e := json.NewEncoder(w)
 	e.SetIndent("", "\t")
 	return e.Encode(g)
 }
 
+// ReadJSON reads a JSON representation of a genotype from an io.Writer into this genotype.
 func (g *Genotype) ReadJson(r io.Reader) error {
 	d := json.NewDecoder(r)
 	return d.Decode(g)
 }
 
+// WriteJsonFile writes a JSON representation of this Genotype to a file.
 func (g *Genotype) WriteJsonFile(filename string) error {
 	f, err := os.Create(filename)
 	if err != nil {
@@ -372,6 +383,7 @@ func (g *Genotype) WriteJsonFile(filename string) error {
 	return g.WriteJson(f)
 }
 
+// ReadJsonFile reads a JSON representation of a genotype from a file into this genotype.
 func (g *Genotype) ReadJsonFile(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {

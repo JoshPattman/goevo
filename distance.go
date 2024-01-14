@@ -2,12 +2,12 @@ package goevo
 
 import "math"
 
+// GeneticDistanceFunc is a function which calculates the genetic distance between two genotypes
 type GeneticDistanceFunc func(*Genotype, *Genotype) float64
 
-// Returns a function that computes the genetic distance between the two genotypes.
+// ClassicGeneticDistance returns a GeneticDistanceFunc as described in the original paper.
 // This is disjoint * number_of_disjoint_genes + matching * total_matching_synapse_weight_diff.
 // The values used in the original paper are disjoint=1, matching=0.4.
-// The returned function can be used in Speciate().
 func ClassicGeneticDistance(disjoint, matching float64) GeneticDistanceFunc {
 	return func(g1, g2 *Genotype) float64 {
 		numMatching := 0.0
