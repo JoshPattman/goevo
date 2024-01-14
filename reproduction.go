@@ -5,9 +5,9 @@ import (
 	"math/rand"
 )
 
-type ReproductionFunction func(*Genotype, *Genotype) *Genotype
+type ReproductionFunc func(*Genotype, *Genotype) *Genotype
 
-func ProbabalisticReproduction(counter *Counter, numNewSynapseStd, numNewNeuronsStd, numSynapseMutationStd, numPruneSynapsesStd float64, synapseMutStd, synapseGrowStd float64, newNeuronActivations []Activation) ReproductionFunction {
+func StdReproduction(counter *Counter, numNewSynapseStd, numNewNeuronsStd, numSynapseMutationStd, numPruneSynapsesStd float64, synapseMutStd, synapseGrowStd float64, newNeuronActivations []Activation) ReproductionFunc {
 	return func(a, b *Genotype) *Genotype {
 		child := CrossoverGenotypes(a, b)
 
