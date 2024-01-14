@@ -1,7 +1,10 @@
 package goevo
 
 import (
+	"encoding/json"
+	"io"
 	"math"
+	"os"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -173,4 +176,34 @@ func (p *LayeredHyperPhenotype) Forward(inputs []float64) []float64 {
 		}
 	}
 	return buf.RawVector().Data
+}
+
+func (s *LayeredSubstrate) WriteJson(w io.Writer) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", " ")
+	return enc.Encode(s)
+}
+
+// WriteJsonFile writes a JSON representation of this Genotype to a file.
+func (s *LayeredSubstrate) WriteJsonFile(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return s.WriteJson(f)
+}
+
+func (s *LayeredSubstrate) ReadJson(r io.Reader) error {
+	dec := json.NewDecoder(r)
+	return dec.Decode(s)
+}
+
+func (s *LayeredSubstrate) ReadJsonFile(filename string) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	return s.ReadJson(f)
 }
