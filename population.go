@@ -6,6 +6,15 @@ import (
 	"math/rand"
 )
 
+// Population is a slice of agents
+type Population []*Agent
+
+// SpeciatedPopulation is a population, but split into species
+type SpeciatedPopulation map[int][]*Agent
+
+// OffspringCounts stores how many offspring each species can have
+type OffspringCounts map[int]int
+
 // An agent is a genotype with a fitness and a species id.
 // It is used when performing the NEAT algorithms.
 type Agent struct {
@@ -27,16 +36,16 @@ func NewAgent(g *Genotype) *Agent {
 // You must provide a distance function which takes two genotypes and returns a float64 representing the distance between them.
 // For instance, you could use the GeneticDistance function.
 // If keepExistingSpecies is true, then the species ids of the agents in the population will be preserved.
-func Speciate(newSpeciesCounter *Counter, agents []*Agent, distanceThreshold float64, keepExistingSpecies bool, distance GeneticDistanceFunc) map[int][]*Agent {
+func (population Population) Speciate(newSpeciesCounter *Counter, distanceThreshold float64, keepExistingSpecies bool, distance GeneticDistanceFunc) SpeciatedPopulation {
 	if distanceThreshold < 0 {
 		distanceThreshold = 0
 	}
-	agentsPool := make([]*Agent, len(agents))
-	copy(agentsPool, agents)
-	species := make(map[int][]*Agent)
+	agentsPool := make(Population, len(population))
+	copy(agentsPool, population)
+	species := make(SpeciatedPopulation)
 	for len(agentsPool) > 0 {
-		newSpecies := make([]*Agent, 0)
-		agentsNewPool := make([]*Agent, 0)
+		newSpecies := make(Population, 0)
+		agentsNewPool := make(Population, 0)
 		template := agentsPool[rand.Intn(len(agentsPool))]
 		for _, a := range agentsPool {
 			if distance(template.Genotype, a.Genotype) <= distanceThreshold {
@@ -76,7 +85,7 @@ func Speciate(newSpeciesCounter *Counter, agents []*Agent, distanceThreshold flo
 
 // Calculate the number of offspring each species should have.
 // targetCount is the total number of offspring to be created (the actual number of offspring may vary slightly due to rounding).
-func CalculateOffspring(speciatedPopulation map[int][]*Agent, targetCount int) map[int]int {
+func (speciatedPopulation SpeciatedPopulation) CalculateOffspring(targetCount int) OffspringCounts {
 	// Caclulate the total fitness of each species and the global total fitness (adjusted fitness)
 	speciesTotalFitness := make(map[int]float64)
 	globalTotalFitness := 0.0
@@ -92,7 +101,7 @@ func CalculateOffspring(speciatedPopulation map[int][]*Agent, targetCount int) m
 		globalTotalFitness += totalFitness
 	}
 	// Calculate the number of offspring each species should have
-	speciesAllowedOffspring := make(map[int]int)
+	speciesAllowedOffspring := make(OffspringCounts)
 	for sid := range speciatedPopulation {
 		speciesAllowedOffspring[sid] = int(math.Round(float64(targetCount) * speciesTotalFitness[sid] / globalTotalFitness))
 		if speciesAllowedOffspring[sid] < 0 {
@@ -116,9 +125,9 @@ func CalculateOffspring(speciatedPopulation map[int][]*Agent, targetCount int) m
 // allowedOffspringCounts is a map of species ids to the number of offspring that species is allowed to have, which can be obtained by using CalculateOffspring.
 // reproduction is a function which takes two genotypes and returns a new genotype which is the child of the two parents.
 // selection is a function which takes a slice of agents and returns a single agent which is the parent.
-func Repopulate(speciatedPopulation map[int][]*Agent, allowedOffspringCounts map[int]int, reproduction ReproductionFunc, selection SelectionFunc) []*Agent {
+func (speciatedPopulation SpeciatedPopulation) Repopulate(allowedOffspringCounts OffspringCounts, reproduction ReproductionFunc, selection SelectionFunc) Population {
 	// Define new population to fill
-	population := make([]*Agent, 0)
+	population := make(Population, 0)
 	// For every species
 	for sid, spec := range speciatedPopulation {
 		// Using roulette wheel selection, for the specified number of times, pick two parents proportinate to their fitness
