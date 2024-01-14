@@ -6,7 +6,7 @@ import (
 )
 
 // Mutate the weight of a random synapse in `g` by sampling the normal distribution with standard deviation `stddev“
-func MutateRandomSynapse(g *Genotype, stddev float64) {
+func (g *Genotype) MutateRandomSynapse(stddev float64) {
 	if len(g.Synapses) == 0 {
 		return
 	}
@@ -22,7 +22,7 @@ func MutateRandomSynapse(g *Genotype, stddev float64) {
 }
 
 // Prune a random synapse from `g`. This has the capability to prun more than one synapse and neuron as it also removes redundant neurons and synapses.
-func PruneRandomSynapse(g *Genotype) {
+func (g *Genotype) PruneRandomSynapse() {
 	if len(g.Synapses) == 0 {
 		return
 	}
@@ -38,10 +38,17 @@ func PruneRandomSynapse(g *Genotype) {
 }
 
 // Add a new synapse to `g` with weight sampled from normal distribution with standard deviation `stddev`.
-// `isRecurrent` specifies if the synapse should be recurrent or forward-facing.
-// `attempts` is the maximum number of random combinations of neurons to try before deciding there is no more space for synapses.
-// A good value for `attempts` is 5
-func AddRandomSynapse(counter *Counter, g *Genotype, weightStddev float64, isRecurrent bool, attempts int) error {
+func (g *Genotype) AddRandomSynapse(counter *Counter, weightStddev float64) error {
+	return addRandomSynapse(counter, g, weightStddev, false, 10)
+}
+
+// Add a new recurrent (backwards) synapse to `g` with weight sampled from normal distribution with standard deviation `stddev`.
+func (g *Genotype) AddRandomRecurrentSynapse(counter *Counter, weightStddev float64) error {
+	return addRandomSynapse(counter, g, weightStddev, true, 10)
+}
+
+// Helper function used by both synapse adding functions
+func addRandomSynapse(counter *Counter, g *Genotype, weightStddev float64, isRecurrent bool, attempts int) error {
 	if attempts == 0 {
 		return errors.New("did not find new synapse slot within nuber of attempts")
 	}
@@ -58,13 +65,13 @@ func AddRandomSynapse(counter *Counter, g *Genotype, weightStddev float64, isRec
 	}
 	_, err := g.AddSynapse(counter, g.NeuronOrder[nao], g.NeuronOrder[nbo], rand.NormFloat64()*weightStddev)
 	if err != nil {
-		return AddRandomSynapse(counter, g, weightStddev, isRecurrent, attempts-1)
+		return addRandomSynapse(counter, g, weightStddev, isRecurrent, attempts-1)
 	}
 	return nil
 }
 
 // Add a neuron on a random synapse of `g` with activation function `activation`
-func AddRandomNeuron(counter *Counter, g *Genotype, activation Activation) error {
+func (g *Genotype) AddRandomNeuron(counter *Counter, activation Activation) error {
 	if len(g.Synapses) == 0 {
 		return errors.New("no synapses to create neuron on")
 	}

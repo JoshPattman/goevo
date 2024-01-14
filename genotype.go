@@ -1,8 +1,11 @@
 package goevo
 
 import (
+	"encoding/json"
 	"errors"
+	"io"
 	"math/rand"
+	"os"
 )
 
 // A type denoting the type of a neuron (input, hidden, output). Must be one of the consts that start with 'Neuron...'
@@ -51,7 +54,8 @@ type Genotype struct {
 	InverseNeuronOrder map[int]int `json:"inverse_neuron_order"`
 }
 
-func NewGenotypeEmpty() *Genotype {
+// Should only be used for loading
+func NewEmptyGenotype() *Genotype {
 	return &Genotype{
 		NumIn:              -1,
 		NumOut:             -1,
@@ -98,7 +102,7 @@ func NewGenotype(counter *Counter, numIn, numOut int, inActivation, outActivatio
 }
 
 // Create a new Genotype which is a clone of `g`
-func NewGenotypeCopy(g *Genotype) *Genotype {
+func CloneGenotype(g *Genotype) *Genotype {
 	neurons := make(map[int]*Neuron)
 	synapses := make(map[int]*Synapse)
 	neuronOrder := make([]int, len(g.NeuronOrder))
@@ -125,7 +129,7 @@ func NewGenotypeCopy(g *Genotype) *Genotype {
 
 // Creates a new Genotype which is a clone of g1, but with 50% of the weights of matching synapses from g2.
 // g1 should be the fitter parent
-func NewGenotypeCrossover(g1 *Genotype, g2 *Genotype) *Genotype {
+func CrossoverGenotypes(g1 *Genotype, g2 *Genotype) *Genotype {
 	neurons := make(map[int]*Neuron)
 	synapses := make(map[int]*Synapse)
 	neuronOrder := make([]int, len(g1.NeuronOrder))
@@ -346,4 +350,33 @@ func (g *Genotype) insertNeuron(nid, order int, n *Neuron) {
 	for i := range g.NeuronOrder {
 		g.InverseNeuronOrder[g.NeuronOrder[i]] = i
 	}
+}
+
+func (g *Genotype) WriteJson(w io.Writer) error {
+	e := json.NewEncoder(w)
+	e.SetIndent("", "\t")
+	return e.Encode(g)
+}
+
+func (g *Genotype) ReadJson(r io.Reader) error {
+	d := json.NewDecoder(r)
+	return d.Decode(g)
+}
+
+func (g *Genotype) WriteJsonFile(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return g.WriteJson(f)
+}
+
+func (g *Genotype) ReadJsonFile(filename string) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	return g.ReadJson(f)
 }
