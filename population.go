@@ -125,7 +125,7 @@ func (speciatedPopulation SpeciatedPopulation) CalculateOffspring(targetCount in
 // allowedOffspringCounts is a map of species ids to the number of offspring that species is allowed to have, which can be obtained by using CalculateOffspring.
 // reproduction is a function which takes two genotypes and returns a new genotype which is the child of the two parents.
 // selection is a function which takes a slice of agents and returns a single agent which is the parent.
-func (speciatedPopulation SpeciatedPopulation) Repopulate(allowedOffspringCounts OffspringCounts, reproduction ReproductionFunc, selection SelectionFunc) Population {
+func (speciatedPopulation SpeciatedPopulation) NextGeneration(allowedOffspringCounts OffspringCounts, reproduction ReproductionFunc, selection SelectionFunc) Population {
 	// Define new population to fill
 	population := make(Population, 0)
 	// For every species
