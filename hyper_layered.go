@@ -32,26 +32,30 @@ func NewLayeredSubstrateEmpty() *LayeredSubstrate {
 //   - biasLateralPosition: The lateral position of the bias neuron, bias neuron for each layer will always be placed in th eprevious layer
 func NewLayeredSubstrate(nodeLateralPositions [][]Pos, layerPositions []Pos, layerActivations []Activation, biasLateralPosition Pos) *LayeredSubstrate {
 	if len(nodeLateralPositions) < 2 {
-		panic("LayeredSubstrate must have at least an input and ouput layer")
+		panic("must have at least an input and ouput layer")
 	}
 	if len(nodeLateralPositions) != len(layerPositions) || len(nodeLateralPositions) != len(layerActivations) {
-		panic("incorrect lengths. p.s. write better error message")
+		panic("nodeLateralPositions, layerPositions, and layerActivations must have same length")
 	}
 	for l := range nodeLateralPositions {
 		if len(nodeLateralPositions[l]) == 0 {
 			panic("all layers must have at least one neuron")
 		}
 	}
-	dims := len(nodeLateralPositions[0][0]) + len(layerPositions[0])
+	layerDims := len(layerPositions[0])
+	nodeDims := len(biasLateralPosition)
+	if layerDims == 0 || nodeDims == 0 {
+		panic("both layer ndims and node ndims must be at least 1")
+	}
 	for l := range nodeLateralPositions {
+		if len(layerPositions[l]) != layerDims {
+			panic("all layers must have same number of ndims")
+		}
 		for p := range nodeLateralPositions[l] {
-			if len(nodeLateralPositions[l][p])+len(layerPositions[l]) != dims {
-				panic("all posses must have the same ndims")
+			if len(nodeLateralPositions[l][p]) != nodeDims {
+				panic("all node posses must have same number of ndims as bias")
 			}
 		}
-	}
-	if len(biasLateralPosition)+len(layerPositions[0]) != dims {
-		panic("bias neuron must have same ndims as other neurons")
 	}
 
 	return &LayeredSubstrate{
