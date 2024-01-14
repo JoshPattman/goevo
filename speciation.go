@@ -49,7 +49,7 @@ func NewAgent(g *Genotype) *Agent {
 // You must provide a distance function which takes two genotypes and returns a float64 representing the distance between them.
 // For instance, you could use the GeneticDistance function.
 // If keepExistingSpecies is true, then the species ids of the agents in the population will be preserved.
-func Speciate(newSpeciesCounter Counter, agents []*Agent, distanceThreshold float64, keepExistingSpecies bool, distance func(a, b *Genotype) float64) map[int][]*Agent {
+func Speciate(newSpeciesCounter *Counter, agents []*Agent, distanceThreshold float64, keepExistingSpecies bool, distance func(a, b *Genotype) float64) map[int][]*Agent {
 	if distanceThreshold < 0 {
 		distanceThreshold = 0
 	}

@@ -65,7 +65,7 @@ func NewGenotypeEmpty() *Genotype {
 // Create a new Genotype. Create all new innovation IDs with the provided Counter `counter`.
 // The genotype will have `numIn` input nodes and `numOut` output nodes.
 // The input nodes will have activation `inActivation` and the output nodes will have activation `outActivation`
-func NewGenotype(counter Counter, numIn, numOut int, inActivation, outActivation Activation) *Genotype {
+func NewGenotype(counter *Counter, numIn, numOut int, inActivation, outActivation Activation) *Genotype {
 	neurons := make(map[int]*Neuron)
 	neuronOrder := make([]int, numIn+numOut)
 	inverseNeuronOrder := make(map[int]int)
@@ -176,7 +176,7 @@ func (n *Genotype) LookupSynapse(from, to int) (int, error) {
 // `from` and `to` are the innovation IDs of two neurons.
 // If `from` is ordered after `to` then the connection is recurrent.
 // Will return `synapseID, error`
-func (n *Genotype) AddSynapse(counter Counter, from, to int, weight float64) (int, error) {
+func (n *Genotype) AddSynapse(counter *Counter, from, to int, weight float64) (int, error) {
 	if !(n.IsNeuron(from) && n.IsNeuron(to)) {
 		return -1, errors.New("ids are not both nodes")
 	}
@@ -207,7 +207,7 @@ func (n *Genotype) AddSynapse(counter Counter, from, to int, weight float64) (in
 // `conn` is the ID of the synapse to create the neuron on, and `conn` must not refer to a recurrent connection.
 // Will return `neuronID, synapseID, error`, where synapseID is the id of the synapse that was created due to the original synapse being split.
 // This synapse connects the new neuron to the old synapses endpoint, and the old synapses endpoint is moved to the new neuron
-func (n *Genotype) AddNeuron(counter Counter, conn int, activation Activation) (int, int, error) {
+func (n *Genotype) AddNeuron(counter *Counter, conn int, activation Activation) (int, int, error) {
 	if !n.IsSynapse(conn) {
 		return -1, -1, errors.New("id is not a connection")
 	}

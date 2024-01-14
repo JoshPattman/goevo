@@ -88,8 +88,8 @@ func (s *LayeredSubstrate) CPNNInputsOutputs() (int, int) {
 	return (s.Dimensions()+1)*2 + 1, 1
 }
 
-// NewPhenotype creates a new LayeredHyperPhenotype from the CPPN using this substrate.
-func (s *LayeredSubstrate) NewPhenotype(cppn Forwarder) *LayeredHyperPhenotype {
+// BuildPhenotype creates a new LayeredHyperPhenotype from the CPPN using this substrate.
+func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype {
 	numLayers := len(s.LayeredNeuronPositions)
 	weights := make([]*mat.Dense, numLayers-1)
 	activations := make([]func(float64) float64, numLayers)

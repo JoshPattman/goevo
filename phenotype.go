@@ -28,7 +28,7 @@ type Phenotype struct {
 }
 
 // Create a phenotype from genotype `g`
-func NewPhenotype(g *Genotype) *Phenotype {
+func (g *Genotype) BuildPhenotype() *Phenotype {
 	mem := make([]float64, len(g.Neurons))
 	acts := make([](func(float64) float64), len(g.Neurons))
 	conns := make([][]PhenotypeConnection, len(g.Neurons))

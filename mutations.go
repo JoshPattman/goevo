@@ -41,7 +41,7 @@ func PruneRandomSynapse(g *Genotype) {
 // `isRecurrent` specifies if the synapse should be recurrent or forward-facing.
 // `attempts` is the maximum number of random combinations of neurons to try before deciding there is no more space for synapses.
 // A good value for `attempts` is 5
-func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, isRecurrent bool, attempts int) error {
+func AddRandomSynapse(counter *Counter, g *Genotype, weightStddev float64, isRecurrent bool, attempts int) error {
 	if attempts == 0 {
 		return errors.New("did not find new synapse slot within nuber of attempts")
 	}
@@ -64,7 +64,7 @@ func AddRandomSynapse(counter Counter, g *Genotype, weightStddev float64, isRecu
 }
 
 // Add a neuron on a random synapse of `g` with activation function `activation`
-func AddRandomNeuron(counter Counter, g *Genotype, activation Activation) error {
+func AddRandomNeuron(counter *Counter, g *Genotype, activation Activation) error {
 	if len(g.Synapses) == 0 {
 		return errors.New("no synapses to create neuron on")
 	}
