@@ -130,7 +130,7 @@ func (speciatedPopulation SpeciatedPopulation) NextGeneration(allowedOffspringCo
 	population := make(Population, 0)
 	// For every species
 	for sid, spec := range speciatedPopulation {
-		// Using roulette wheel selection, for the specified number of times, pick two parents proportinate to their fitness
+		// Using selection, for the specified number of times, pick two parents proportinate to their fitness
 		// Create a new agent which is the child of both parents. Ensure the first parent is the more fit one
 		// Add the new agent to the new population
 		for i := 0; i < allowedOffspringCounts[sid]; i++ {
@@ -149,4 +149,38 @@ func (speciatedPopulation SpeciatedPopulation) NextGeneration(allowedOffspringCo
 		}
 	}
 	return population
+}
+
+func (s SpeciatedPopulation) GetBest() (int, float64) {
+	maxAvgFitness := math.Inf(-1)
+	maxSpecies := -1
+	for si := range s {
+		totalFitness := 0.0
+		for _, a := range s[si] {
+			totalFitness += a.Fitness
+		}
+		avgFitness := totalFitness / float64(len(s[si]))
+		if avgFitness > maxAvgFitness {
+			maxAvgFitness = avgFitness
+			maxSpecies = si
+		}
+	}
+	return maxSpecies, maxAvgFitness
+}
+
+func (s SpeciatedPopulation) GetWorst() (int, float64) {
+	minAvgFitness := math.Inf(1)
+	minSpecies := -1
+	for si := range s {
+		totalFitness := 0.0
+		for _, a := range s[si] {
+			totalFitness += a.Fitness
+		}
+		avgFitness := totalFitness / float64(len(s[si]))
+		if avgFitness < minAvgFitness {
+			minAvgFitness = avgFitness
+			minSpecies = si
+		}
+	}
+	return minSpecies, minAvgFitness
 }
