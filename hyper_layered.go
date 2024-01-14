@@ -103,7 +103,7 @@ func positionalEncoding(p float64, maximumMult float64, dims int, offset float64
 
 // CPNNInputsOutputs returns the number of inputs and outputs the CPPN should have for this substrate.
 func (s *LayeredSubstrate) CPNNInputsOutputs() (int, int) {
-	return (s.Dimensions()+1)*2 + 1, 1
+	return (s.Dimensions())*2 + 1, 1
 }
 
 // BuildPhenotype creates a new LayeredHyperPhenotype from the CPPN using this substrate.
@@ -129,12 +129,13 @@ func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype
 			}
 			for tar := 0; tar < tarNum; tar++ {
 				tarPos := append(append(Pos{}, s.NodeLateralPositions[tarLayer][tar]...), s.LayerPositions[tarLayer]...)
-				cppnInputs := make([]float64, (s.Dimensions()+1)*2+1)
-				for i := 0; i < s.Dimensions()+1; i++ { // add one to dimensions as dimensions does not include layer
+				inps, _ := s.CPNNInputsOutputs()
+				cppnInputs := make([]float64, inps)
+				for i := 0; i < s.Dimensions(); i++ {
 					cppnInputs[i] = srcPos[i]
-					cppnInputs[i+s.Dimensions()+1] = tarPos[i]
+					cppnInputs[i+s.Dimensions()] = tarPos[i]
 				}
-				cppnInputs[(s.Dimensions()+1)*2] = 1 // Bias
+				cppnInputs[len(cppnInputs)-1] = 1 // Bias
 				// The structure of cppnInputs is (srcPos.X, srcPos.Y, tarPos.X, tarPos.Y, bias) but can be more or less than just X and Y
 				// The output of the CPPN is the weight of the synapse
 				weight := cppn.Forward(cppnInputs)[0]
@@ -150,7 +151,7 @@ func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype
 
 // Dimensions returns the number of dimensions each layer has. If each layer has one axis (P(0.5)), this will return 1
 func (s *LayeredSubstrate) Dimensions() int {
-	return len(s.NodeLateralPositions[0][0])
+	return len(s.NodeLateralPositions[0][0]) + len(s.LayerPositions[0])
 }
 
 // LayeredHyperPhenotype is a HyperNEAT phenotype created with a substrate composed of a number of n dimensional layers.
