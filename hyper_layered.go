@@ -66,7 +66,7 @@ func NewLayeredSubstrate(nodeLateralPositions [][]Pos, layerPositions []Pos, lay
 	}
 }
 
-// NewProceduralSinLayeredSubstrate creates a new substrate for creating a layered hyper phenotype, using generated positions for nodes.
+/*// NewProceduralSinLayeredSubstrate creates a new substrate for creating a layered hyper phenotype, using generated positions for nodes.
 // Instead of the programmer manually placing nodes in ndimensional space, this function procedurally generates the positions of the nodes, using a sin-based positional encoding.
 //
 //   - layerNeuronCounts: The topology of the network. E.g. [3, 5, 4, 1] would give 3 input, 5 hidden1, 4 hidden2, and 1 output
@@ -99,15 +99,19 @@ func positionalEncoding(p float64, maximumMult float64, dims int, offset float64
 		totalOffset += offset
 	}
 	return encoding
-}
+}*/ // Not convinced the above code performs any better than a linear pattern, as the cppn can just lear to use sin functions
 
-// CPNNInputsOutputs returns the number of inputs and outputs the CPPN should have for this substrate.
-func (s *LayeredSubstrate) CPNNInputsOutputs() (int, int) {
+// CPPNIO returns the number of inputs and outputs the CPPN should have for this substrate.
+func (s *LayeredSubstrate) CPPNIO() (int, int) {
 	return (s.Dimensions())*2 + 1, 1
 }
 
 // BuildPhenotype creates a new LayeredHyperPhenotype from the CPPN using this substrate.
-func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype {
+//
+//   - cppn: The network used to generate the weights, should have inputs and outputs the same as CPPNIO(). Should also output values in range -1 to 1
+//   - maxWeight: The maximum weight that the cppn outputs are scaled to, reccomended to use '3'
+//   - weightThreshold: Any values -weightThreshold < v < weightThreshold will be set to 0 weights, as specified by users page. Reccomended to use '.3'
+func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder, maxWeight float64, weightThreshold float64) *LayeredHyperPhenotype {
 	numLayers := len(s.NodeLateralPositions)
 	weights := make([]*mat.Dense, numLayers-1)
 	activations := make([]func(float64) float64, numLayers)
@@ -129,7 +133,7 @@ func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype
 			}
 			for tar := 0; tar < tarNum; tar++ {
 				tarPos := append(append(Pos{}, s.NodeLateralPositions[tarLayer][tar]...), s.LayerPositions[tarLayer]...)
-				inps, _ := s.CPNNInputsOutputs()
+				inps, _ := s.CPPNIO()
 				cppnInputs := make([]float64, inps)
 				for i := 0; i < s.Dimensions(); i++ {
 					cppnInputs[i] = srcPos[i]
@@ -139,7 +143,16 @@ func (s *LayeredSubstrate) BuildPhenotype(cppn Forwarder) *LayeredHyperPhenotype
 				// The structure of cppnInputs is (srcPos.X, srcPos.Y, tarPos.X, tarPos.Y, bias) but can be more or less than just X and Y
 				// The output of the CPPN is the weight of the synapse
 				weight := cppn.Forward(cppnInputs)[0]
-				weights[srcLayer].Set(tar, src, weight)
+				if weight > 1 || weight < -1 {
+					panic("the cppn should always output values between -1 and 1")
+				}
+				if math.Abs(weight) < weightThreshold {
+					weights[srcLayer].Set(tar, src, 0)
+				} else if weight < 0 {
+					weights[srcLayer].Set(tar, src, maxWeight*(weight+weightThreshold)/(1-weightThreshold))
+				} else {
+					weights[srcLayer].Set(tar, src, maxWeight*(weight-weightThreshold)/(1-weightThreshold))
+				}
 			}
 		}
 	}
