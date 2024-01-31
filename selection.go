@@ -52,3 +52,17 @@ func PolyProbSelection(polyDegree float64) SelectionFunc {
 		return agents[int(math.Floor(r*float64(len(agents))))]
 	}
 }
+
+// Very fast, not sure how good tho
+func TournamentSelection(numIndividuals int) SelectionFunc {
+	return func(a []*Agent) *Agent {
+		current := rand.Intn(len(a))
+		for i := 0; i < numIndividuals-1; i++ {
+			other := rand.Intn(len(a))
+			if a[other].Fitness > a[current].Fitness {
+				current = other
+			}
+		}
+		return a[current]
+	}
+}
