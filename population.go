@@ -151,7 +151,7 @@ func (speciatedPopulation SpeciatedPopulation) NextGeneration(allowedOffspringCo
 	return population
 }
 
-func (s SpeciatedPopulation) GetBest() (int, float64) {
+func (s SpeciatedPopulation) GetBestByMean() (int, float64) {
 	maxAvgFitness := math.Inf(-1)
 	maxSpecies := -1
 	for si := range s {
@@ -168,7 +168,7 @@ func (s SpeciatedPopulation) GetBest() (int, float64) {
 	return maxSpecies, maxAvgFitness
 }
 
-func (s SpeciatedPopulation) GetWorst() (int, float64) {
+func (s SpeciatedPopulation) GetWorstByMean() (int, float64) {
 	minAvgFitness := math.Inf(1)
 	minSpecies := -1
 	for si := range s {
@@ -183,4 +183,36 @@ func (s SpeciatedPopulation) GetWorst() (int, float64) {
 		}
 	}
 	return minSpecies, minAvgFitness
+}
+
+func (s SpeciatedPopulation) GetBestByMax() (int, float64) {
+	maxFitness := math.Inf(-1)
+	maxSpecies := -1
+	for si := range s {
+		for _, a := range s[si] {
+			if a.Fitness > maxFitness {
+				maxFitness = a.Fitness
+				maxSpecies = si
+			}
+		}
+	}
+	return maxSpecies, maxFitness
+}
+
+func (s SpeciatedPopulation) GetWorstByMax() (int, float64) {
+	minFitness := math.Inf(1)
+	minSpecies := -1
+	for si := range s {
+		speciesMax := math.Inf(-1)
+		for _, a := range s[si] {
+			if a.Fitness > speciesMax {
+				speciesMax = a.Fitness
+			}
+		}
+		if speciesMax < minFitness {
+			minFitness = speciesMax
+			minSpecies = si
+		}
+	}
+	return minSpecies, minFitness
 }
