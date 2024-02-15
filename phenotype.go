@@ -1,113 +1,61 @@
 package goevo
 
-import (
-	"fmt"
-	"math"
-)
-
-// Data type for a phenotype connection
-type PhenotypeConnection struct {
-	To     int
-	Weight float64
+type phenotypeConnection struct {
+	toIdx int
+	w     float64
 }
 
-// Data type for a recurrent phenotype connection
-type RecurrentPhenotypeConnection struct {
-	From   int
-	Weight float64
-}
-
-// Data type representing a phenotype, a sort of compiled genotype
 type Phenotype struct {
-	memory         []float64
-	activations    [](func(float64) float64)
-	conns          [][]PhenotypeConnection
-	recurrentConns [][]RecurrentPhenotypeConnection
 	numIn          int
 	numOut         int
+	accumulators   []float64
+	activations    []Activation
+	forwardWeights [][]phenotypeConnection
 }
 
-// Create a phenotype from genotype `g`
-func NewPhenotype(g *Genotype) *Phenotype {
-	mem := make([]float64, len(g.Neurons))
-	acts := make([](func(float64) float64), len(g.Neurons))
-	conns := make([][]PhenotypeConnection, len(g.Neurons))
-	recurrentConns := make([][]RecurrentPhenotypeConnection, len(g.Neurons))
-
-	for n := range conns {
-		conns[n] = make([]PhenotypeConnection, 0)
-		recurrentConns[n] = make([]RecurrentPhenotypeConnection, 0)
-		acts[n] = activationMap[g.Neurons[g.NeuronOrder[n]].Activation]
+func (g *Genotype) Build() *Phenotype {
+	accs := make([]float64, len(g.neuronOrder))
+	acts := make([]Activation, len(g.neuronOrder))
+	fwdWeights := make([][]phenotypeConnection, len(g.neuronOrder))
+	for no, nid := range g.neuronOrder {
+		acts[no] = g.activations[nid]
+		fwdWeights[no] = make([]phenotypeConnection, 0)
 	}
-
-	neuronOrderCache := make(map[int]int)
-
-	for _, s := range g.Synapses {
-		var fromOrder int
-		var toOrder int
-		if val, ok := neuronOrderCache[s.From]; ok {
-			fromOrder = val
-		} else {
-			fromOrder, _ = g.GetNeuronOrder(s.From)
-			neuronOrderCache[s.From] = fromOrder
-		}
-		if val, ok := neuronOrderCache[s.To]; ok {
-			toOrder = val
-		} else {
-			toOrder, _ = g.GetNeuronOrder(s.To)
-			neuronOrderCache[s.To] = toOrder
-		}
-		if fromOrder < toOrder {
-			conns[fromOrder] = append(conns[fromOrder], PhenotypeConnection{toOrder, s.Weight})
-		} else {
-			recurrentConns[toOrder] = append(recurrentConns[toOrder], RecurrentPhenotypeConnection{fromOrder, s.Weight})
+	for sid, w := range g.weights {
+		ep := g.synapseEndpointLookup[sid]
+		oa, ob := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
+		if ob > oa {
+			fwdWeights[oa] = append(fwdWeights[oa], phenotypeConnection{ob, w})
 		}
 	}
 	return &Phenotype{
-		memory:         mem,
+		numIn:          g.numInputs,
+		numOut:         g.numOutputs,
+		accumulators:   accs,
 		activations:    acts,
-		conns:          conns,
-		recurrentConns: recurrentConns,
-		numIn:          g.NumIn,
-		numOut:         g.NumOut,
+		forwardWeights: fwdWeights,
 	}
 }
 
-// Do a forward pass with some input data for the phenotype, returning the output of the network. This also will take into account any memory left over from previous calls
-func (p *Phenotype) Forward(inputs []float64) []float64 {
-	if len(inputs) != p.numIn {
-		panic(fmt.Errorf("not correct number of inputs: expected %v but got %v", p.numIn, len(inputs)))
+func (p *Phenotype) Forward(x []float64) []float64 {
+	if len(x) != p.numIn {
+		panic("incorrect number of inputs")
 	}
-	for _, x := range inputs {
-		if math.IsNaN(x) {
-			panic("input to phenotype contains nan")
+	// Reset accumulators to default vals
+	for i := 0; i < len(p.accumulators); i++ {
+		if i < len(x) {
+			p.accumulators[i] = x[i]
+		} else {
+			p.accumulators[i] = 0
 		}
 	}
-	for i := range p.memory {
-		if i < p.numIn {
-			p.memory[i] += inputs[i]
+	for i := 0; i < len(p.accumulators); i++ {
+		p.accumulators[i] = activate(p.accumulators[i], p.activations[i])
+		for _, w := range p.forwardWeights[i] {
+			p.accumulators[w.toIdx] += w.w * p.accumulators[i]
 		}
 	}
-	for ni := range p.memory {
-		p.memory[ni] = p.activations[ni](p.memory[ni])
-		for _, c := range p.conns[ni] {
-			p.memory[c.To] += c.Weight * p.memory[ni]
-		}
-	}
-	output := make([]float64, p.numOut)
-	copy(output, p.memory[len(p.memory)-p.numOut:])
-	for ni := range p.memory {
-		p.memory[ni] = 0
-		for _, c := range p.recurrentConns[ni] {
-			p.memory[ni] += p.memory[c.From] * c.Weight
-		}
-	}
-	return output
-}
-
-// Clear any memory retained from previous calls to `p.Forward`
-func (p *Phenotype) ClearRecurrentMemory() {
-	for i := range p.memory {
-		p.memory[i] = 0
-	}
+	outs := make([]float64, p.numOut)
+	copy(outs, p.accumulators[len(p.accumulators)-p.numOut:])
+	return outs
 }
