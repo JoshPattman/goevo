@@ -204,6 +204,7 @@ func (g *Genotype) ResetRandomSynapse() bool {
 	return true
 }
 
+// Change the activation of a rnadom HIDDEN neuron to one of the supplied activations
 func (g *Genotype) MutateRandomActivation(activations ...Activation) bool {
 	numHidden := len(g.neuronOrder) - g.numInputs - g.numOutputs
 	if numHidden <= 0 {
@@ -214,6 +215,7 @@ func (g *Genotype) MutateRandomActivation(activations ...Activation) bool {
 	return true
 }
 
+// Render this genotype to an image.Image, with a width and height in inches
 func (g *Genotype) Draw(width, height float64) image.Image {
 	gv := graphviz.New()
 
@@ -274,7 +276,7 @@ func (g *Genotype) Clone() *Genotype {
 	return gc
 }
 
-// g is fitter than g2
+// Simple crossover of the genotypes, where g is fitter than g2
 func (g *Genotype) CrossoverWith(g2 *Genotype) *Genotype {
 	gc := &Genotype{
 		g.maxSynapseValue,
@@ -307,15 +309,15 @@ func (g *Genotype) isOutputOrder(order int) bool {
 	return order >= len(g.neuronOrder)-g.numOutputs
 }
 
-func (g *Genotype) NumInputs() int {
+func (g *Genotype) NumInputNeurons() int {
 	return g.numInputs
 }
 
-func (g *Genotype) NumOutputs() int {
+func (g *Genotype) NumOutputNeurons() int {
 	return g.numOutputs
 }
 
-func (g *Genotype) NumHidden() int {
+func (g *Genotype) NumHiddenNeurons() int {
 	return len(g.activations) - g.numInputs - g.numOutputs
 }
 
