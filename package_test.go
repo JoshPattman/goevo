@@ -1,7 +1,10 @@
 package goevo
 
 import (
+	"fmt"
+	"image/png"
 	"math"
+	"os"
 	"testing"
 )
 
@@ -72,14 +75,15 @@ func TestXOR(t *testing.T) {
 		MaxHiddenNeurons:        3,
 	}
 	var maxFitness float64
+	debugging := false
 	for gen := 0; gen < 5000; gen++ {
 		maxFitness = math.Inf(-1)
-		//var maxGt *Genotype
+		var maxGt *Genotype
 		for _, a := range pop.Agents() {
 			a.Fitness = fitness(a.Genotype.Build())
 			if a.Fitness > maxFitness {
 				maxFitness = a.Fitness
-				//maxGt = a.Genotype
+				maxGt = a.Genotype
 			}
 		}
 		if maxFitness > -0.4 {
@@ -88,14 +92,14 @@ func TestXOR(t *testing.T) {
 			reprod.StdNumPruneSynapses = 0
 		}
 		// Below is only for debug
-		/*if gen%100 == 0 {
+		if debugging && gen%100 == 0 {
 			fmt.Printf("Generation %v: Max fitness %v\n", gen, maxFitness)
 			func() {
 				f, _ := os.Create("img.png")
 				defer f.Close()
 				png.Encode(f, maxGt.Draw(20, 10))
 			}()
-		}*/
+		}
 
 		pop = pop.NextGeneration(selec, reprod)
 	}
