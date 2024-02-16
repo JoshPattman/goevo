@@ -1,5 +1,9 @@
 package goevo
 
+type Forwarder interface {
+	Forward([]float64) []float64
+}
+
 type phenotypeConnection struct {
 	toIdx int
 	w     float64

@@ -36,7 +36,7 @@ func TestXOR(t *testing.T) {
 		{0},
 	}
 
-	fitness := func(f *Phenotype) float64 {
+	fitness := func(f Forwarder) float64 {
 		fitness := 0.0
 		for i := range X {
 			pred := f.Forward(X[i])
