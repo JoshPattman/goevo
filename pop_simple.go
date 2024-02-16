@@ -18,7 +18,11 @@ func NewSimplePopulation(newGenotype func() *Genotype, n int) *SimplePopulation 
 func (p *SimplePopulation) NextGeneration(selection Selection, reproduction Reproduction) *SimplePopulation {
 	selection.SetAgents(p.agents)
 	return NewSimplePopulation(func() *Genotype {
-		return reproduction.Reproduce(selection.Select().Genotype, selection.Select().Genotype)
+		a, b := selection.Select(), selection.Select()
+		if a.Fitness < b.Fitness {
+			a, b = b, a
+		}
+		return reproduction.Reproduce(a.Genotype, b.Genotype)
 	}, len(p.agents))
 }
 

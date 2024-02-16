@@ -12,10 +12,6 @@ type TournamentSelection struct {
 	agents         []*Agent
 }
 
-func NewTournamentSelection(tournamentSize int) *TournamentSelection {
-	return &TournamentSelection{tournamentSize, nil}
-}
-
 func (t *TournamentSelection) SetAgents(agents []*Agent) {
 	t.agents = agents
 }
