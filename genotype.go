@@ -275,7 +275,6 @@ func (g *Genotype) Clone() *Genotype {
 }
 
 // g is fitter than g2
-// TODO: for now this only clones
 func (g *Genotype) CrossoverWith(g2 *Genotype) *Genotype {
 	gc := &Genotype{
 		g.maxSynapseValue,
@@ -287,6 +286,14 @@ func (g *Genotype) CrossoverWith(g2 *Genotype) *Genotype {
 		maps.Clone(g.weights),
 		maps.Clone(g.synapseEndpointLookup),
 		maps.Clone(g.endpointSynapseLookup),
+	}
+
+	for sid, sw := range g2.weights {
+		if _, ok := gc.weights[sid]; ok {
+			if rand.Float64() > 0.5 {
+				gc.weights[sid] = sw
+			}
+		}
 	}
 
 	return gc
