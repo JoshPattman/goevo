@@ -7,14 +7,30 @@ func P(ds ...float64) Pos {
 	return Pos(ds)
 }
 
-// PosGrid creates a grid of positions in a hypercube, with min and max values.
-// The nth dimension will have dims[n] points.
-func PosGrid(dims []int, min, max float64) []Pos {
-	panic("Not implemented yet")
-}
-
-// PosArray creates an array of 'dims' points with minimum and maximum values.
-// It returns 1D points.
-func PosArray(dims int, min, max float64) []Pos {
-	return PosGrid([]int{dims}, min, max)
+func LayoutPosLine(min, max Pos, numPoints int) []Pos {
+	if len(min) != len(max) {
+		panic("lengths must match")
+	}
+	if numPoints == 1 {
+		return []Pos{min}
+	}
+	if numPoints < 1 {
+		panic("must have some points")
+	}
+	increment := make(Pos, len(min))
+	for i := range min {
+		increment[i] = (max[i] - min[i]) / float64(numPoints-1)
+	}
+	current := make(Pos, len(min))
+	copy(current, min)
+	pts := []Pos{}
+	for i := 0; i < numPoints; i++ {
+		pt := make(Pos, len(min))
+		copy(pt, current)
+		pts = append(pts, pt)
+		for j := range current {
+			current[j] += increment[j]
+		}
+	}
+	return pts
 }
