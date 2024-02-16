@@ -19,10 +19,11 @@ type marshallableSynapse struct {
 }
 
 type marshallableGenotype struct {
-	NumIn    int                   `json:"num_in"`
-	NumOut   int                   `json:"num_out"`
-	Neurons  []marshallableNeuron  `json:"neurons"`
-	Synapses []marshallableSynapse `json:"synapses"`
+	NumIn         int                   `json:"num_in"`
+	NumOut        int                   `json:"num_out"`
+	Neurons       []marshallableNeuron  `json:"neurons"`
+	Synapses      []marshallableSynapse `json:"synapses"`
+	MaxSynapseVal float64               `json:"max_synapse_val"`
 }
 
 // MarshalJSON implements json.Marshaler.
@@ -40,7 +41,7 @@ func (g *Genotype) MarshalJSON() ([]byte, error) {
 			Weight: w,
 		})
 	}
-	mg := marshallableGenotype{g.numInputs, g.numOutputs, mns, mss}
+	mg := marshallableGenotype{g.numInputs, g.numOutputs, mns, mss, g.maxSynapseValue}
 	return json.Marshal(&mg)
 }
 
@@ -69,5 +70,9 @@ func (g *Genotype) UnmarshalJSON(bs []byte) error {
 		g.endpointSynapseLookup[ep] = ms.ID
 		g.synapseEndpointLookup[ms.ID] = ep
 	}
+
+	g.numInputs = mg.NumIn
+	g.numOutputs = mg.NumOut
+	g.maxSynapseValue = mg.MaxSynapseVal
 	return nil
 }

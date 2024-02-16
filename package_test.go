@@ -1,6 +1,8 @@
 package goevo
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"image/png"
 	"math"
@@ -105,5 +107,37 @@ func TestXOR(t *testing.T) {
 	}
 	if maxFitness < -0.1 {
 		t.Fatalf("XOR Failed to converge, ending with fitness %f", maxFitness)
+	}
+}
+
+func TestSaving(t *testing.T) {
+	counter := NewCounter()
+	gt := NewGenotype(counter, 3, 2, Tanh)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomNeuron(counter, Tanh, Relu, Sigmoid)
+	gt.AddRandomNeuron(counter, Tanh, Relu, Sigmoid)
+	gt.AddRandomNeuron(counter, Tanh, Relu, Sigmoid)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+
+	input := []float64{1, 1, 1}
+	originalOutput := gt.Build().Forward(input)
+
+	buf := new(bytes.Buffer)
+	if err := json.NewEncoder(buf).Encode(gt); err != nil {
+		t.Fatal(err)
+	}
+	var loadedGt *Genotype
+	if err := json.NewDecoder(buf).Decode(&loadedGt); err != nil {
+		t.Fatal(err)
+	}
+	loadedOutput := loadedGt.Build().Forward(input)
+	if originalOutput[0] != loadedOutput[0] || originalOutput[1] != loadedOutput[1] {
+		t.Fatalf("unmatching outputs: %v and %v", loadedOutput, originalOutput)
 	}
 }

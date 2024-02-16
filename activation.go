@@ -77,8 +77,10 @@ func (a *Activation) UnmarshalJSON(bs []byte) error {
 		*a = Sin
 	case Cos.String():
 		*a = Cos
+	default:
+		return fmt.Errorf("invalid activation: '%s'", s)
 	}
-	return fmt.Errorf("invalid activation: %s", s)
+	return nil
 }
 
 // MarshalJSON implements json.Marshaler.
