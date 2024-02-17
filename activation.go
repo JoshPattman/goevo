@@ -81,7 +81,7 @@ func activate(x float64, a Activation) float64 {
 		if x < 0 {
 			return 0
 		}
-		return math.Log(x)
+		return math.Log(x + 1)
 	}
 	panic("unknown activation")
 }
