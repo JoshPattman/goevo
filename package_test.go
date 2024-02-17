@@ -74,7 +74,7 @@ func TestXOR(t *testing.T) {
 		StdNewSynapseWeight:     0.2,
 		StdMutateSynapseWeight:  0.4,
 		Counter:                 counter,
-		PossibleActivations:     []Activation{Relu, Tanh, Sigmoid, Sin, Cos},
+		PossibleActivations:     AllActivations,
 		MaxHiddenNeurons:        3,
 	}
 	var maxFitness float64
@@ -249,7 +249,7 @@ func TestRecurrency(t *testing.T) {
 		StdNewSynapseWeight:        0.2,
 		StdMutateSynapseWeight:     0.4,
 		Counter:                    counter,
-		PossibleActivations:        []Activation{Relu, Tanh, Sigmoid, Sin, Cos},
+		PossibleActivations:        AllActivations,
 		MaxHiddenNeurons:           3,
 	}
 	var maxFitness float64

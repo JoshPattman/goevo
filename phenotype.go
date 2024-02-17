@@ -86,3 +86,10 @@ func (p *Phenotype) Forward(x []float64) []float64 {
 	// Reuturn
 	return outs
 }
+
+// Reset recurrent memory
+func (p *Phenotype) Reset() {
+	for i := range p.accumulators {
+		p.accumulators[i] = 0
+	}
+}

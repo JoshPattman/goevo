@@ -16,7 +16,12 @@ const (
 	Tanh
 	Sin
 	Cos
+	Binary
+	Relum
+	Reln
 )
+
+var AllActivations = []Activation{Relu, Linear, Sigmoid, Tanh, Sin, Cos, Binary, Reln, Relum}
 
 func (a Activation) String() string {
 	switch a {
@@ -32,6 +37,12 @@ func (a Activation) String() string {
 		return "sin"
 	case Cos:
 		return "cos"
+	case Binary:
+		return "binary"
+	case Reln:
+		return "reln"
+	case Relum:
+		return "relum"
 	}
 	panic("unknown activation")
 }
@@ -53,6 +64,24 @@ func activate(x float64, a Activation) float64 {
 		return math.Sin(x)
 	case Cos:
 		return math.Cos(x)
+	case Binary:
+		if x > 0 {
+			return 1
+		} else {
+			return 0
+		}
+	case Relum:
+		if x < 0 {
+			return 0
+		} else if x > 1 {
+			return 1
+		}
+		return x
+	case Reln:
+		if x < 0 {
+			return 0
+		}
+		return math.Log(x)
 	}
 	panic("unknown activation")
 }
@@ -77,6 +106,12 @@ func (a *Activation) UnmarshalJSON(bs []byte) error {
 		*a = Sin
 	case Cos.String():
 		*a = Cos
+	case Binary.String():
+		*a = Binary
+	case Reln.String():
+		*a = Reln
+	case Relum.String():
+		*a = Relum
 	default:
 		return fmt.Errorf("invalid activation: '%s'", s)
 	}
