@@ -439,7 +439,8 @@ func (g *Genotype) Validate() error {
 		foundIDs[int(id)] = true
 	}
 
-	// Check that synapseEPLookup and EPSynapseLookup are synced
+	// Check that synapseEPLookup and EPSynapseLookup are synced.
+	// Only need to do this one way because we have already checked that they have same length
 	for id, ep := range g.synapseEndpointLookup {
 		if id2, ok := g.endpointSynapseLookup[ep]; !ok {
 			return fmt.Errorf("missing id that exists in synapse endpoint lookup but not in endpoint synapse lookup: %v", id)
@@ -447,11 +448,42 @@ func (g *Genotype) Validate() error {
 			return fmt.Errorf("synapse endpoint lookup and endpoint synapse lookup are not symmetrical with id: %v (there and back becomes %v)", id, id2)
 		}
 	}
-	for ep, id := range g.endpointSynapseLookup {
-		if ep2, ok := g.synapseEndpointLookup[id]; !ok {
-			return fmt.Errorf("missing id that exists in endpoint synapse lookup but not in synapse endpoint lookup: %v", id)
-		} else if ep != ep2 {
-			return fmt.Errorf("synapse endpoint lookup and endpoint synapse lookup are not symmetrical with ep: %v (there and back becomes %v)", ep, ep2)
+
+	// Check that weights and synapseEPLookup are synced.
+	// Again, they already have same length.
+	for id := range g.synapseEndpointLookup {
+		if _, ok := g.weights[id]; !ok {
+			return fmt.Errorf("missing id that exists in synapse endpoint lookup but not in weights: %v", id)
+		}
+	}
+
+	// Check that neuron order and inverse neuron order are synced
+	for i := range g.neuronOrder {
+		if g.inverseNeuronOrder[g.neuronOrder[i]] != i {
+			return fmt.Errorf("order %v is not symmetrical in neuron order and inverse neuron order", i)
+		}
+	}
+
+	// Check that all classes of synapse are correctly categorised
+	for _, sid := range g.forwardSynapses {
+		ep := g.synapseEndpointLookup[sid]
+		of, ot := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
+		if ot <= of {
+			return fmt.Errorf("synapse with id %v is incorrectly categorised as forward", sid)
+		}
+	}
+	for _, sid := range g.backwardSynapses {
+		ep := g.synapseEndpointLookup[sid]
+		of, ot := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
+		if ot >= of {
+			return fmt.Errorf("synapse with id %v is incorrectly categorised as backward", sid)
+		}
+	}
+	for _, sid := range g.selfSynapses {
+		ep := g.synapseEndpointLookup[sid]
+		of, ot := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
+		if ot != of {
+			return fmt.Errorf("synapse with id %v is incorrectly categorised as self", sid)
 		}
 	}
 
