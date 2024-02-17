@@ -78,10 +78,11 @@ func TestXOR(t *testing.T) {
 		MaxHiddenNeurons:        3,
 	}
 	var maxFitness float64
+	var maxGt *Genotype
 	debugging := false
 	for gen := 0; gen < 5000; gen++ {
 		maxFitness = math.Inf(-1)
-		var maxGt *Genotype
+		maxGt = nil
 		for _, a := range pop.Agents() {
 			a.Fitness = fitness(a.Genotype.Build())
 			if a.Fitness > maxFitness {
@@ -108,6 +109,9 @@ func TestXOR(t *testing.T) {
 	}
 	if maxFitness < -0.1 {
 		t.Fatalf("XOR Failed to converge, ending with fitness %f", maxFitness)
+	}
+	if err := maxGt.Validate(); err != nil {
+		t.Fatalf("final genotype was not valid: %v\nGenotype:\n%v", err, maxGt)
 	}
 }
 

@@ -423,5 +423,37 @@ func (g *Genotype) Validate() error {
 	if len(g.weights) != len(g.forwardSynapses)+len(g.backwardSynapses)+len(g.selfSynapses) {
 		return fmt.Errorf("forward, backward, and self synapses have combined length %v but weights has length %v", len(g.forwardSynapses)+len(g.backwardSynapses)+len(g.selfSynapses), len(g.weights))
 	}
+
+	// Ensure that there are no ids that are the same between the neurons and the synapses
+	foundIDs := make(map[int]bool)
+	for id := range g.activations {
+		if _, ok := foundIDs[int(id)]; ok {
+			return fmt.Errorf("repeated id: %v", id)
+		}
+		foundIDs[int(id)] = true
+	}
+	for id := range g.weights {
+		if _, ok := foundIDs[int(id)]; ok {
+			return fmt.Errorf("repeated id: %v", id)
+		}
+		foundIDs[int(id)] = true
+	}
+
+	// Check that synapseEPLookup and EPSynapseLookup are synced
+	for id, ep := range g.synapseEndpointLookup {
+		if id2, ok := g.endpointSynapseLookup[ep]; !ok {
+			return fmt.Errorf("missing id that exists in synapse endpoint lookup but not in endpoint synapse lookup: %v", id)
+		} else if id != id2 {
+			return fmt.Errorf("synapse endpoint lookup and endpoint synapse lookup are not symmetrical with id: %v (there and back becomes %v)", id, id2)
+		}
+	}
+	for ep, id := range g.endpointSynapseLookup {
+		if ep2, ok := g.synapseEndpointLookup[id]; !ok {
+			return fmt.Errorf("missing id that exists in endpoint synapse lookup but not in synapse endpoint lookup: %v", id)
+		} else if ep != ep2 {
+			return fmt.Errorf("synapse endpoint lookup and endpoint synapse lookup are not symmetrical with ep: %v (there and back becomes %v)", ep, ep2)
+		}
+	}
+
 	return nil
 }
