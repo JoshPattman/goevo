@@ -32,6 +32,9 @@ type Genotype struct {
 	weights               map[SynapseID]float64
 	synapseEndpointLookup map[SynapseID]SynapseEP
 	endpointSynapseLookup map[SynapseEP]SynapseID
+	forwardSynapses       []SynapseID // With these three we just track which synapses are of what type
+	backwardSynapses      []SynapseID // A synapse can NEVER change type
+	selfSynapses          []SynapseID
 }
 
 func NewGenotype(counter *Counter, inputs, outputs int, outputActivation Activation) *Genotype {
@@ -44,6 +47,9 @@ func NewGenotype(counter *Counter, inputs, outputs int, outputActivation Activat
 	weights := make(map[SynapseID]float64)
 	synapseEndpointLookup := make(map[SynapseID]SynapseEP)
 	endpointSynapseLookup := make(map[SynapseEP]SynapseID)
+	forwardSyanpses := make([]SynapseID, 0)
+	backwardSyanpses := make([]SynapseID, 0)
+	selfSyanpses := make([]SynapseID, 0)
 
 	for i := 0; i < inputs; i++ {
 		id := NeuronID(counter.Next())
@@ -69,6 +75,9 @@ func NewGenotype(counter *Counter, inputs, outputs int, outputActivation Activat
 		weights:               weights,
 		synapseEndpointLookup: synapseEndpointLookup,
 		endpointSynapseLookup: endpointSynapseLookup,
+		forwardSynapses:       forwardSyanpses,
+		backwardSynapses:      backwardSyanpses,
+		selfSynapses:          selfSyanpses,
 	}
 }
 
@@ -77,7 +86,13 @@ func (g *Genotype) AddRandomNeuron(counter *Counter, activations ...Activation) 
 		return false
 	}
 
-	sid := randomMapKey(g.weights)
+	widx := rand.Intn(len(g.forwardSynapses) + len(g.backwardSynapses)) // We should never add a weight on a self synapse
+	var sid SynapseID
+	if widx < len(g.forwardSynapses) {
+		sid = g.forwardSynapses[widx]
+	} else {
+		sid = g.backwardSynapses[widx-len(g.forwardSynapses)]
+	}
 
 	ep := g.synapseEndpointLookup[sid]
 
@@ -98,9 +113,19 @@ func (g *Genotype) AddRandomNeuron(counter *Counter, activations ...Activation) 
 	g.synapseEndpointLookup[newSid] = epb
 	g.weights[newSid] = 1
 
-	// Create a new neuron
 	// Find the two original endpoints orders, and also which was first and which was second
 	ao, bo := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
+
+	// Add b to the index of its synapse class
+	if ao < bo {
+		g.forwardSynapses = append(g.forwardSynapses, newSid)
+	} else if ao > bo {
+		g.backwardSynapses = append(g.backwardSynapses, newSid)
+	} else {
+		g.selfSynapses = append(g.selfSynapses, newSid)
+	}
+
+	// Create a new neuron
 	firstO, secondO := ao, bo
 	if bo < ao {
 		firstO, secondO = bo, ao
@@ -147,8 +172,8 @@ func (g *Genotype) AddRandomSynapse(counter *Counter, weightStd float64, recurre
 	for i := 0; i < 10; i++ {
 		ao := rand.Intn(len(g.neuronOrder))
 		bo := rand.Intn(len(g.neuronOrder))
-		if ao == bo {
-			continue // No self connections
+		if ao == bo && !recurrent {
+			continue // No self connections if non recurrent
 		}
 		if (!recurrent && ao > bo) || (recurrent && bo > ao) {
 			ao, bo = bo, ao // Ensure that this connection is of correct type
@@ -165,6 +190,13 @@ func (g *Genotype) AddRandomSynapse(counter *Counter, weightStd float64, recurre
 		g.endpointSynapseLookup[ep] = sid
 		g.synapseEndpointLookup[sid] = ep
 		g.weights[sid] = clamp(rand.NormFloat64()*weightStd, -g.maxSynapseValue, g.maxSynapseValue)
+		if !recurrent {
+			g.forwardSynapses = append(g.forwardSynapses, sid)
+		} else if ep.From == ep.To {
+			g.selfSynapses = append(g.selfSynapses, sid)
+		} else {
+			g.backwardSynapses = append(g.backwardSynapses, sid)
+		}
 		return true
 	}
 	return false
@@ -187,8 +219,24 @@ func (g *Genotype) RemoveRandomSynapse() bool {
 		return false
 	}
 	sid := randomMapKey(g.weights)
-	delete(g.weights, sid)
 	ep := g.synapseEndpointLookup[sid]
+
+	fo, to := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
+	if fo < to {
+		idx := slices.Index(g.forwardSynapses, sid)
+		g.forwardSynapses[idx] = g.forwardSynapses[len(g.forwardSynapses)-1]
+		g.forwardSynapses = g.forwardSynapses[:len(g.forwardSynapses)-1]
+	} else if fo > to {
+		idx := slices.Index(g.backwardSynapses, sid)
+		g.backwardSynapses[idx] = g.backwardSynapses[len(g.backwardSynapses)-1]
+		g.backwardSynapses = g.backwardSynapses[:len(g.backwardSynapses)-1]
+	} else {
+		idx := slices.Index(g.selfSynapses, sid)
+		g.selfSynapses[idx] = g.selfSynapses[len(g.selfSynapses)-1]
+		g.selfSynapses = g.selfSynapses[:len(g.selfSynapses)-1]
+	}
+
+	delete(g.weights, sid)
 	delete(g.synapseEndpointLookup, sid)
 	delete(g.endpointSynapseLookup, ep)
 	return true
@@ -271,6 +319,9 @@ func (g *Genotype) Clone() *Genotype {
 		maps.Clone(g.weights),
 		maps.Clone(g.synapseEndpointLookup),
 		maps.Clone(g.endpointSynapseLookup),
+		slices.Clone(g.forwardSynapses),
+		slices.Clone(g.backwardSynapses),
+		slices.Clone(g.selfSynapses),
 	}
 
 	return gc
@@ -288,6 +339,9 @@ func (g *Genotype) CrossoverWith(g2 *Genotype) *Genotype {
 		maps.Clone(g.weights),
 		maps.Clone(g.synapseEndpointLookup),
 		maps.Clone(g.endpointSynapseLookup),
+		slices.Clone(g.forwardSynapses),
+		slices.Clone(g.backwardSynapses),
+		slices.Clone(g.selfSynapses),
 	}
 
 	for sid, sw := range g2.weights {
