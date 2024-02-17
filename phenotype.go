@@ -10,34 +10,40 @@ type phenotypeConnection struct {
 }
 
 type Phenotype struct {
-	numIn          int
-	numOut         int
-	accumulators   []float64
-	activations    []Activation
-	forwardWeights [][]phenotypeConnection
+	numIn            int
+	numOut           int
+	accumulators     []float64
+	activations      []Activation
+	forwardWeights   [][]phenotypeConnection
+	recurrentWeights [][]phenotypeConnection
 }
 
 func (g *Genotype) Build() *Phenotype {
 	accs := make([]float64, len(g.neuronOrder))
 	acts := make([]Activation, len(g.neuronOrder))
 	fwdWeights := make([][]phenotypeConnection, len(g.neuronOrder))
+	recurrentWeights := make([][]phenotypeConnection, len(g.neuronOrder))
 	for no, nid := range g.neuronOrder {
 		acts[no] = g.activations[nid]
 		fwdWeights[no] = make([]phenotypeConnection, 0)
+		recurrentWeights[no] = make([]phenotypeConnection, 0)
 	}
 	for sid, w := range g.weights {
 		ep := g.synapseEndpointLookup[sid]
 		oa, ob := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
 		if ob > oa {
 			fwdWeights[oa] = append(fwdWeights[oa], phenotypeConnection{ob, w})
+		} else {
+			recurrentWeights[oa] = append(recurrentWeights[oa], phenotypeConnection{ob, w})
 		}
 	}
 	return &Phenotype{
-		numIn:          g.numInputs,
-		numOut:         g.numOutputs,
-		accumulators:   accs,
-		activations:    acts,
-		forwardWeights: fwdWeights,
+		numIn:            g.numInputs,
+		numOut:           g.numOutputs,
+		accumulators:     accs,
+		activations:      acts,
+		forwardWeights:   fwdWeights,
+		recurrentWeights: recurrentWeights,
 	}
 }
 
