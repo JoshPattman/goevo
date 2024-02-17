@@ -13,6 +13,7 @@ type Phenotype struct {
 	numIn            int
 	numOut           int
 	accumulators     []float64
+	lastAccumulators []float64
 	activations      []Activation
 	forwardWeights   [][]phenotypeConnection
 	recurrentWeights [][]phenotypeConnection
@@ -51,7 +52,10 @@ func (p *Phenotype) Forward(x []float64) []float64 {
 	if len(x) != p.numIn {
 		panic("incorrect number of inputs")
 	}
-	// Reset accumulators to default vals
+	// Reset accumulators to default vals (remember what they were before incase we need recurrent connections)
+	if len(p.recurrentWeights) > 0 { // For efficiency
+		copy(p.lastAccumulators, p.accumulators)
+	}
 	for i := 0; i < len(p.accumulators); i++ {
 		if i < len(x) {
 			p.accumulators[i] = x[i]
@@ -59,13 +63,24 @@ func (p *Phenotype) Forward(x []float64) []float64 {
 			p.accumulators[i] = 0
 		}
 	}
+	if len(p.recurrentWeights) > 0 { // For efficiency
+		// Apply recurrent connections (does not matter what order we do this in)
+		for i := 0; i < len(p.accumulators); i++ {
+			for _, w := range p.recurrentWeights[i] {
+				p.accumulators[w.toIdx] += w.w * p.lastAccumulators[i]
+			}
+		}
+	}
+	// Apply forward connections
 	for i := 0; i < len(p.accumulators); i++ {
 		p.accumulators[i] = activate(p.accumulators[i], p.activations[i])
 		for _, w := range p.forwardWeights[i] {
 			p.accumulators[w.toIdx] += w.w * p.accumulators[i]
 		}
 	}
+	// Copy output array to avoid modification of internal state
 	outs := make([]float64, p.numOut)
 	copy(outs, p.accumulators[len(p.accumulators)-p.numOut:])
+	// Reuturn
 	return outs
 }

@@ -82,17 +82,12 @@ func NewGenotype(counter *Counter, inputs, outputs int, outputActivation Activat
 }
 
 func (g *Genotype) AddRandomNeuron(counter *Counter, activations ...Activation) bool {
-	if len(g.weights) == 0 {
+	if len(g.forwardSynapses) == 0 {
 		return false
 	}
 
-	widx := rand.Intn(len(g.forwardSynapses) + len(g.backwardSynapses)) // We should never add a weight on a self synapse
-	var sid SynapseID
-	if widx < len(g.forwardSynapses) {
-		sid = g.forwardSynapses[widx]
-	} else {
-		sid = g.backwardSynapses[widx-len(g.forwardSynapses)]
-	}
+	// We only ever want to add nodes on forward synapses
+	sid := g.forwardSynapses[rand.Intn(len(g.forwardSynapses))]
 
 	ep := g.synapseEndpointLookup[sid]
 
