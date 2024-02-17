@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/png"
 	"math"
+	"math/rand"
 	"os"
 	"testing"
 )
@@ -139,5 +140,46 @@ func TestSaving(t *testing.T) {
 	loadedOutput := loadedGt.Build().Forward(input)
 	if originalOutput[0] != loadedOutput[0] || originalOutput[1] != loadedOutput[1] {
 		t.Fatalf("unmatching outputs: %v and %v", loadedOutput, originalOutput)
+	}
+}
+
+func TestGenotypeStressTest(t *testing.T) {
+	// Basically just randomly run ops on a genotype to check if any of them can invalidate it
+	counter := NewCounter()
+	gt := NewGenotype(counter, 5, 3, Sigmoid)
+	if err := gt.Validate(); err != nil {
+		t.Fatalf("error after creating genotype: %v", err)
+	}
+
+	for i := 0; i < 5000; i++ {
+		var op string
+		cachedGt := gt.Clone()
+		if err := cachedGt.Validate(); err != nil {
+			t.Fatalf("error after cloning genotype: %v\nORIGINAL:\n%v\nCLONED:\n%v", err, gt, cachedGt)
+		}
+		opId := rand.Intn(6)
+		switch opId {
+		case 0:
+			op = "AddFwdSynapse"
+			gt.AddRandomSynapse(counter, 0.5, false)
+		case 1:
+			op = "AddRecSynapse"
+			gt.AddRandomSynapse(counter, 0.5, true)
+		case 2:
+			op = "RemoveSynapse"
+			gt.RemoveRandomSynapse()
+		case 3:
+			op = "AddNeuron"
+			gt.AddRandomNeuron(counter, Relu, Tanh, Sigmoid)
+		case 4:
+			op = "MutateSynapse"
+			gt.MutateRandomSynapse(0.3)
+		case 5:
+			op = "MutateActivation"
+			gt.MutateRandomActivation(Relu, Tanh, Sigmoid)
+		}
+		if err := gt.Validate(); err != nil {
+			t.Fatalf("error after performing %v op on genotype: %v\nBEFORE:\n%v\nAFTER:\n%v", err, op, cachedGt, gt)
+		}
 	}
 }

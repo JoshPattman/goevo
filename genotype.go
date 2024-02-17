@@ -382,3 +382,46 @@ func (g *Genotype) NumNeurons() int {
 func (g *Genotype) NumSynapses() int {
 	return len(g.weights)
 }
+
+// This will run as many checks as possible to check the genotype is valid.
+// It is really only designed to be used as part of a test suite to catch errors with the package.
+// This should never throw an error, but if it does either there is a bug in the package, or the user has somehow invalidated the genotype.
+func (g *Genotype) Validate() error {
+	// Check there are enough inputs and outputs
+	if g.numInputs <= 0 {
+		return fmt.Errorf("not enough inputs: %v", g.numInputs)
+	}
+	if g.numOutputs <= 0 {
+		return fmt.Errorf("not enough outputs: %v", g.numOutputs)
+	}
+
+	// Check there are at least enough input and output nodes
+	if len(g.neuronOrder) < g.numInputs+g.numOutputs {
+		return fmt.Errorf("than number of inputs (%v) and outputs (%v) is not possible with the number of nodes loaded (%v)", g.numInputs, g.numOutputs, len(g.neuronOrder))
+	}
+
+	// Check max synapse value is valid
+	if g.maxSynapseValue <= 0 {
+		return fmt.Errorf("invalid maximum synapse value: %v", g.maxSynapseValue)
+	}
+
+	// Ensure that all node indexes have same length
+	if len(g.neuronOrder) != len(g.inverseNeuronOrder) {
+		return fmt.Errorf("inverse neuron order has length %v but neuron order has length %v", len(g.inverseNeuronOrder), len(g.neuronOrder))
+	}
+	if len(g.neuronOrder) != len(g.activations) {
+		return fmt.Errorf("activations has length %v but neuron order has length %v", len(g.activations), len(g.neuronOrder))
+	}
+
+	// Ensure that all weight indexes have same length
+	if len(g.weights) != len(g.synapseEndpointLookup) {
+		return fmt.Errorf("synapse endpoint lookup has length %v but weights has length %v", len(g.synapseEndpointLookup), len(g.weights))
+	}
+	if len(g.weights) != len(g.endpointSynapseLookup) {
+		return fmt.Errorf("endpoint synapse lookup has length %v but weights has length %v", len(g.endpointSynapseLookup), len(g.weights))
+	}
+	if len(g.weights) != len(g.forwardSynapses)+len(g.backwardSynapses)+len(g.selfSynapses) {
+		return fmt.Errorf("forward, backward, and self synapses have combined length %v but weights has length %v", len(g.forwardSynapses)+len(g.backwardSynapses)+len(g.selfSynapses), len(g.weights))
+	}
+	return nil
+}
