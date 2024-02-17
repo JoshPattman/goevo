@@ -95,17 +95,30 @@ func TestXOR(t *testing.T) {
 		} else {
 			reprod.StdNumPruneSynapses = 0
 		}
+
+		if maxFitness > -0.1 {
+			break
+		}
 		// Below is only for debug
 		if debugging && gen%100 == 0 {
 			fmt.Printf("Generation %v: Max fitness %v\n", gen, maxFitness)
-			func() {
-				f, _ := os.Create("img.png")
-				defer f.Close()
-				png.Encode(f, maxGt.Draw(20, 10))
-			}()
 		}
 
 		pop = pop.NextGeneration(selec, reprod)
+	}
+	if debugging {
+		maxPt := maxGt.Build()
+		fmt.Println(maxPt.Forward([]float64{1}))
+		fmt.Println(maxPt.Forward([]float64{1}))
+		fmt.Println(maxPt.Forward([]float64{1}))
+		fmt.Println(maxPt.Forward([]float64{1}))
+		bs, _ := json.MarshalIndent(maxGt, "", "\t")
+		fmt.Println(string(bs))
+		func() {
+			f, _ := os.Create("img.png")
+			defer f.Close()
+			png.Encode(f, maxGt.Draw(20, 10))
+		}()
 	}
 	if maxFitness < -0.1 {
 		t.Fatalf("XOR Failed to converge, ending with fitness %f", maxFitness)
@@ -185,5 +198,107 @@ func TestGenotypeStressTest(t *testing.T) {
 		if err := gt.Validate(); err != nil {
 			t.Fatalf("error after performing %v op on genotype: %v\nBEFORE:\n%v\nAFTER:\n%v", err, op, cachedGt, gt)
 		}
+	}
+}
+
+func TestRecurrency(t *testing.T) {
+	// We add a bias on the end of each input, which is always 1
+	X := [][]float64{
+		{1},
+		{1},
+		{1},
+		{1},
+	}
+	Y := [][]float64{
+		{0},
+		{1},
+		{1},
+		{0},
+	}
+
+	fitness := func(f Forwarder) float64 {
+		fitness := 0.0
+		for i := range X {
+			pred := f.Forward(X[i])
+			e := pred[0] - Y[i][0]
+			fitness -= math.Pow(math.Abs(e), 3)
+		}
+		return fitness
+	}
+
+	counter := NewCounter()
+
+	originalGt := NewGenotype(counter, 1, 1, Sigmoid)
+	originalGt.AddRandomSynapse(counter, 0.3, false)
+	pop := NewSimplePopulation(func() *Genotype {
+		gt := originalGt.Clone()
+		gt.AddRandomSynapse(counter, 0.3, false)
+		return gt
+	}, 100)
+
+	selec := &TournamentSelection{
+		TournamentSize: 3,
+	}
+	reprod := &StdReproduction{
+		StdNumNewSynapses:          1,
+		StdNumNewRecurrentSynapses: 0.5,
+		StdNumNewNeurons:           0.5,
+		StdNumMutateSynapses:       2,
+		StdNumPruneSynapses:        0,
+		StdNumMutateActivations:    0.5,
+		StdNewSynapseWeight:        0.2,
+		StdMutateSynapseWeight:     0.4,
+		Counter:                    counter,
+		PossibleActivations:        []Activation{Relu, Tanh, Sigmoid, Sin, Cos},
+		MaxHiddenNeurons:           3,
+	}
+	var maxFitness float64
+	var maxGt *Genotype
+	debugging := false
+	for gen := 0; gen < 5000; gen++ {
+		maxFitness = math.Inf(-1)
+		maxGt = nil
+		for _, a := range pop.Agents() {
+			a.Fitness = fitness(a.Genotype.Build())
+			if a.Fitness > maxFitness {
+				maxFitness = a.Fitness
+				maxGt = a.Genotype
+			}
+		}
+		if maxFitness > -0.4 {
+			reprod.StdNumPruneSynapses = 0.5
+		} else {
+			reprod.StdNumPruneSynapses = 0
+		}
+
+		if maxFitness > -0.1 {
+			break
+		}
+		// Below is only for debug
+		if debugging && gen%100 == 0 {
+			fmt.Printf("Generation %v: Max fitness %v\n", gen, maxFitness)
+		}
+
+		pop = pop.NextGeneration(selec, reprod)
+	}
+	if debugging {
+		maxPt := maxGt.Build()
+		fmt.Println(maxPt.Forward([]float64{1}))
+		fmt.Println(maxPt.Forward([]float64{1}))
+		fmt.Println(maxPt.Forward([]float64{1}))
+		fmt.Println(maxPt.Forward([]float64{1}))
+		bs, _ := json.MarshalIndent(maxGt, "", "\t")
+		fmt.Println(string(bs))
+		func() {
+			f, _ := os.Create("img.png")
+			defer f.Close()
+			png.Encode(f, maxGt.Draw(20, 10))
+		}()
+	}
+	if maxFitness < -0.1 {
+		t.Fatalf("Recurrency Failed to converge, ending with fitness %f", maxFitness)
+	}
+	if err := maxGt.Validate(); err != nil {
+		t.Fatalf("final genotype was not valid: %v\nGenotype:\n%v", err, maxGt)
 	}
 }

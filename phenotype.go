@@ -21,6 +21,7 @@ type Phenotype struct {
 
 func (g *Genotype) Build() *Phenotype {
 	accs := make([]float64, len(g.neuronOrder))
+	laccs := make([]float64, len(g.neuronOrder))
 	acts := make([]Activation, len(g.neuronOrder))
 	fwdWeights := make([][]phenotypeConnection, len(g.neuronOrder))
 	recurrentWeights := make([][]phenotypeConnection, len(g.neuronOrder))
@@ -42,6 +43,7 @@ func (g *Genotype) Build() *Phenotype {
 		numIn:            g.numInputs,
 		numOut:           g.numOutputs,
 		accumulators:     accs,
+		lastAccumulators: laccs,
 		activations:      acts,
 		forwardWeights:   fwdWeights,
 		recurrentWeights: recurrentWeights,
