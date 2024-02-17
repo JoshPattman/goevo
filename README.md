@@ -25,12 +25,19 @@ You may have noticed that there are three inputs, instead of the two you would e
 
 To validate the network does indeed work, I hardcoded the evolved network quickly in python, in the file README_ASSETS/xor.py. You can see that the network does in fact perform an XOR operation.
 
+## GoEvo Features
+- Fast gene mutation and crossover
+- Efficient execution of genes by first _compiling_ them into a Phenotype
+- Both forward and recurrent connections supported
+- Hidden neurons can each have different activations
+- Supports many types of genetic algorithms for evolving Genotypes
+- Easy saving and loading of genotypes using json
+- Supports drawing genotypes to an image using graphviz
+
 ## Future Work
 - HyperNEAT: I already implemented this in the original package before I rewrote it, so this should be trivial. HyperNEAT basically allows NEAT to evolve much larger networks.
 - Implement NEAT algorithm: This should be coming very soon, as I just need to convert the code from the original into this package. Currently, there is a simple population.
 - Document EVERYTHING
 - Examples directory
 - More Tests
-- Check recurrent genes are working, and allow neurons to connect to themselves
-- Implement recurrent genes into phenotype
 - Implement a second phenotype that propagates one neuron per timestep. This is possibly the original way that it was done.
