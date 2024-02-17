@@ -19,11 +19,12 @@ func stdN(std float64) int {
 }
 
 type StdReproduction struct {
-	StdNumNewSynapses       float64
-	StdNumNewNeurons        float64
-	StdNumMutateSynapses    float64
-	StdNumPruneSynapses     float64
-	StdNumMutateActivations float64
+	StdNumNewSynapses          float64
+	StdNumNewRecurrentSynapses float64
+	StdNumNewNeurons           float64
+	StdNumMutateSynapses       float64
+	StdNumPruneSynapses        float64
+	StdNumMutateActivations    float64
 
 	StdNewSynapseWeight    float64
 	StdMutateSynapseWeight float64
@@ -39,6 +40,9 @@ func (r *StdReproduction) Reproduce(a, b *Genotype) *Genotype {
 
 	for i := 0; i < stdN(r.StdNewSynapseWeight); i++ {
 		g.AddRandomSynapse(r.Counter, r.StdNewSynapseWeight, false)
+	}
+	for i := 0; i < stdN(r.StdNumNewRecurrentSynapses); i++ {
+		g.AddRandomSynapse(r.Counter, r.StdNewSynapseWeight, true)
 	}
 	for i := 0; i < stdN(r.StdNumNewNeurons); i++ {
 		if r.MaxHiddenNeurons < 0 || g.NumHiddenNeurons() < r.MaxHiddenNeurons {
