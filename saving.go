@@ -1,6 +1,9 @@
 package goevo
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Make sure we implement json marshalling
 var _ json.Marshaler = &Genotype{}
@@ -64,15 +67,30 @@ func (g *Genotype) UnmarshalJSON(bs []byte) error {
 	g.weights = make(map[SynapseID]float64)
 	g.synapseEndpointLookup = make(map[SynapseID]SynapseEP)
 	g.endpointSynapseLookup = make(map[SynapseEP]SynapseID)
+	g.forwardSynapses = make([]SynapseID, 0)
+	g.backwardSynapses = make([]SynapseID, 0)
+	g.selfSynapses = make([]SynapseID, 0)
 	for _, ms := range mg.Synapses {
 		ep := SynapseEP{ms.From, ms.To}
 		g.weights[ms.ID] = ms.Weight
 		g.endpointSynapseLookup[ep] = ms.ID
 		g.synapseEndpointLookup[ms.ID] = ep
+		fromOrder := g.inverseNeuronOrder[ep.From]
+		toOrder := g.inverseNeuronOrder[ep.To]
+		if fromOrder < toOrder {
+			g.forwardSynapses = append(g.forwardSynapses, ms.ID)
+		} else if fromOrder > toOrder {
+			g.backwardSynapses = append(g.backwardSynapses, ms.ID)
+		} else {
+			g.selfSynapses = append(g.selfSynapses, ms.ID)
+		}
 	}
 
 	g.numInputs = mg.NumIn
 	g.numOutputs = mg.NumOut
 	g.maxSynapseValue = mg.MaxSynapseVal
+	if err := g.Validate(); err != nil {
+		return fmt.Errorf("genotype was invalid upon loading: %v", err)
+	}
 	return nil
 }
