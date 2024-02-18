@@ -19,9 +19,11 @@ const (
 	Binary
 	Relum
 	Reln
+	Sawtooth
+	Abs
 )
 
-var AllActivations = []Activation{Relu, Linear, Sigmoid, Tanh, Sin, Cos, Binary, Reln, Relum}
+var AllActivations = []Activation{Relu, Linear, Sigmoid, Tanh, Sin, Cos, Binary, Reln, Relum, Sawtooth, Abs}
 
 func (a Activation) String() string {
 	switch a {
@@ -43,6 +45,10 @@ func (a Activation) String() string {
 		return "reln"
 	case Relum:
 		return "relum"
+	case Sawtooth:
+		return "sawtooth"
+	case Abs:
+		return "abs"
 	}
 	panic("unknown activation")
 }
@@ -82,6 +88,14 @@ func activate(x float64, a Activation) float64 {
 			return 0
 		}
 		return math.Log(x + 1)
+	case Sawtooth:
+		xr := math.Round(x)
+		if xr > x {
+			xr--
+		}
+		return x - xr
+	case Abs:
+		return math.Abs(x)
 	}
 	panic("unknown activation")
 }
@@ -112,6 +126,10 @@ func (a *Activation) UnmarshalJSON(bs []byte) error {
 		*a = Reln
 	case Relum.String():
 		*a = Relum
+	case Sawtooth.String():
+		*a = Sawtooth
+	case Abs.String():
+		*a = Abs
 	default:
 		return fmt.Errorf("invalid activation: '%s'", s)
 	}
