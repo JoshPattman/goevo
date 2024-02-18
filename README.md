@@ -33,6 +33,149 @@ To validate the network does indeed work, I hardcoded the evolved network quickl
 - Supports many types of genetic algorithms for evolving Genotypes
 - Easy saving and loading of genotypes using json
 - Supports drawing genotypes to an image using graphviz
+- You write the generational loop to suit your own needs, leading to much higher customisability
+
+## Example - Cartpole
+Below is an example of using GoEvo to create an agent to balance a pole on a cart that can move left or right.
+
+```golang
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"image/png"
+	"math"
+	"os"
+
+	"github.com/JoshPattman/goevo"
+	"github.com/JoshPattman/gym"
+	"github.com/gopxl/pixel/pixelgl"
+)
+
+// This function takes a phenotype and an environment (designed for cartpole), and outputs a fitness.
+// The fitness is based on how many steps the phenotype was able to stay alive in the environemnt.
+func fitness(pt *goevo.Phenotype, e gym.Env) float64 {
+	reps := 10
+	total := 0.0
+	for r := 0; r < reps; r++ {
+		lastObs := e.Reset().Observation
+		pt.Reset()
+		for s := 0; s < 60*10; s++ {
+			action := pt.Forward(append(lastObs, 1))
+			sd := e.Step(action)
+			if sd.Terminated {
+				break
+			}
+			// We use +1 here instead of using the reward returned by the environment as i have found it to work better in this situation.
+			// This may not be a valid solution in an environment where finishing a level fast is the goal.
+			total += 1
+			lastObs = sd.Observation
+		}
+	}
+	return total / float64(reps)
+}
+
+func main() {
+	// Initialise the environment we will use for training our AI.
+	env := gym.NewCartPoleEnv(gym.DefaultCartPoleSettings)
+
+	// Initialise the counter that will be used to assign new neurons and synapses an innovation ID
+	ctr := goevo.NewCounter()
+
+	// Create a population all cloned from a last common ancestor.
+	// It is very important that we do this so all of the genotypes have the same IDs for their corresponding input and output nodes.
+	// We will create a simple population of size 100, which means that there will only be a single species.
+	lca := goevo.NewGenotype(ctr, env.ObservationLength()+1, env.ActionLength(), goevo.Tanh)
+	pop := goevo.NewSimplePopulation(func() *goevo.Genotype {
+		return lca.Clone()
+	}, 100)
+
+	// Initialise our selection function: tournament selection with a size of three.
+	// In goevo, selections and reproductions do not have "NewXXX" functions.
+	selec := &goevo.TournamentSelection{
+		TournamentSize: 3,
+	}
+
+	// Initialise the reproduction function, which uses normally distributed random numbers to perform mutations
+	reprod := &goevo.StdReproduction{
+		StdNumNewSynapses:          0.5,
+		StdNumNewRecurrentSynapses: 0.2,
+		StdNumNewNeurons:           0.25,
+		StdNumMutateSynapses:       1.5,
+		StdNumPruneSynapses:        0.0,
+		StdNumMutateActivations:    0.1,
+		StdNewSynapseWeight:        0.2,
+		StdMutateSynapseWeight:     0.2,
+		MaxHiddenNeurons:           4,
+		Counter:                    ctr,
+		PossibleActivations:        goevo.AllActivations,
+	}
+
+	// Track the best genotype of the previous generation
+	var bestGt *goevo.Genotype
+
+	// Loop for 200 generations
+	for gen := 1; gen <= 200; gen++ {
+		// Calculate the fitness of all agents, tracking the best fitness and genotype as we go.
+		// An agent is just a genotype paired with a fitness.
+		bestFitness := math.Inf(-1)
+		bestGt = nil
+		for _, a := range pop.Agents() {
+			a.Fitness = fitness(a.Genotype.Build(), env)
+			if a.Fitness > bestFitness {
+				bestFitness = a.Fitness
+				bestGt = a.Genotype
+			}
+		}
+		// Every 10 generations, log some information
+		if gen%10 == 0 || gen == 1 {
+			fmt.Printf("Generation %v: bestf=%.3f\n", gen, bestFitness)
+		}
+
+		// Get the next generation of agents using our selection and reproduction functions
+		pop = pop.NextGeneration(selec, reprod)
+	}
+
+	// Save an image of the best genotype we found
+	fImg, _ := os.Create("best_genotype.png")
+	defer fImg.Close()
+	png.Encode(fImg, bestGt.Draw(20, 10))
+
+	// Save the genotype to a file
+	fJson, _ := os.Create("best_genotype.json")
+	defer fJson.Close()
+	enc := json.NewEncoder(fJson)
+	enc.SetIndent("", "\t")
+	enc.Encode(bestGt)
+
+	// Compile the genotype into a phenotype so we can actually run number through it
+	bestPt := bestGt.Build()
+
+	// Until we press escape, run the genotype in a visualisation of the environment.
+	// Press R to reset the environment.
+	lastObs := env.Reset().Observation
+	gym.BeginRenderLoop(env, func(win *pixelgl.Window) bool {
+		action := bestPt.Forward(append(lastObs, 1))
+		sd := env.Step(action)
+		lastObs = sd.Observation
+		bestPt.Reset()
+		if sd.Terminated || win.JustPressed(pixelgl.KeyR) {
+			lastObs = env.Reset().Observation
+		}
+		return win.JustPressed(pixelgl.KeyEscape)
+	})
+}
+
+```
+
+This code took about 15 seconds to run on my laptop, and produced a pretty good pole balancer. There are plenty of improvements to be made though, like testing each agent for more timesteps.
+
+Below is the genotype that was generated. Red connections are recurrent ones, meaning they carry data from the previous timestep into the next one.
+
+![best_geno](./README_ASSETS/best_genotype.png)
+
+You can see that the nodes in the genotype are fairly sparsely connected, and two of the input nodes are actually not used at all.
 
 ## Future Work
 - HyperNEAT: I already implemented this in the original package before I rewrote it, so this should be trivial. HyperNEAT basically allows NEAT to evolve much larger networks.
