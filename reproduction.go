@@ -61,3 +61,51 @@ func (r *StdReproduction) Reproduce(a, b *Genotype) *Genotype {
 
 	return g
 }
+
+type ProbReproduction struct {
+	NewNeuronProbability           float64
+	NewSynapseProbability          float64
+	NewRecurrentSynapseProbability float64
+	RemoveSynapseProbability       float64
+	MutateSynapseProbability       float64
+	MutateActivationProbability    float64
+	SetSynapseZeroProbability      float64
+
+	NewSynapseStd    float64
+	MutateSynapseStd float64
+	Activations      []Activation
+
+	UseUnfitParentProbability float64
+
+	Counter *Counter
+}
+
+func (r *ProbReproduction) Reproduce(a, b *Genotype) *Genotype {
+	if rand.Float64() < r.UseUnfitParentProbability {
+		a, b = b, a
+	}
+	g := a.CrossoverWith(b)
+
+	if rand.Float64() < r.NewNeuronProbability {
+		g.AddRandomNeuron(r.Counter, r.Activations...)
+	}
+	if rand.Float64() < r.NewSynapseProbability {
+		g.AddRandomSynapse(r.Counter, r.NewSynapseStd, false)
+	}
+	if rand.Float64() < r.NewRecurrentSynapseProbability {
+		g.AddRandomSynapse(r.Counter, r.NewSynapseStd, true)
+	}
+	if rand.Float64() < r.RemoveSynapseProbability {
+		g.RemoveRandomSynapse()
+	}
+	if rand.Float64() < r.SetSynapseZeroProbability {
+		g.ResetRandomSynapse()
+	}
+	if rand.Float64() < r.MutateSynapseProbability {
+		g.MutateRandomSynapse(r.MutateSynapseStd)
+	}
+	if rand.Float64() < r.MutateActivationProbability {
+		g.MutateRandomActivation(r.Activations...)
+	}
+	return g
+}
