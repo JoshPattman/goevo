@@ -119,7 +119,7 @@ func TestXOR(t *testing.T) {
 		func() {
 			f, _ := os.Create("img.png")
 			defer f.Close()
-			png.Encode(f, maxGt.Draw(20, 10))
+			png.Encode(f, maxGt.RenderImage(20, 10))
 		}()
 	}
 	if maxFitness < -0.1 {
@@ -296,7 +296,7 @@ func TestRecurrency(t *testing.T) {
 		func() {
 			f, _ := os.Create("img.png")
 			defer f.Close()
-			png.Encode(f, maxGt.Draw(20, 10))
+			png.Encode(f, maxGt.RenderImage(20, 10))
 		}()
 	}
 	if maxFitness < -0.1 {
