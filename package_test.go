@@ -17,6 +17,7 @@ func assertEq[T comparable](t *testing.T, a T, b T, name string) {
 	}
 }
 
+// Test the genotype constructor makes a valid genotype that can be run
 func TestNewGenotype(t *testing.T) {
 	c := NewCounter()
 	g := NewGenotype(c, 10, 5, Tanh)
@@ -27,6 +28,7 @@ func TestNewGenotype(t *testing.T) {
 	assertEq(t, len(outs), 5, "output length")
 }
 
+// Test training a new genotype on the XOR problem, fail if do not solve the problem
 func TestXOR(t *testing.T) {
 	// We add a bias on the end of each input, which is always 1
 	X := [][]float64{
@@ -128,6 +130,7 @@ func TestXOR(t *testing.T) {
 	}
 }
 
+// Check we can save and load the genotype
 func TestSaving(t *testing.T) {
 	counter := NewCounter()
 	gt := NewGenotype(counter, 3, 2, Tanh)
@@ -160,8 +163,8 @@ func TestSaving(t *testing.T) {
 	}
 }
 
+// Randomly perform mutation operations on a genotype to check if it remains valid
 func TestGenotypeStressTest(t *testing.T) {
-	// Basically just randomly run ops on a genotype to check if any of them can invalidate it
 	counter := NewCounter()
 	gt := NewGenotype(counter, 5, 3, Sigmoid)
 	if err := gt.Validate(); err != nil {
@@ -201,6 +204,7 @@ func TestGenotypeStressTest(t *testing.T) {
 	}
 }
 
+// Test recurrent connections can evolve to remeber the sequence 0, 1, 1, 0 (with the same input each time)
 func TestRecurrency(t *testing.T) {
 	// We add a bias on the end of each input, which is always 1
 	X := [][]float64{
