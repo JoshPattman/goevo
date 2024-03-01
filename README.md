@@ -1,5 +1,5 @@
 # GoEvo Evolutionary Algorithms
-<img src="./PACKAGE_ART/logo.png" width=256 align="right"/>
+<img src="./PACKAGE_ART/icon-background.svg" width=256 align="right"/>
 
 GoEvo is an evolutionary algorithms package for Go that provides both flexible and fast implementations of many genetic algorithms.
 
