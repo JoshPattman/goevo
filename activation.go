@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Activation is an enum representing the different activation functions that can be used in a neural network.
 type Activation int
 
 const (
@@ -23,8 +24,10 @@ const (
 	Abs
 )
 
+// AllActivations is a list of all possible activations.
 var AllActivations = []Activation{Relu, Linear, Sigmoid, Tanh, Sin, Cos, Binary, Reln, Relum, Sawtooth, Abs}
 
+// String returns the string representation of the activation.
 func (a Activation) String() string {
 	switch a {
 	case Relu:
@@ -104,7 +107,7 @@ var _ json.Marshaler = Relu
 var dummy = Relu
 var _ json.Unmarshaler = &dummy
 
-// UnmarshalJSON implements json.Unmarshaler.
+// UnmarshalJSON implements [json.Unmarshaler].
 func (a *Activation) UnmarshalJSON(bs []byte) error {
 	s := strings.TrimPrefix(strings.TrimSuffix(string(bs), "\""), "\"")
 	switch s {
@@ -136,7 +139,7 @@ func (a *Activation) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// MarshalJSON implements json.Marshaler.
+// MarshalJSON implements [json.Marshaler].
 func (a Activation) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + a.String() + "\""), nil
 }

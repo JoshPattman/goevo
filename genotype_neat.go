@@ -3,23 +3,30 @@ package goevo
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"math"
 	"math/rand"
 	"slices"
 
+	"github.com/goccy/go-graphviz"
 	"golang.org/x/exp/maps"
 )
 
+// NEATNeuronID is the unique identifier for a neuron in a NEATGenotype
 type NEATNeuronID int
+
+// NEATSynapseID is the unique identifier for a synapse in a NEATGenotype
 type NEATSynapseID int
 
-// NEATSynapseEP is the endpoints of a synapse
+// NEATSynapseEP is the endpoints of a synapse in a NEATGenotype
 type NEATSynapseEP struct {
 	From NEATNeuronID
 	To   NEATNeuronID
 }
 
-// NEATGenotype represents the DNA of a creature. It is optimised for mutating, but cannot be run directly.
+// NEATGenotype is a genotype for a neural network using the NEAT algorithm.
+// It is conceptually similar to the DNA of an organism: it encodes how to build a neural network, but is not the neural network itself.
+// This means if you want to actually run the neural network, you need to use the [NEATGenotype.Build] method to create a [NEATPhenotype].
 type NEATGenotype struct {
 	maxSynapseValue       float64
 	numInputs             int
@@ -35,6 +42,9 @@ type NEATGenotype struct {
 	selfSynapses          []NEATSynapseID
 }
 
+// NewNEATGenotype creates a new NEATGenotype with the given number of inputs and outputs, and the given output activation function.
+// All output neurons will have the same activation function, and all input neurons will have the linear activation function.
+// The genotype will have no synapses.
 func NewNEATGenotype(counter *Counter, inputs, outputs int, outputActivation Activation) *NEATGenotype {
 	if inputs <= 0 || outputs <= 0 {
 		panic("must have at least one input and one output")
@@ -79,6 +89,9 @@ func NewNEATGenotype(counter *Counter, inputs, outputs int, outputActivation Act
 	}
 }
 
+// AddRandomNeuron adds a new neuron to the genotype on a random forward synapse.
+// It will return false if there are no forward synapses to add to.
+// The new neuron will have a random activation function from the given list of activations.
 func (g *NEATGenotype) AddRandomNeuron(counter *Counter, activations ...Activation) bool {
 	if len(g.forwardSynapses) == 0 {
 		return false
@@ -160,6 +173,10 @@ func (g *NEATGenotype) AddRandomNeuron(counter *Counter, activations ...Activati
 	return true
 }
 
+// AddRandomSynapse adds a new synapse to the genotype between two nodes.
+// It will return false if it failed to find a place to put the synapse after 10 tries.
+// The synapse will have a random weight from a normal distribution with the given standard deviation.
+// If recurrent is true, the synapse will be recurrent, otherwise it will not.
 func (g *NEATGenotype) AddRandomSynapse(counter *Counter, weightStd float64, recurrent bool) bool {
 	// Almost always find a new connection after 10 tries
 	for i := 0; i < 10; i++ {
@@ -195,6 +212,8 @@ func (g *NEATGenotype) AddRandomSynapse(counter *Counter, weightStd float64, rec
 	return false
 }
 
+// MutateRandomSynapse will change the weight of a random synapse by a random amount from a normal distribution with the given standard deviation.
+// It will return false if there are no synapses to mutate.
 func (g *NEATGenotype) MutateRandomSynapse(std float64) bool {
 	if len(g.weights) == 0 {
 		return false
@@ -206,7 +225,8 @@ func (g *NEATGenotype) MutateRandomSynapse(std float64) bool {
 	return true
 }
 
-// This will delete a random synapse. It will leave hanging neurons, because they may be useful later.
+// RemoveRandomSynapse will remove a random synapse from the genotype.
+// It will return false if there are no synapses to remove.
 func (g *NEATGenotype) RemoveRandomSynapse() bool {
 	if len(g.weights) == 0 {
 		return false
@@ -235,7 +255,8 @@ func (g *NEATGenotype) RemoveRandomSynapse() bool {
 	return true
 }
 
-// This will set the weight of a random synapse to 0. Kind of similar to disabling a synapse, which this implementation does not have.
+// ResetRandomSynapse will reset the weight of a random synapse to 0.
+// It will return false if there are no synapses to reset.
 func (g *NEATGenotype) ResetRandomSynapse() bool {
 	if len(g.weights) == 0 {
 		return false
@@ -245,7 +266,9 @@ func (g *NEATGenotype) ResetRandomSynapse() bool {
 	return true
 }
 
-// Change the activation of a rnadom HIDDEN neuron to one of the supplied activations
+// MutateRandomActivation will change the activation function of a random hidden neuron to
+// a random activation function from the given list of activations.
+// It will return false if there are no hidden neurons to mutate.
 func (g *NEATGenotype) MutateRandomActivation(activations ...Activation) bool {
 	numHidden := len(g.neuronOrder) - g.numInputs - g.numOutputs
 	if numHidden <= 0 {
@@ -256,7 +279,7 @@ func (g *NEATGenotype) MutateRandomActivation(activations ...Activation) bool {
 	return true
 }
 
-// clones the genotype
+// Clone returns a new genotype that is an exact copy of this genotype.
 func (g *NEATGenotype) Clone() *NEATGenotype {
 	gc := &NEATGenotype{
 		g.maxSynapseValue,
@@ -276,7 +299,10 @@ func (g *NEATGenotype) Clone() *NEATGenotype {
 	return gc
 }
 
-// Simple crossover of the genotypes, where g is fitter than g2
+// CrossoverWith will return a new genotype that is a crossover of this genotype with the given genotype.
+// This crossover is similar to what is used in the original NEAT implementation,
+// where only the weights of the synapses are crossed over (the entire structure of g is kept the same).
+// For this reason, the first genotype g should be the fitter parent.
 func (g *NEATGenotype) CrossoverWith(g2 *NEATGenotype) *NEATGenotype {
 	gc := &NEATGenotype{
 		g.maxSynapseValue,
@@ -312,27 +338,32 @@ func (g *NEATGenotype) isOutputOrder(order int) bool {
 	return order >= len(g.neuronOrder)-g.numOutputs
 }
 
+// NumInputNeurons returns the number of input neurons in the genotype.
 func (g *NEATGenotype) NumInputNeurons() int {
 	return g.numInputs
 }
 
+// NumOutputNeurons returns the number of output neurons in the genotype.
 func (g *NEATGenotype) NumOutputNeurons() int {
 	return g.numOutputs
 }
 
+// NumHiddenNeurons returns the number of hidden neurons in the genotype.
 func (g *NEATGenotype) NumHiddenNeurons() int {
 	return len(g.activations) - g.numInputs - g.numOutputs
 }
 
+// NumNeurons returns the total number of neurons in the genotype.
 func (g *NEATGenotype) NumNeurons() int {
 	return len(g.activations)
 }
 
+// NumSynapses returns the total number of synapses in the genotype.
 func (g *NEATGenotype) NumSynapses() int {
 	return len(g.weights)
 }
 
-// This will run as many checks as possible to check the genotype is valid.
+// Validate runs as many checks as possible to check the genotype is valid.
 // It is really only designed to be used as part of a test suite to catch errors with the package.
 // This should never throw an error, but if it does either there is a bug in the package, or the user has somehow invalidated the genotype.
 func (g *NEATGenotype) Validate() error {
@@ -463,7 +494,7 @@ type marshallableGenotype struct {
 	MaxSynapseVal float64               `json:"max_synapse_val"`
 }
 
-// MarshalJSON implements json.Marshaler.
+// MarshalJSON implements json.Marshaler, allowing the genotype to be marshalled to JSON.
 func (g *NEATGenotype) MarshalJSON() ([]byte, error) {
 	mns := make([]marshallableNeuron, len(g.neuronOrder))
 	for no, nid := range g.neuronOrder {
@@ -482,8 +513,9 @@ func (g *NEATGenotype) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&mg)
 }
 
-// UnmarshalJSON implements json.Unmarshaler.
-// TODO: needs more validation
+// UnmarshalJSON implements json.Unmarshaler, allowing the genotype to be unmarshalled from JSON.
+//
+// TODO(Needs more validation)
 func (g *NEATGenotype) UnmarshalJSON(bs []byte) error {
 	mg := marshallableGenotype{}
 	err := json.Unmarshal(bs, &mg)
@@ -527,4 +559,62 @@ func (g *NEATGenotype) UnmarshalJSON(bs []byte) error {
 		return fmt.Errorf("genotype was invalid upon loading: %v", err)
 	}
 	return nil
+}
+
+// RenderDot returns a string in the DOT language that represents the genotype.
+// This DOT code cannot be use to recreate the genotype, but can be used to visualise it using Graphviz.
+func (g *NEATGenotype) RenderDot(width, height float64) string {
+	graphDrawer := newSimpleGraphvizWriter()
+	graphDrawer.writeGraphParam("rankdir", "LR")
+	graphDrawer.writeGraphParam("ratio", "fill")
+	graphDrawer.writeGraphParam("size", fmt.Sprintf("%v,%v", width, height))
+	graphDrawer.writeGraphParam("layout", "dot")
+
+	inputRanks := []string{}
+	outputRanks := []string{}
+
+	for no, nid := range g.neuronOrder {
+		name := fmt.Sprintf("N%v", nid)
+		label := fmt.Sprintf("N%v [%v]\n%v", nid, no, g.activations[nid])
+		color := "black"
+		if no < g.numInputs {
+			color = "green"
+			inputRanks = append(inputRanks, name)
+		} else if no >= len(g.neuronOrder)-g.numOutputs {
+			color = "red"
+			outputRanks = append(outputRanks, name)
+		}
+		graphDrawer.writeNode(name, label, color)
+	}
+
+	graphDrawer.writeMinRank(inputRanks)
+	graphDrawer.writeMaxRank(outputRanks)
+
+	for wid, w := range g.weights {
+		ep := g.synapseEndpointLookup[wid]
+		of, ot := g.inverseNeuronOrder[ep.From], g.inverseNeuronOrder[ep.To]
+		fromName := fmt.Sprintf("N%v", ep.From)
+		toName := fmt.Sprintf("N%v", ep.To)
+		label := fmt.Sprintf("C%v\n%.3f", wid, w)
+		color := "black"
+		if of >= ot {
+			color = "red"
+		}
+		graphDrawer.writeEdge(fromName, toName, label, color)
+	}
+	return graphDrawer.dot()
+}
+
+// RenderImage returns an image of the genotype using graphviz.
+func (g *NEATGenotype) RenderImage(width, height float64) image.Image {
+	graph, err := graphviz.ParseBytes([]byte(g.RenderDot(width, height)))
+	if err != nil {
+		panic(fmt.Sprintf("error when creating a dot graph, this should not have happened (please report bug): %v", err))
+	}
+	gv := graphviz.New()
+	img, err := gv.RenderImage(graph)
+	if err != nil {
+		panic(fmt.Sprintf("error when creating an image from dot, this should not have happened (please report bug): %v", err))
+	}
+	return img
 }

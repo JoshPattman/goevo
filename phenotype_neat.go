@@ -5,6 +5,10 @@ type phenotypeConnection struct {
 	w     float64
 }
 
+// NEATPhenotype is a phenotype for a NEAT genotype.
+// It conceptually represents a neural network, built according to the instructions in the NEATGenotype (DNA).
+// Once built, the NEATPhenotype can be used to forward propagate inputs through the network,
+// but it cannot be modified though mutation or corss-over.
 type NEATPhenotype struct {
 	numIn            int
 	numOut           int
@@ -15,6 +19,7 @@ type NEATPhenotype struct {
 	recurrentWeights [][]phenotypeConnection
 }
 
+// Build a NEATPhenotype from a NEATGenotype.
 func (g *NEATGenotype) Build() *NEATPhenotype {
 	accs := make([]float64, len(g.neuronOrder))
 	laccs := make([]float64, len(g.neuronOrder))
@@ -46,6 +51,7 @@ func (g *NEATGenotype) Build() *NEATPhenotype {
 	}
 }
 
+// Forward propagate inputs through the network, returning the resulting outputs.
 func (p *NEATPhenotype) Forward(x []float64) []float64 {
 	if len(x) != p.numIn {
 		panic("incorrect number of inputs")
@@ -83,7 +89,7 @@ func (p *NEATPhenotype) Forward(x []float64) []float64 {
 	return outs
 }
 
-// Reset recurrent memory
+// Reset will clear the recurrent memories of the phenotype.
 func (p *NEATPhenotype) Reset() {
 	for i := range p.accumulators {
 		p.accumulators[i] = 0

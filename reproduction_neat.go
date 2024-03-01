@@ -38,6 +38,7 @@ type NEATStdReproduction struct {
 	PossibleActivations []Activation
 }
 
+// Reproduce creates a new genotype by crossing over and mutating the given genotypes.
 func (r *NEATStdReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
 	g := a.CrossoverWith(b)
 
@@ -101,6 +102,7 @@ type NEATProbReproduction struct {
 	Counter *Counter
 }
 
+// Reproduce creates a new genotype by crossing over and mutating the given genotypes.
 func (r *NEATProbReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
@@ -166,6 +168,7 @@ type NEATScaledProbReproduction struct {
 	Counter *Counter
 }
 
+// Reproduce creates a new genotype by crossing over and mutating the given genotypes.
 func (r *NEATScaledProbReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
