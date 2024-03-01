@@ -2,21 +2,23 @@ package goevo
 
 import "math/rand"
 
-type Selection interface {
-	SetAgents(agents []*Agent)
-	Select() *Agent
+type Selection[T any] interface {
+	SetAgents(agents []*Agent[T])
+	Select() *Agent[T]
 }
 
-type TournamentSelection struct {
+var _ Selection[*NEATGenotype] = &TournamentSelection[*NEATGenotype]{}
+
+type TournamentSelection[T any] struct {
 	TournamentSize int
-	agents         []*Agent
+	agents         []*Agent[T]
 }
 
-func (t *TournamentSelection) SetAgents(agents []*Agent) {
+func (t *TournamentSelection[T]) SetAgents(agents []*Agent[T]) {
 	t.agents = agents
 }
 
-func (t *TournamentSelection) Select() *Agent {
+func (t *TournamentSelection[T]) Select() *Agent[T] {
 	if t.agents == nil {
 		panic("must call SetAgents before selecting")
 	}

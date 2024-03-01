@@ -20,7 +20,7 @@ func assertEq[T comparable](t *testing.T, a T, b T, name string) {
 // Test the genotype constructor makes a valid genotype that can be run
 func TestNewGenotype(t *testing.T) {
 	c := NewCounter()
-	g := NewGenotype(c, 10, 5, Tanh)
+	g := NewNEATGenotype(c, 10, 5, Tanh)
 	assertEq(t, g.numInputs, 10, "inputs")
 	assertEq(t, g.numOutputs, 5, "outputs")
 	p := g.Build()
@@ -56,18 +56,18 @@ func TestXOR(t *testing.T) {
 
 	counter := NewCounter()
 
-	originalGt := NewGenotype(counter, 3, 1, Sigmoid)
+	originalGt := NewNEATGenotype(counter, 3, 1, Sigmoid)
 	originalGt.AddRandomSynapse(counter, 0.3, false)
-	pop := NewSimplePopulation(func() *Genotype {
+	pop := NewSimplePopulation(func() *NEATGenotype {
 		gt := originalGt.Clone()
 		gt.AddRandomSynapse(counter, 0.3, false)
 		return gt
 	}, 100)
 
-	selec := &TournamentSelection{
+	selec := &TournamentSelection[*NEATGenotype]{
 		TournamentSize: 3,
 	}
-	reprod := &StdReproduction{
+	reprod := &NEATStdReproduction{
 		StdNumNewSynapses:       1,
 		StdNumNewNeurons:        0.5,
 		StdNumMutateSynapses:    2,
@@ -80,7 +80,7 @@ func TestXOR(t *testing.T) {
 		MaxHiddenNeurons:        3,
 	}
 	var maxFitness float64
-	var maxGt *Genotype
+	var maxGt *NEATGenotype
 	debugging := false
 	for gen := 0; gen < 5000; gen++ {
 		maxFitness = math.Inf(-1)
@@ -133,7 +133,7 @@ func TestXOR(t *testing.T) {
 // Check we can save and load the genotype
 func TestSaving(t *testing.T) {
 	counter := NewCounter()
-	gt := NewGenotype(counter, 3, 2, Tanh)
+	gt := NewNEATGenotype(counter, 3, 2, Tanh)
 	gt.AddRandomSynapse(counter, 0.5, false)
 	gt.AddRandomSynapse(counter, 0.5, false)
 	gt.AddRandomSynapse(counter, 0.5, false)
@@ -153,7 +153,7 @@ func TestSaving(t *testing.T) {
 	if err := json.NewEncoder(buf).Encode(gt); err != nil {
 		t.Fatal(err)
 	}
-	var loadedGt *Genotype
+	var loadedGt *NEATGenotype
 	if err := json.NewDecoder(buf).Decode(&loadedGt); err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func TestSaving(t *testing.T) {
 // Randomly perform mutation operations on a genotype to check if it remains valid
 func TestGenotypeStressTest(t *testing.T) {
 	counter := NewCounter()
-	gt := NewGenotype(counter, 5, 3, Sigmoid)
+	gt := NewNEATGenotype(counter, 5, 3, Sigmoid)
 	if err := gt.Validate(); err != nil {
 		t.Fatalf("error after creating genotype: %v", err)
 	}
@@ -232,18 +232,18 @@ func TestRecurrency(t *testing.T) {
 
 	counter := NewCounter()
 
-	originalGt := NewGenotype(counter, 1, 1, Sigmoid)
+	originalGt := NewNEATGenotype(counter, 1, 1, Sigmoid)
 	originalGt.AddRandomSynapse(counter, 0.3, false)
-	pop := NewSimplePopulation(func() *Genotype {
+	pop := NewSimplePopulation(func() *NEATGenotype {
 		gt := originalGt.Clone()
 		gt.AddRandomSynapse(counter, 0.3, false)
 		return gt
 	}, 100)
 
-	selec := &TournamentSelection{
+	selec := &TournamentSelection[*NEATGenotype]{
 		TournamentSize: 3,
 	}
-	reprod := &StdReproduction{
+	reprod := &NEATStdReproduction{
 		StdNumNewSynapses:          1,
 		StdNumNewRecurrentSynapses: 0.5,
 		StdNumNewNeurons:           0.5,
@@ -257,7 +257,7 @@ func TestRecurrency(t *testing.T) {
 		MaxHiddenNeurons:           3,
 	}
 	var maxFitness float64
-	var maxGt *Genotype
+	var maxGt *NEATGenotype
 	debugging := false
 	for gen := 0; gen < 5000; gen++ {
 		maxFitness = math.Inf(-1)

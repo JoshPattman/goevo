@@ -61,7 +61,7 @@ import (
 
 // This is almost certainly a worse way to implement this, but I cannot find a way to force the input and output nodes to align correctly.
 
-func (g *Genotype) RenderDot(width, height float64) string {
+func (g *NEATGenotype) RenderDot(width, height float64) string {
 	graphDrawer := newSimpleGraphvizWriter()
 	graphDrawer.writeGraphParam("rankdir", "LR")
 	graphDrawer.writeGraphParam("ratio", "fill")
@@ -104,7 +104,7 @@ func (g *Genotype) RenderDot(width, height float64) string {
 }
 
 // RenderImage returns an image of the genotype
-func (g *Genotype) RenderImage(width, height float64) image.Image {
+func (g *NEATGenotype) RenderImage(width, height float64) image.Image {
 	graph, err := graphviz.ParseBytes([]byte(g.RenderDot(width, height)))
 	if err != nil {
 		panic(fmt.Sprintf("error when creating a dot graph, this should not have happened (please report bug): %v", err))

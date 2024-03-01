@@ -1,10 +1,10 @@
 package goevo
 
-type Agent struct {
-	Genotype *Genotype
+type Agent[T any] struct {
+	Genotype T
 	Fitness  float64
 }
 
-func NewAgent(gt *Genotype) *Agent {
-	return &Agent{Genotype: gt}
+func NewAgent[T any](gt T) *Agent[T] {
+	return &Agent[T]{Genotype: gt}
 }

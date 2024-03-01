@@ -6,19 +6,19 @@ import (
 )
 
 // Make sure we implement json marshalling
-var _ json.Marshaler = &Genotype{}
-var _ json.Unmarshaler = &Genotype{}
+var _ json.Marshaler = &NEATGenotype{}
+var _ json.Unmarshaler = &NEATGenotype{}
 
 type marshallableNeuron struct {
-	ID         NeuronID   `json:"id"`
-	Activation Activation `json:"activation"`
+	ID         NEATNeuronID `json:"id"`
+	Activation Activation   `json:"activation"`
 }
 
 type marshallableSynapse struct {
-	ID     SynapseID `json:"id"`
-	From   NeuronID  `json:"from"`
-	To     NeuronID  `json:"to"`
-	Weight float64   `json:"weight"`
+	ID     NEATSynapseID `json:"id"`
+	From   NEATNeuronID  `json:"from"`
+	To     NEATNeuronID  `json:"to"`
+	Weight float64       `json:"weight"`
 }
 
 type marshallableGenotype struct {
@@ -30,7 +30,7 @@ type marshallableGenotype struct {
 }
 
 // MarshalJSON implements json.Marshaler.
-func (g *Genotype) MarshalJSON() ([]byte, error) {
+func (g *NEATGenotype) MarshalJSON() ([]byte, error) {
 	mns := make([]marshallableNeuron, len(g.neuronOrder))
 	for no, nid := range g.neuronOrder {
 		mns[no] = marshallableNeuron{nid, g.activations[nid]}
@@ -50,28 +50,28 @@ func (g *Genotype) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements json.Unmarshaler.
 // TODO: needs more validation
-func (g *Genotype) UnmarshalJSON(bs []byte) error {
+func (g *NEATGenotype) UnmarshalJSON(bs []byte) error {
 	mg := marshallableGenotype{}
 	err := json.Unmarshal(bs, &mg)
 	if err != nil {
 		return err
 	}
-	g.neuronOrder = make([]NeuronID, len(mg.Neurons))
-	g.inverseNeuronOrder = make(map[NeuronID]int)
-	g.activations = make(map[NeuronID]Activation)
+	g.neuronOrder = make([]NEATNeuronID, len(mg.Neurons))
+	g.inverseNeuronOrder = make(map[NEATNeuronID]int)
+	g.activations = make(map[NEATNeuronID]Activation)
 	for ni, mn := range mg.Neurons {
 		g.activations[mn.ID] = mn.Activation
 		g.neuronOrder[ni] = mn.ID
 		g.inverseNeuronOrder[mn.ID] = ni
 	}
-	g.weights = make(map[SynapseID]float64)
-	g.synapseEndpointLookup = make(map[SynapseID]SynapseEP)
-	g.endpointSynapseLookup = make(map[SynapseEP]SynapseID)
-	g.forwardSynapses = make([]SynapseID, 0)
-	g.backwardSynapses = make([]SynapseID, 0)
-	g.selfSynapses = make([]SynapseID, 0)
+	g.weights = make(map[NEATSynapseID]float64)
+	g.synapseEndpointLookup = make(map[NEATSynapseID]NEATSynapseEP)
+	g.endpointSynapseLookup = make(map[NEATSynapseEP]NEATSynapseID)
+	g.forwardSynapses = make([]NEATSynapseID, 0)
+	g.backwardSynapses = make([]NEATSynapseID, 0)
+	g.selfSynapses = make([]NEATSynapseID, 0)
 	for _, ms := range mg.Synapses {
-		ep := SynapseEP{ms.From, ms.To}
+		ep := NEATSynapseEP{ms.From, ms.To}
 		g.weights[ms.ID] = ms.Weight
 		g.endpointSynapseLookup[ep] = ms.ID
 		g.synapseEndpointLookup[ms.ID] = ep

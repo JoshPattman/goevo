@@ -9,60 +9,60 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-type NeuronID int
-type SynapseID int
+type NEATNeuronID int
+type NEATSynapseID int
 
-// SynapseEP is the endpoints of a synapse
-type SynapseEP struct {
-	From NeuronID
-	To   NeuronID
+// NEATSynapseEP is the endpoints of a synapse
+type NEATSynapseEP struct {
+	From NEATNeuronID
+	To   NEATNeuronID
 }
 
-// Genotype represents the DNA of a creature. It is optimised for mutating, but cannot be run directly.
-type Genotype struct {
+// NEATGenotype represents the DNA of a creature. It is optimised for mutating, but cannot be run directly.
+type NEATGenotype struct {
 	maxSynapseValue       float64
 	numInputs             int
 	numOutputs            int
-	neuronOrder           []NeuronID
-	inverseNeuronOrder    map[NeuronID]int
-	activations           map[NeuronID]Activation
-	weights               map[SynapseID]float64
-	synapseEndpointLookup map[SynapseID]SynapseEP
-	endpointSynapseLookup map[SynapseEP]SynapseID
-	forwardSynapses       []SynapseID // With these three we just track which synapses are of what type
-	backwardSynapses      []SynapseID // A synapse can NEVER change type
-	selfSynapses          []SynapseID
+	neuronOrder           []NEATNeuronID
+	inverseNeuronOrder    map[NEATNeuronID]int
+	activations           map[NEATNeuronID]Activation
+	weights               map[NEATSynapseID]float64
+	synapseEndpointLookup map[NEATSynapseID]NEATSynapseEP
+	endpointSynapseLookup map[NEATSynapseEP]NEATSynapseID
+	forwardSynapses       []NEATSynapseID // With these three we just track which synapses are of what type
+	backwardSynapses      []NEATSynapseID // A synapse can NEVER change type
+	selfSynapses          []NEATSynapseID
 }
 
-func NewGenotype(counter *Counter, inputs, outputs int, outputActivation Activation) *Genotype {
+func NewNEATGenotype(counter *Counter, inputs, outputs int, outputActivation Activation) *NEATGenotype {
 	if inputs <= 0 || outputs <= 0 {
 		panic("must have at least one input and one output")
 	}
-	neuronOrder := make([]NeuronID, 0)
-	inverseNeuronOrder := make(map[NeuronID]int)
-	activations := make(map[NeuronID]Activation)
-	weights := make(map[SynapseID]float64)
-	synapseEndpointLookup := make(map[SynapseID]SynapseEP)
-	endpointSynapseLookup := make(map[SynapseEP]SynapseID)
-	forwardSyanpses := make([]SynapseID, 0)
-	backwardSyanpses := make([]SynapseID, 0)
-	selfSyanpses := make([]SynapseID, 0)
+	neuronOrder := make([]NEATNeuronID, 0)
+	inverseNeuronOrder := make(map[NEATNeuronID]int)
+	activations := make(map[NEATNeuronID]Activation)
+	weights := make(map[NEATSynapseID]float64)
+	synapseEndpointLookup := make(map[NEATSynapseID]NEATSynapseEP)
+	endpointSynapseLookup := make(map[NEATSynapseEP]NEATSynapseID)
+	forwardSyanpses := make([]NEATSynapseID, 0)
+	backwardSyanpses := make([]NEATSynapseID, 0)
+	selfSyanpses := make([]NEATSynapseID, 0)
 
 	for i := 0; i < inputs; i++ {
-		id := NeuronID(counter.Next())
+		id := NEATNeuronID(counter.Next())
 		neuronOrder = append(neuronOrder, id)
 		inverseNeuronOrder[id] = len(neuronOrder) - 1
 		activations[id] = Linear
 	}
 
 	for i := 0; i < outputs; i++ {
-		id := NeuronID(counter.Next())
+		id := NEATNeuronID(counter.Next())
 		neuronOrder = append(neuronOrder, id)
 		inverseNeuronOrder[id] = len(neuronOrder) - 1
 		activations[id] = outputActivation
 	}
 
-	return &Genotype{
+	return &NEATGenotype{
 		maxSynapseValue:       3,
 		numInputs:             inputs,
 		numOutputs:            outputs,
@@ -78,7 +78,7 @@ func NewGenotype(counter *Counter, inputs, outputs int, outputActivation Activat
 	}
 }
 
-func (g *Genotype) AddRandomNeuron(counter *Counter, activations ...Activation) bool {
+func (g *NEATGenotype) AddRandomNeuron(counter *Counter, activations ...Activation) bool {
 	if len(g.forwardSynapses) == 0 {
 		return false
 	}
@@ -88,11 +88,11 @@ func (g *Genotype) AddRandomNeuron(counter *Counter, activations ...Activation) 
 
 	ep := g.synapseEndpointLookup[sid]
 
-	newSid := SynapseID(counter.Next())
-	newNid := NeuronID(counter.Next())
+	newSid := NEATSynapseID(counter.Next())
+	newNid := NEATNeuronID(counter.Next())
 
-	epa := SynapseEP{ep.From, newNid}
-	epb := SynapseEP{newNid, ep.To}
+	epa := NEATSynapseEP{ep.From, newNid}
+	epb := NEATSynapseEP{newNid, ep.To}
 
 	// Swap the old connection for a, which will also retain the original weight
 	delete(g.endpointSynapseLookup, ep)
@@ -145,7 +145,7 @@ func (g *Genotype) AddRandomNeuron(counter *Counter, activations ...Activation) 
 	}
 
 	// Insert the neuron at that order
-	newNeuronOrder := make([]NeuronID, len(g.neuronOrder)+1)
+	newNeuronOrder := make([]NEATNeuronID, len(g.neuronOrder)+1)
 	copy(newNeuronOrder, g.neuronOrder[:no])
 	newNeuronOrder[no] = newNid
 	copy(newNeuronOrder[no+1:], g.neuronOrder[no:])
@@ -159,7 +159,7 @@ func (g *Genotype) AddRandomNeuron(counter *Counter, activations ...Activation) 
 	return true
 }
 
-func (g *Genotype) AddRandomSynapse(counter *Counter, weightStd float64, recurrent bool) bool {
+func (g *NEATGenotype) AddRandomSynapse(counter *Counter, weightStd float64, recurrent bool) bool {
 	// Almost always find a new connection after 10 tries
 	for i := 0; i < 10; i++ {
 		ao := rand.Intn(len(g.neuronOrder))
@@ -174,11 +174,11 @@ func (g *Genotype) AddRandomSynapse(counter *Counter, weightStd float64, recurre
 			continue // Trying to connect either anything-input or output-output
 		}
 		aid, bid := g.neuronOrder[ao], g.neuronOrder[bo]
-		ep := SynapseEP{aid, bid}
+		ep := NEATSynapseEP{aid, bid}
 		if _, ok := g.endpointSynapseLookup[ep]; ok {
 			continue // This connection already exists, try to find another
 		}
-		sid := SynapseID(counter.Next())
+		sid := NEATSynapseID(counter.Next())
 		g.endpointSynapseLookup[ep] = sid
 		g.synapseEndpointLookup[sid] = ep
 		g.weights[sid] = clamp(rand.NormFloat64()*weightStd, -g.maxSynapseValue, g.maxSynapseValue)
@@ -194,7 +194,7 @@ func (g *Genotype) AddRandomSynapse(counter *Counter, weightStd float64, recurre
 	return false
 }
 
-func (g *Genotype) MutateRandomSynapse(std float64) bool {
+func (g *NEATGenotype) MutateRandomSynapse(std float64) bool {
 	if len(g.weights) == 0 {
 		return false
 	}
@@ -206,7 +206,7 @@ func (g *Genotype) MutateRandomSynapse(std float64) bool {
 }
 
 // This will delete a random synapse. It will leave hanging neurons, because they may be useful later.
-func (g *Genotype) RemoveRandomSynapse() bool {
+func (g *NEATGenotype) RemoveRandomSynapse() bool {
 	if len(g.weights) == 0 {
 		return false
 	}
@@ -235,7 +235,7 @@ func (g *Genotype) RemoveRandomSynapse() bool {
 }
 
 // This will set the weight of a random synapse to 0. Kind of similar to disabling a synapse, which this implementation does not have.
-func (g *Genotype) ResetRandomSynapse() bool {
+func (g *NEATGenotype) ResetRandomSynapse() bool {
 	if len(g.weights) == 0 {
 		return false
 	}
@@ -245,7 +245,7 @@ func (g *Genotype) ResetRandomSynapse() bool {
 }
 
 // Change the activation of a rnadom HIDDEN neuron to one of the supplied activations
-func (g *Genotype) MutateRandomActivation(activations ...Activation) bool {
+func (g *NEATGenotype) MutateRandomActivation(activations ...Activation) bool {
 	numHidden := len(g.neuronOrder) - g.numInputs - g.numOutputs
 	if numHidden <= 0 {
 		return false
@@ -256,8 +256,8 @@ func (g *Genotype) MutateRandomActivation(activations ...Activation) bool {
 }
 
 // clones the genotype
-func (g *Genotype) Clone() *Genotype {
-	gc := &Genotype{
+func (g *NEATGenotype) Clone() *NEATGenotype {
+	gc := &NEATGenotype{
 		g.maxSynapseValue,
 		g.numInputs,
 		g.numOutputs,
@@ -276,8 +276,8 @@ func (g *Genotype) Clone() *Genotype {
 }
 
 // Simple crossover of the genotypes, where g is fitter than g2
-func (g *Genotype) CrossoverWith(g2 *Genotype) *Genotype {
-	gc := &Genotype{
+func (g *NEATGenotype) CrossoverWith(g2 *NEATGenotype) *NEATGenotype {
+	gc := &NEATGenotype{
 		g.maxSynapseValue,
 		g.numInputs,
 		g.numOutputs,
@@ -303,38 +303,38 @@ func (g *Genotype) CrossoverWith(g2 *Genotype) *Genotype {
 	return gc
 }
 
-func (g *Genotype) isInputOrder(order int) bool {
+func (g *NEATGenotype) isInputOrder(order int) bool {
 	return order < g.numInputs
 }
 
-func (g *Genotype) isOutputOrder(order int) bool {
+func (g *NEATGenotype) isOutputOrder(order int) bool {
 	return order >= len(g.neuronOrder)-g.numOutputs
 }
 
-func (g *Genotype) NumInputNeurons() int {
+func (g *NEATGenotype) NumInputNeurons() int {
 	return g.numInputs
 }
 
-func (g *Genotype) NumOutputNeurons() int {
+func (g *NEATGenotype) NumOutputNeurons() int {
 	return g.numOutputs
 }
 
-func (g *Genotype) NumHiddenNeurons() int {
+func (g *NEATGenotype) NumHiddenNeurons() int {
 	return len(g.activations) - g.numInputs - g.numOutputs
 }
 
-func (g *Genotype) NumNeurons() int {
+func (g *NEATGenotype) NumNeurons() int {
 	return len(g.activations)
 }
 
-func (g *Genotype) NumSynapses() int {
+func (g *NEATGenotype) NumSynapses() int {
 	return len(g.weights)
 }
 
 // This will run as many checks as possible to check the genotype is valid.
 // It is really only designed to be used as part of a test suite to catch errors with the package.
 // This should never throw an error, but if it does either there is a bug in the package, or the user has somehow invalidated the genotype.
-func (g *Genotype) Validate() error {
+func (g *NEATGenotype) Validate() error {
 	// Check there are enough inputs and outputs
 	if g.numInputs <= 0 {
 		return fmt.Errorf("not enough inputs: %v", g.numInputs)
