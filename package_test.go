@@ -306,3 +306,36 @@ func TestRecurrency(t *testing.T) {
 		t.Fatalf("final genotype was not valid: %v\nGenotype:\n%v", err, maxGt)
 	}
 }
+
+func TestFloatsGt(t *testing.T) {
+	pop := NewSimplePopulation(func() Float64sGenotype { return NewFloat64sGenotype(10, 0.5) }, 100)
+	reprod := &FloatsReproduction{
+		MutateProbability: 0.1,
+		MutateStd:         0.05,
+	}
+	selec := &TournamentSelection[Float64sGenotype]{
+		TournamentSize: 3,
+	}
+	// Fitness is max (0) when all the numbers sum to 10
+	fitness := func(f Float64sGenotype) float64 {
+		total := 0.0
+		for i := range f {
+			total += f[i]
+		}
+		return -math.Abs(10 - total)
+	}
+	var highestFitness float64
+	for gen := 0; gen < 100; gen++ {
+		highestFitness = math.Inf(-1)
+		for _, a := range pop.Agents() {
+			a.Fitness = fitness(a.Genotype)
+			if a.Fitness > highestFitness {
+				highestFitness = a.Fitness
+			}
+		}
+		pop = pop.NextGeneration(selec, reprod)
+	}
+	if highestFitness < -0.1 {
+		t.Fatalf("Failed to converge, ending with fitness %f", highestFitness)
+	}
+}
