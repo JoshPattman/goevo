@@ -8,13 +8,8 @@ Some Key Features:
 - **Optimise Anything**: NEAT genotypes, slices of floats, or any type that you can perform crossover, mutation, and fitness evaluation on are supported by this package.
 - **Flexible for Your Use-Case**: As long as your components (such as mutation functions, selection functions, etc) implement the easy-to-understand interfaces specified, you can implement interesting and unique custom behaviour.
 
-## Outline
-In GoEvo, there is a clear separation between the optimisation algorithms, and the actual data to be optimised (known as a genotype). Any optimisation algorithm can be run on any genotype as long as the correction reproduction, selection, and fitness functions are available.
-
-TODO: Write the rest of this section
-
 ## Documentation
-TODO: Write a wiki
+The documentation is stored on the [GoEvo Wiki](https://github.com/JoshPattman/goevo/wiki).
 
 ## Built-In Features List
 ### Algorithms
