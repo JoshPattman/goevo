@@ -1,4 +1,4 @@
-package goevo
+package simple
 
 import "github.com/JoshPattman/goevo"
 
