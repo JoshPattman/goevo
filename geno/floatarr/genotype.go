@@ -1,3 +1,5 @@
+// Package floatarr provides a genotype type that is a slice of float64 values.
+// It also provides functions for reproduction using these genotypes.
 package floatarr
 
 import "math/rand"

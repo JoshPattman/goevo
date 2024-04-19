@@ -1,3 +1,5 @@
+// Package simple provides a simple implementation of a population, where all agents are in a single species.
+// Agents are selected and bred to create the next generation with the same number of agents.
 package simple
 
 import "github.com/JoshPattman/goevo"

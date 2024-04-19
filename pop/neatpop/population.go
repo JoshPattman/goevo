@@ -1,4 +1,6 @@
-package goevo
+// Package neatpop provides a NEAT population of agents, each with a genotype of type T.
+// THIS IS UNFINISHED AND NOT READY FOR USE.
+package neatpop
 
 import "github.com/JoshPattman/goevo"
 

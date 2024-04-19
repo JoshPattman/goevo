@@ -1,3 +1,5 @@
+// Package neat provides a genotype for a neural network using the NEAT algorithm.
+// This does not provide the NEAT population, that is in pop/neatpop
 package neat
 
 import (
