@@ -1,4 +1,4 @@
-module github.com/JoshPattman/geno/goevo/neat
+module github.com/JoshPattman/goevo/geno/neat
 
 go 1.22.2
 
