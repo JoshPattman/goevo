@@ -1,16 +1,18 @@
-package goevo
+package neat
 
 import (
 	"math/rand"
+
+	"github.com/JoshPattman/goevo"
 )
 
-var _ Reproduction[*NEATGenotype] = &NEATStdReproduction{}
-var _ Reproduction[*NEATGenotype] = &NEATProbReproduction{}
-var _ Reproduction[*NEATGenotype] = &NEATScaledProbReproduction{}
+var _ goevo.Reproduction[*Genotype] = &StdReproduction{}
+var _ goevo.Reproduction[*Genotype] = &ProbReproduction{}
+var _ goevo.Reproduction[*Genotype] = &ScaledProbReproduction{}
 
-// NEATStdReproduction is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
+// StdReproduction is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
 // The standard deviation is not scaled by the size of the network, meaning that larger networks will tend to have more mutations than smaller networks.
-type NEATStdReproduction struct {
+type StdReproduction struct {
 	// The standard deviation for the number of new synapses
 	StdNumNewSynapses float64
 	// The standard deviation for the number of new recurrent synapses
@@ -33,13 +35,13 @@ type NEATStdReproduction struct {
 	MaxHiddenNeurons int
 
 	// The counter to use for new synapse IDs
-	Counter *Counter
+	Counter *goevo.Counter
 	// The possible activations to use for new neurons
-	PossibleActivations []Activation
+	PossibleActivations []goevo.Activation
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *NEATStdReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
+func (r *StdReproduction) Reproduce(a, b *Genotype) *Genotype {
 	g := a.CrossoverWith(b)
 
 	for i := 0; i < stdN(r.StdNewSynapseWeight); i++ {
@@ -66,10 +68,10 @@ func (r *NEATStdReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
 	return g
 }
 
-// NEATProbReproduction is a reproduction strategy that uses probabilities for the number of mutations in each category.
+// ProbReproduction is a reproduction strategy that uses probabilities for the number of mutations in each category.
 // The probabilities are not scaled by the size of the network, meaning that larger networks will tend to have the same number of mutations as smaller networks.
-// NEATProbReproduction can also only perform one mutation per category.
-type NEATProbReproduction struct {
+// ProbReproduction can also only perform one mutation per category.
+type ProbReproduction struct {
 	// The probability of adding a new neuron
 	NewNeuronProbability float64
 	// The probability of adding a new synapse
@@ -90,7 +92,7 @@ type NEATProbReproduction struct {
 	// The standard deviation for the weight of mutated synapses
 	MutateSynapseStd float64
 	// The possible activations to use for new neurons
-	Activations []Activation
+	Activations []goevo.Activation
 
 	// The probability of using the unfit parent as the base for the child
 	UseUnfitParentProbability float64
@@ -99,11 +101,11 @@ type NEATProbReproduction struct {
 	MaxHiddenNeurons int
 
 	// The counter to use for new synapse IDs
-	Counter *Counter
+	Counter *goevo.Counter
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *NEATProbReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
+func (r *ProbReproduction) Reproduce(a, b *Genotype) *Genotype {
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
 	}
@@ -133,9 +135,9 @@ func (r *NEATProbReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
 	return g
 }
 
-// NEATScaledProbReproduction is a reproduction strategy that uses probabilities for the number of mutations in each category.
+// ScaledProbReproduction is a reproduction strategy that uses probabilities for the number of mutations in each category.
 // The probabilities are scaled by the size of the network, meaning that larger networks will tend to have more mutations than smaller networks.
-type NEATScaledProbReproduction struct {
+type ScaledProbReproduction struct {
 	// Probability of creating a new neuron per synapse
 	NewNeuronProbability float64
 	// Probability of creating a synapse per (node^2)
@@ -156,7 +158,7 @@ type NEATScaledProbReproduction struct {
 	// Standard deviation for mutated synapse weights
 	MutateSynapseStd float64
 	// Possible activations to use for new neurons
-	Activations []Activation
+	Activations []goevo.Activation
 
 	// Probability of using the unfit parent as the base for the child
 	UseUnfitParentProbability float64
@@ -165,11 +167,11 @@ type NEATScaledProbReproduction struct {
 	MaxHiddenNeurons int
 
 	// Counter to use for new synapse IDs
-	Counter *Counter
+	Counter *goevo.Counter
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *NEATScaledProbReproduction) Reproduce(a, b *NEATGenotype) *NEATGenotype {
+func (r *ScaledProbReproduction) Reproduce(a, b *Genotype) *Genotype {
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
 	}

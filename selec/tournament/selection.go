@@ -1,25 +1,29 @@
 package goevo
 
-import "math/rand"
+import (
+	"math/rand"
+
+	"github.com/JoshPattman/goevo"
+)
 
 // Ensure that TournamentSelection implements Selection.
-var _ Selection[*NEATGenotype] = &TournamentSelection[*NEATGenotype]{}
+var _ goevo.Selection[int] = &TournamentSelection[int]{}
 
 // TournamentSelection is a selection strategy that selects the best agent from a random tournament of agents.
 // It implements [Selection].
 type TournamentSelection[T any] struct {
 	// The number of agents to include in each tournament.
 	TournamentSize int
-	agents         []*Agent[T]
+	agents         []*goevo.Agent[T]
 }
 
 // SetAgents sets the agents to select from for this generation.
-func (t *TournamentSelection[T]) SetAgents(agents []*Agent[T]) {
+func (t *TournamentSelection[T]) SetAgents(agents []*goevo.Agent[T]) {
 	t.agents = agents
 }
 
 // Select returns an agent selected from the population using a tournament.
-func (t *TournamentSelection[T]) Select() *Agent[T] {
+func (t *TournamentSelection[T]) Select() *goevo.Agent[T] {
 	if t.agents == nil {
 		panic("must call SetAgents before selecting")
 	}

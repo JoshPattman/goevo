@@ -1,6 +1,8 @@
-package goevo
+package floatarr
 
-var _ Reproduction[Float64sGenotype] = &FloatsReproduction{}
+import "github.com/JoshPattman/goevo"
+
+var _ goevo.Reproduction[Genotype] = &FloatsReproduction{}
 
 // FloatsReproduction is a reproduction strategy for Float64sGenotype.
 // It performs crossover and mutation.
@@ -12,7 +14,7 @@ type FloatsReproduction struct {
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *FloatsReproduction) Reproduce(a, b Float64sGenotype) Float64sGenotype {
+func (r *FloatsReproduction) Reproduce(a, b Genotype) Genotype {
 	child := a.CrossoverWith(b)
 	child.Mutate(r.MutateProbability, r.MutateStd)
 	return child

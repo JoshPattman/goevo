@@ -56,7 +56,7 @@ func (a Activation) String() string {
 	panic("unknown activation")
 }
 
-func activate(x float64, a Activation) float64 {
+func Activate(x float64, a Activation) float64 {
 	switch a {
 	case Relu:
 		if x < 0 {

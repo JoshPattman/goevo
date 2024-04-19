@@ -1,27 +1,29 @@
 package goevo
 
-// NEATPopulation is a population of agents, each with a genotype of type T.
+import "github.com/JoshPattman/goevo"
+
+// Population is a population of agents, each with a genotype of type T.
 // The population is split into species, and the next generation is created by selecting and breeding from the previous one,
 // while respecting the species.
 // It uses the Nero Evolution of Augmenting Topologies (NEAT) algorithm.
-type NEATPopulation[T any] struct {
+type Population[T any] struct {
 	// The maximum distance between two genotypes for them to be considered the same species.
 	DistanceThreshold float64
 	// The multiplier for the distance threshold, which is used to increase or decrease the distance threshold each generation.
 	DistanceThresholdMultiplier float64
-	species                     [][]*Agent[T]
+	species                     [][]*goevo.Agent[T]
 }
 
-// NewNEATPopulation creates a new NEATPopulation with n agents, each with a new genotype created by newGenotype.
-func NewNEATPopulation[T any](newGenotype func() T, n int, initialDistanceThreshold, distanceThresholdMultiplier float64) *NEATPopulation[T] {
-	pop := &NEATPopulation[T]{
-		species:                     make([][]*Agent[T], 1),
+// NewPopulation creates a new NEATPopulation with n agents, each with a new genotype created by newGenotype.
+func NewPopulation[T any](newGenotype func() T, n int, initialDistanceThreshold, distanceThresholdMultiplier float64) *Population[T] {
+	pop := &Population[T]{
+		species:                     make([][]*goevo.Agent[T], 1),
 		DistanceThreshold:           initialDistanceThreshold,
 		DistanceThresholdMultiplier: distanceThresholdMultiplier,
 	}
-	pop.species[0] = make([]*Agent[T], n)
+	pop.species[0] = make([]*goevo.Agent[T], n)
 	for i := range pop.species[0] {
-		pop.species[0][i] = NewAgent(newGenotype())
+		pop.species[0][i] = goevo.NewAgent(newGenotype())
 	}
 	return pop
 }

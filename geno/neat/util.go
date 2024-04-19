@@ -1,4 +1,4 @@
-package goevo
+package neat
 
 import (
 	"fmt"
@@ -6,6 +6,14 @@ import (
 	"math/rand"
 	"strings"
 )
+
+func stdN(std float64) int {
+	v := math.Abs(rand.NormFloat64() * std)
+	if v > std*10 {
+		v = std * 10 // Lets just cap this at 10 std to prevent any sillyness
+	}
+	return int(math.Round(v))
+}
 
 func randomMapKey[T comparable, U any](m map[T]U) T {
 	n := rand.Intn(len(m))
@@ -41,14 +49,6 @@ func clamp(x, min, max float64) float64 {
 		return max
 	}
 	return x
-}
-
-func stdN(std float64) int {
-	v := math.Abs(rand.NormFloat64() * std)
-	if v > std*10 {
-		v = std * 10 // Lets just cap this at 10 std to prevent any sillyness
-	}
-	return int(math.Round(v))
 }
 
 // Utility struct to build up a simple graphviz graph one statement at a time

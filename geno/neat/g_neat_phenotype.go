@@ -1,29 +1,31 @@
-package goevo
+package neat
+
+import "github.com/JoshPattman/goevo"
 
 type phenotypeConnection struct {
 	toIdx int
 	w     float64
 }
 
-// NEATPhenotype is a phenotype for a NEAT genotype.
+// Phenotype is a phenotype for a NEAT genotype.
 // It conceptually represents a neural network, built according to the instructions in the NEATGenotype (DNA).
-// Once built, the NEATPhenotype can be used to forward propagate inputs through the network,
+// Once built, the Phenotype can be used to forward propagate inputs through the network,
 // but it cannot be modified though mutation or corss-over.
-type NEATPhenotype struct {
+type Phenotype struct {
 	numIn            int
 	numOut           int
 	accumulators     []float64
 	lastAccumulators []float64
-	activations      []Activation
+	activations      []goevo.Activation
 	forwardWeights   [][]phenotypeConnection
 	recurrentWeights [][]phenotypeConnection
 }
 
 // Build a NEATPhenotype from a NEATGenotype.
-func (g *NEATGenotype) Build() *NEATPhenotype {
+func (g *Genotype) Build() *Phenotype {
 	accs := make([]float64, len(g.neuronOrder))
 	laccs := make([]float64, len(g.neuronOrder))
-	acts := make([]Activation, len(g.neuronOrder))
+	acts := make([]goevo.Activation, len(g.neuronOrder))
 	fwdWeights := make([][]phenotypeConnection, len(g.neuronOrder))
 	recurrentWeights := make([][]phenotypeConnection, len(g.neuronOrder))
 	for no, nid := range g.neuronOrder {
@@ -40,7 +42,7 @@ func (g *NEATGenotype) Build() *NEATPhenotype {
 			recurrentWeights[oa] = append(recurrentWeights[oa], phenotypeConnection{ob, w})
 		}
 	}
-	return &NEATPhenotype{
+	return &Phenotype{
 		numIn:            g.numInputs,
 		numOut:           g.numOutputs,
 		accumulators:     accs,
@@ -52,7 +54,7 @@ func (g *NEATGenotype) Build() *NEATPhenotype {
 }
 
 // Forward propagate inputs through the network, returning the resulting outputs.
-func (p *NEATPhenotype) Forward(x []float64) []float64 {
+func (p *Phenotype) Forward(x []float64) []float64 {
 	if len(x) != p.numIn {
 		panic("incorrect number of inputs")
 	}
@@ -77,7 +79,7 @@ func (p *NEATPhenotype) Forward(x []float64) []float64 {
 	}
 	// Apply forward connections
 	for i := 0; i < len(p.accumulators); i++ {
-		p.accumulators[i] = activate(p.accumulators[i], p.activations[i])
+		p.accumulators[i] = goevo.Activate(p.accumulators[i], p.activations[i])
 		for _, w := range p.forwardWeights[i] {
 			p.accumulators[w.toIdx] += w.w * p.accumulators[i]
 		}
@@ -90,7 +92,7 @@ func (p *NEATPhenotype) Forward(x []float64) []float64 {
 }
 
 // Reset will clear the recurrent memories of the phenotype.
-func (p *NEATPhenotype) Reset() {
+func (p *Phenotype) Reset() {
 	for i := range p.accumulators {
 		p.accumulators[i] = 0
 	}
