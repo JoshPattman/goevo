@@ -22,11 +22,11 @@ func NewPopulation[T any](newGenotype func() T, n int) *Population[T] {
 func (p *Population[T]) NextGeneration(selection goevo.Selection[T], reproduction goevo.Reproduction[T]) *Population[T] {
 	selection.SetAgents(p.agents)
 	return NewPopulation(func() T {
-		a, b := selection.Select(), selection.Select()
-		if a.Fitness < b.Fitness {
-			a, b = b, a
+		parents := make([]T, reproduction.NumParents())
+		for i := range parents {
+			parents[i] = selection.Select().Genotype
 		}
-		return reproduction.Reproduce(a.Genotype, b.Genotype)
+		return reproduction.Reproduce(parents)
 	}, len(p.agents))
 }
 

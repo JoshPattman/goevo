@@ -41,7 +41,11 @@ type StdReproduction struct {
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *StdReproduction) Reproduce(a, b *Genotype) *Genotype {
+func (r *StdReproduction) Reproduce(gs []*Genotype) *Genotype {
+	if len(gs) != 2 {
+		panic("neat: expected 2 parents")
+	}
+	a, b := gs[0], gs[1]
 	g := a.CrossoverWith(b)
 
 	for i := 0; i < stdN(r.StdNewSynapseWeight); i++ {
@@ -66,6 +70,10 @@ func (r *StdReproduction) Reproduce(a, b *Genotype) *Genotype {
 	}
 
 	return g
+}
+
+func (r *StdReproduction) NumParents() int {
+	return 2
 }
 
 // ProbReproduction is a reproduction strategy that uses probabilities for the number of mutations in each category.
@@ -105,7 +113,11 @@ type ProbReproduction struct {
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *ProbReproduction) Reproduce(a, b *Genotype) *Genotype {
+func (r *ProbReproduction) Reproduce(gs []*Genotype) *Genotype {
+	if len(gs) != 2 {
+		panic("neat: expected 2 parents")
+	}
+	a, b := gs[0], gs[1]
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
 	}
@@ -133,6 +145,10 @@ func (r *ProbReproduction) Reproduce(a, b *Genotype) *Genotype {
 		g.MutateRandomActivation(r.Activations...)
 	}
 	return g
+}
+
+func (r *ProbReproduction) NumParents() int {
+	return 2
 }
 
 // ScaledProbReproduction is a reproduction strategy that uses probabilities for the number of mutations in each category.
@@ -171,7 +187,11 @@ type ScaledProbReproduction struct {
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *ScaledProbReproduction) Reproduce(a, b *Genotype) *Genotype {
+func (r *ScaledProbReproduction) Reproduce(gs []*Genotype) *Genotype {
+	if len(gs) != 2 {
+		panic("neat: expected 2 parents")
+	}
+	a, b := gs[0], gs[1]
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
 	}
@@ -224,4 +244,8 @@ func (r *ScaledProbReproduction) Reproduce(a, b *Genotype) *Genotype {
 		}
 	}
 	return g
+}
+
+func (r *ScaledProbReproduction) NumParents() int {
+	return 2
 }
