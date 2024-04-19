@@ -1,5 +1,5 @@
-github.com/JoshPattman/goevo v0.3.0 h1:K3kjLa94inFKnfhBrN5tUtymTn3ikhjnMxutT5i1PwM=
-github.com/JoshPattman/goevo v0.3.0/go.mod h1:UrFUg3BkX7uZSe5g2+twigrR/5Gt4H5A3gMm+QcDHPk=
+github.com/JoshPattman/goevo v0.4.5-e h1:VSDENkdRFNTHhxFV7/aTwJpOXSFvnBkvXCQQUv1+Boc=
+github.com/JoshPattman/goevo v0.4.5-e/go.mod h1:DshwapWnza1itL4CU7bMEuOauFT3CCSb9g4ZxDXG+i0=
 github.com/corona10/goimagehash v1.0.2 h1:pUfB0LnsJASMPGEZLj7tGY251vF+qLGqOgEP4rUs6kA=
 github.com/corona10/goimagehash v1.0.2/go.mod h1:/l9umBhvcHQXVtQO1V6Gp1yD20STawkhRnnX0D1bvVI=
 github.com/fogleman/gg v1.3.0 h1:/7zJX8F6AaYQc57WQCyN9cAIz+4bCJGO9B+dyW29am8=
@@ -16,5 +16,3 @@ golang.org/x/exp v0.0.0-20230321023759-10a507213a29 h1:ooxPy7fPvB4kwsA2h+iBNHkAb
 golang.org/x/exp v0.0.0-20230321023759-10a507213a29/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
 golang.org/x/image v0.14.0 h1:tNgSxAFe3jC4uYqvZdTr84SZoM1KfwdC9SKIFrLjFn4=
 golang.org/x/image v0.14.0/go.mod h1:HUYqC05R2ZcZ3ejNQsIHQDQiwWM4JBqmm6MKANTp4LE=
-gonum.org/v1/gonum v0.14.0 h1:2NiG67LD1tEH0D7kM+ps2V+fXmsAnpUeec7n8tcr4S0=
-gonum.org/v1/gonum v0.14.0/go.mod h1:AoWeoz0becf9QMWtE8iWXNXc27fK4fNeHNf/oMejGfU=
