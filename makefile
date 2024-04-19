@@ -1,4 +1,4 @@
-export GOEVO_VERSION=v0.4.5-e
+export GOEVO_VERSION=v0.4.0
 
 nothing:
 	@echo "Nothing to do"
