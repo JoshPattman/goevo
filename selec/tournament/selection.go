@@ -1,4 +1,4 @@
-package goevo
+package tournament
 
 import (
 	"math/rand"
