@@ -56,6 +56,7 @@ func (a Activation) String() string {
 	panic("unknown activation")
 }
 
+// Activate applies the activation function to the given value.
 func Activate(x float64, a Activation) float64 {
 	switch a {
 	case Relu:
@@ -103,6 +104,7 @@ func Activate(x float64, a Activation) float64 {
 	panic("unknown activation")
 }
 
+// Implementations
 var _ json.Marshaler = Relu
 var dummy = Relu
 var _ json.Unmarshaler = &dummy

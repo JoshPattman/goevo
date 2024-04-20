@@ -10,11 +10,11 @@ var _ goevo.Population[int] = &Population[int]{}
 type Population[T any] struct {
 	Agents       []*goevo.Agent[T]
 	Selection    goevo.SelectionStrategy[T]
-	Reproduction goevo.Reproduction[T]
+	Reproduction goevo.ReproductionStrategy[T]
 }
 
 // NewPopulation creates a new SimplePopulation with n agents, each with a new genotype created by newGenotype.
-func NewPopulation[T any](newGenotype func() T, n int, selection goevo.SelectionStrategy[T], reproduction goevo.Reproduction[T]) *Population[T] {
+func NewPopulation[T any](newGenotype func() T, n int, selection goevo.SelectionStrategy[T], reproduction goevo.ReproductionStrategy[T]) *Population[T] {
 	agents := make([]*goevo.Agent[T], n)
 	for i := range agents {
 		agents[i] = goevo.NewAgent(newGenotype())
