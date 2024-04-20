@@ -24,7 +24,7 @@ type Phenotype struct {
 }
 
 // Build a NEATPhenotype from a NEATGenotype.
-func (g *Genotype) Build() *Phenotype {
+func (g *Genotype) Build() goevo.Forwarder {
 	accs := make([]float64, len(g.neuronOrder))
 	laccs := make([]float64, len(g.neuronOrder))
 	acts := make([]goevo.Activation, len(g.neuronOrder))

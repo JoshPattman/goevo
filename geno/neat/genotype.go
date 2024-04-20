@@ -14,6 +14,7 @@ import (
 
 var _ goevo.Cloneable = &Genotype{}
 var _ goevo.PointCrossoverable = &Genotype{}
+var _ goevo.Buildable = &Genotype{}
 
 // NeuronID is the unique identifier for a neuron in a NEATGenotype
 type NeuronID int
