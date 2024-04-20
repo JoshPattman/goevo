@@ -12,6 +12,9 @@ import (
 	"golang.org/x/exp/maps"
 )
 
+var _ goevo.Cloneable = &Genotype{}
+var _ goevo.PointCrossoverable = &Genotype{}
+
 // NeuronID is the unique identifier for a neuron in a NEATGenotype
 type NeuronID int
 
@@ -280,7 +283,7 @@ func (g *Genotype) MutateRandomActivation(activations ...goevo.Activation) bool 
 }
 
 // Clone returns a new genotype that is an exact copy of this genotype.
-func (g *Genotype) Clone() *Genotype {
+func (g *Genotype) Clone() any {
 	gc := &Genotype{
 		g.maxSynapseValue,
 		g.numInputs,
@@ -299,11 +302,12 @@ func (g *Genotype) Clone() *Genotype {
 	return gc
 }
 
-// CrossoverWith will return a new genotype that is a crossover of this genotype with the given genotype.
+// PointCrossoverWith will return a new genotype that is a crossover of this genotype with the given genotype.
 // This crossover is similar to what is used in the original NEAT implementation,
 // where only the weights of the synapses are crossed over (the entire structure of g is kept the same).
 // For this reason, the first genotype g should be the fitter parent.
-func (g *Genotype) CrossoverWith(g2 *Genotype) *Genotype {
+func (g *Genotype) PointCrossoverWith(g2i goevo.PointCrossoverable) goevo.PointCrossoverable {
+	g2 := g2i.(*Genotype)
 	gc := &Genotype{
 		g.maxSynapseValue,
 		g.numInputs,

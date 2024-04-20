@@ -2,11 +2,11 @@ package floatarr
 
 import "github.com/JoshPattman/goevo"
 
-var _ goevo.Reproduction[Genotype] = &FloatsReproduction{}
+var _ goevo.Reproduction[Genotype] = &UniformStdReproduction{}
 
-// FloatsReproduction is a reproduction strategy for Float64sGenotype.
+// UniformStdReproduction is a reproduction strategy for Float64sGenotype.
 // It performs crossover and mutation.
-type FloatsReproduction struct {
+type UniformStdReproduction struct {
 	// The probability of mutating each locus
 	MutateProbability float64
 	// The standard deviation for the mutation
@@ -14,17 +14,17 @@ type FloatsReproduction struct {
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *FloatsReproduction) Reproduce(gs []Genotype) Genotype {
+func (r *UniformStdReproduction) Reproduce(gs []Genotype) Genotype {
 	if len(gs) != 2 {
 		panic("floatarr: expected 2 parents")
 	}
 	a, b := gs[0], gs[1]
-	child := a.CrossoverWith(b)
-	child.Mutate(r.MutateProbability, r.MutateStd)
+	child := goevo.PointCrossover(a, b)
+	child.UniformStdMutate(r.MutateProbability, r.MutateStd)
 	return child
 }
 
 // NumParents returns 2, as this reproduction strategy requires 2 parents.
-func (r *FloatsReproduction) NumParents() int {
+func (r *UniformStdReproduction) NumParents() int {
 	return 2
 }

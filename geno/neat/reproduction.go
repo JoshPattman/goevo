@@ -46,7 +46,7 @@ func (r *StdReproduction) Reproduce(gs []*Genotype) *Genotype {
 		panic("neat: expected 2 parents")
 	}
 	a, b := gs[0], gs[1]
-	g := a.CrossoverWith(b)
+	g := goevo.PointCrossover(a, b)
 
 	for i := 0; i < stdN(r.StdNewSynapseWeight); i++ {
 		g.AddRandomSynapse(r.Counter, r.StdNewSynapseWeight, false)
@@ -121,7 +121,7 @@ func (r *ProbReproduction) Reproduce(gs []*Genotype) *Genotype {
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
 	}
-	g := a.CrossoverWith(b)
+	g := goevo.PointCrossover(a, b)
 
 	if len(g.activations) < r.MaxHiddenNeurons && rand.Float64() < r.NewNeuronProbability {
 		g.AddRandomNeuron(r.Counter, r.Activations...)
@@ -195,7 +195,7 @@ func (r *ScaledProbReproduction) Reproduce(gs []*Genotype) *Genotype {
 	if rand.Float64() < r.UseUnfitParentProbability {
 		a, b = b, a
 	}
-	g := a.CrossoverWith(b)
+	g := goevo.PointCrossover(a, b)
 
 	// Can only add a neuron on each forward synapse
 	numNewNeuronPositions := len(g.forwardSynapses)

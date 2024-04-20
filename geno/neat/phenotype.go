@@ -7,6 +7,8 @@ type phenotypeConnection struct {
 	w     float64
 }
 
+var _ goevo.Forwarder = &Phenotype{}
+
 // Phenotype is a phenotype for a NEAT genotype.
 // It conceptually represents a neural network, built according to the instructions in the NEATGenotype (DNA).
 // Once built, the Phenotype can be used to forward propagate inputs through the network,

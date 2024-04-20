@@ -2,7 +2,14 @@
 // It also provides functions for reproduction using these genotypes.
 package floatarr
 
-import "math/rand"
+import (
+	"math/rand"
+
+	"github.com/JoshPattman/goevo"
+)
+
+var _ goevo.Cloneable = Genotype{}
+var _ goevo.PointCrossoverable = Genotype{}
 
 // Genotype is a genotype that is a slice of float64 values.
 type Genotype []float64
@@ -16,8 +23,8 @@ func NewGenotype(size int, std float64) Genotype {
 	return gt
 }
 
-// Mutate modifies the genotype by adding a random value from a normal distribution to each value with the given probability and standard deviation.
-func (f64s Genotype) Mutate(probPerLocus, mutStd float64) {
+// UniformStdMutate modifies the genotype by adding a random value from a normal distribution to each value with the given probability and standard deviation.
+func (f64s Genotype) UniformStdMutate(probPerLocus, mutStd float64) {
 	for i := range f64s {
 		if rand.Float64() < probPerLocus {
 			f64s[i] += rand.NormFloat64() * mutStd
@@ -25,9 +32,10 @@ func (f64s Genotype) Mutate(probPerLocus, mutStd float64) {
 	}
 }
 
-// CrossoverWith returns a new genotype that is a combination of this genotype and the other genotype.
-func (f64s Genotype) CrossoverWith(other Genotype) Genotype {
-	if len(f64s) != len(other) {
+// PointCrossoverWith returns a new genotype that is a combination of this genotype and the other genotype.
+func (f64s Genotype) PointCrossoverWith(other goevo.PointCrossoverable) goevo.PointCrossoverable {
+	otherT := other.(Genotype)
+	if len(f64s) != len(otherT) {
 		panic("genotypes must have the same length")
 	}
 	child := make(Genotype, len(f64s))
@@ -35,14 +43,14 @@ func (f64s Genotype) CrossoverWith(other Genotype) Genotype {
 		if rand.Float64() < 0.5 {
 			child[i] = f64s[i]
 		} else {
-			child[i] = other[i]
+			child[i] = otherT[i]
 		}
 	}
 	return child
 }
 
 // Clone returns a new genotype that is a copy of this genotype.
-func (f64s Genotype) Clone() Genotype {
+func (f64s Genotype) Clone() any {
 	clone := make(Genotype, len(f64s))
 	copy(clone, f64s)
 	return clone
