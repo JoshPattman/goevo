@@ -9,3 +9,19 @@ type Selection[T any] interface {
 	// Select returns an agent selected from the agents set by SetAgents.
 	Select() *Agent[T]
 }
+
+func SelectN[T any](selection Selection[T], n int) []*Agent[T] {
+	agents := make([]*Agent[T], n)
+	for i := range agents {
+		agents[i] = selection.Select()
+	}
+	return agents
+}
+
+func SelectNGenotypes[T any](selection Selection[T], n int) []T {
+	gts := make([]T, n)
+	for i := range gts {
+		gts[i] = selection.Select().Genotype
+	}
+	return gts
+}
