@@ -1,9 +1,19 @@
 package goevo
 
-// Reproduction is an interface for the reproduction of n parents to create a child
+type MutationStrategy[T any] interface {
+	// Mutate performs a mutation with this strategy on the given genotype
+	Mutate(T)
+}
+
+type CrossoverStrategy[T any] interface {
+	// Crossover performs a crossover with this strategy on the given genotypes.
+	// It can combine any number of genotypes (for example 1 for asexual, 2 for sexual, n for averaging of multiple?)
+	Crossover([]T) T
+	// NumParents returns the number of parents required for this crossover strategy
+	NumParents() int
+}
+
 type Reproduction[T any] interface {
-	// Reproduce creates a new genotype from the n parents. The parents are NOT ordered by fitness.
-	Reproduce(agents []T) T
-	// NumParents returns the number of parents required for reproduction
+	Reproduce([]T) T
 	NumParents() int
 }

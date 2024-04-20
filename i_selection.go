@@ -1,8 +1,8 @@
 package goevo
 
-// Selection is a strategy for selecting agents from a population.
+// SelectionStrategy is a strategy for selecting agents from a population.
 // It acts on agents of type T.
-type Selection[T any] interface {
+type SelectionStrategy[T any] interface {
 	// SetAgents sets the agents to select from for this generation.
 	// This is run once per generation. You may wish to perform slow operations here such as sorting by fitness.
 	SetAgents(agents []*Agent[T])
@@ -10,7 +10,7 @@ type Selection[T any] interface {
 	Select() *Agent[T]
 }
 
-func SelectN[T any](selection Selection[T], n int) []*Agent[T] {
+func SelectN[T any](selection SelectionStrategy[T], n int) []*Agent[T] {
 	agents := make([]*Agent[T], n)
 	for i := range agents {
 		agents[i] = selection.Select()
@@ -18,7 +18,7 @@ func SelectN[T any](selection Selection[T], n int) []*Agent[T] {
 	return agents
 }
 
-func SelectNGenotypes[T any](selection Selection[T], n int) []T {
+func SelectNGenotypes[T any](selection SelectionStrategy[T], n int) []T {
 	gts := make([]T, n)
 	for i := range gts {
 		gts[i] = selection.Select().Genotype

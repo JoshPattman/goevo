@@ -8,7 +8,7 @@ import (
 )
 
 // Ensure that TournamentSelection implements Selection.
-var _ goevo.Selection[int] = &Selection[int]{}
+var _ goevo.SelectionStrategy[int] = &Selection[int]{}
 
 // Selection is a selection strategy that selects the best agent from a random tournament of agents.
 // It implements [Selection].
