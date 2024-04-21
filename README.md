@@ -1,5 +1,5 @@
 # Warning
-This package is currently under a period of intense development, and should be considered extrmely unstable until version `v0.5.0`.
+This package is currently under a period of intense development, and should be considered extremely unstable until version `v0.5.0`.
 
 # GoEvo Evolutionary Algorithms
 <img src="./PACKAGE_ART/icon-background.svg" width=256 align="right"/>
