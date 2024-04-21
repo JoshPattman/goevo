@@ -9,5 +9,5 @@ use (
 	./pop/simple
 	./selec/elite
 	./selec/tournament
-	./test
+	./goevo_test
 )

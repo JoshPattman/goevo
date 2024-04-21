@@ -2,11 +2,11 @@ package neat
 
 import "github.com/JoshPattman/goevo"
 
-var _ goevo.MutationStrategy[*Genotype] = &StdReproduction{}
+var _ goevo.MutationStrategy[*Genotype] = &StdMutation{}
 
-// StdReproduction is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
+// StdMutation is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
 // The standard deviation is not scaled by the size of the network, meaning that larger networks will tend to have more mutations than smaller networks.
-type StdReproduction struct {
+type StdMutation struct {
 	// The standard deviation for the number of new synapses
 	StdNumNewSynapses float64
 	// The standard deviation for the number of new recurrent synapses
@@ -35,7 +35,7 @@ type StdReproduction struct {
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *StdReproduction) Mutate(g *Genotype) {
+func (r *StdMutation) Mutate(g *Genotype) {
 	for i := 0; i < stdN(r.StdNewSynapseWeight); i++ {
 		AddRandomSynapse(g, r.Counter, r.StdNewSynapseWeight, false)
 	}

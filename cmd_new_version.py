@@ -20,7 +20,7 @@ with open("go.work", "r") as f:
         line = line.strip()
         if re.match(r'./', line):
             name = line.strip().rstrip("/")
-            if name != "." and name != "./test":
+            if name != ".":
                 submodules.append(name)
 
 print(f"Submodules: {submodules}")
@@ -28,7 +28,7 @@ print(f"Submodules: {submodules}")
 current_dir = os.getcwd()
 print(f"Current directory: {current_dir}")
 
-with open("new_version.sh", "w") as script:
+with open("cmd_new_version.sh", "w") as script:
     script.write(f"#!/bin/bash\n")
 
     script.write("\n# Ensure all current changes are pushed\n")
