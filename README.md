@@ -4,10 +4,8 @@ This package is currently under a period of intense development and should be co
 ## TODO pre `v0.5.0`
 - NEAT Population
 - Evolutionary tree diagram
-- N point crossover on floatarr
-- Convert floatarr to arr (provide multiple mutators for floats, chars, etc. Should be able to use the same crossovers for all)
 - Add more tests and clean up test dir
-- Add an examples dir
+- Add an example dir
 - Make wiki
 
 

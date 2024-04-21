@@ -328,7 +328,7 @@ func TestFloatsGt(t *testing.T) {
 		MutateProbability: 0.1,
 		MutateStd:         0.05,
 	}
-	crs := &arr.PointCrossoverStrategy[float64]{}
+	crs := &arr.KPointCrossoverStrategy[float64]{K: 2}
 	reprod := goevo.NewCrossoverMutateReproduction(crs, mut)
 	selec := &tournament.Selection[*arr.Genotype[float64]]{
 		TournamentSize: 3,
