@@ -1,4 +1,4 @@
-module github.com/JoshPattman/goevo/geno/arr
+module github.com/JoshPattman/goevo/pop/speciated
 
 go 1.22.2
 

@@ -3,6 +3,7 @@ This package is currently under a period of intense development and should be co
 
 ## TODO pre `v0.5.0`
 - NEAT Population
+- Speciated Population
 - Evolutionary tree diagram
 - Add more tests and clean up test dir
 - Add an example dir

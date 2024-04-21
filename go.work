@@ -8,6 +8,7 @@ use (
 	./pop/hillclimber
 	./pop/neatpop
 	./pop/simple
+	./pop/speciated
 	./selec/elite
 	./selec/tournament
 )
