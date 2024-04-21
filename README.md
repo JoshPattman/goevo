@@ -1,3 +1,6 @@
+# Warning
+This package is currently under a period of intense development, and should be considered extrmely unstable until version `v0.5.0`.
+
 # GoEvo Evolutionary Algorithms
 <img src="./PACKAGE_ART/icon-background.svg" width=256 align="right"/>
 
@@ -32,4 +35,3 @@ It is also entirely possible to only use certain components of the package. For 
 - [NEAT](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
   	- [HyperNEAT](https://axon.cs.byu.edu/~dan/778/papers/NeuroEvolution/stanley3**.pdf) is also supported
 - Float array
-- Boolean array
