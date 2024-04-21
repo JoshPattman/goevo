@@ -1,4 +1,9 @@
 git.sr.ht/~sbinet/gg v0.3.1/go.mod h1:KGYtlADtqsqANL9ueOFkWymvzUvLMQllU5Ixo+8v3pc=
+github.com/JoshPattman/goevo/geno/arr v0.4.3/go.mod h1:Zz9a1T9aNI86A9DV9SgU8DGNgaoWQrrFxtuO9XeWLyE=
+github.com/JoshPattman/goevo/geno/neat v0.4.3/go.mod h1:LRqIttotnGLJlAbFuoe8qeCW9LLnW/oqtxQhbmwSp34=
+github.com/JoshPattman/goevo/pop/simple v0.4.3/go.mod h1:LJZ8TDCdJkZkavt9w4Fse3hoSWFYYErnUSIjrA+sUv4=
+github.com/JoshPattman/goevo/pop/speciated v0.4.3/go.mod h1:2Z7/giiYopD1hE45bw2TjwR4/R6HzAxAzpvZrXWJRGA=
+github.com/JoshPattman/goevo/selec/tournament v0.4.3/go.mod h1:KIezngDadoAnaUPaN/CiNInA0cAf6KnTPvp1muDdObM=
 github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b/go.mod h1:1KcenG0jGWcpt8ov532z81sp/kMMUG485J2InIOyADM=
 github.com/go-fonts/liberation v0.3.0/go.mod h1:jdJ+cqF+F4SUL2V+qxBth8fvBpBDS7yloUL5Fi8GTGY=
 github.com/go-latex/latex v0.0.0-20230307184459-12ec69307ad9/go.mod h1:gWuR/CrFDDeVRFQwHPvsv9soJVB/iqymhuZQuJ3a9OM=

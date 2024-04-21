@@ -3,12 +3,12 @@ module github.com/JoshPattman/goevo/goevo_test
 go 1.22.2
 
 require (
-	github.com/JoshPattman/goevo v0.4.2
-	github.com/JoshPattman/goevo/geno/arr v0.4.2
-	github.com/JoshPattman/goevo/geno/neat v0.4.2
-	github.com/JoshPattman/goevo/pop/simple v0.4.2
-	github.com/JoshPattman/goevo/pop/speciated v0.4.2
-	github.com/JoshPattman/goevo/selec/tournament v0.4.2
+	github.com/JoshPattman/goevo v0.4.3
+	github.com/JoshPattman/goevo/geno/arr v0.4.3
+	github.com/JoshPattman/goevo/geno/neat v0.4.3
+	github.com/JoshPattman/goevo/pop/simple v0.4.3
+	github.com/JoshPattman/goevo/pop/speciated v0.4.3
+	github.com/JoshPattman/goevo/selec/tournament v0.4.3
 )
 
 require (
