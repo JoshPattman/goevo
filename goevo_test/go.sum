@@ -1,7 +1,5 @@
 github.com/JoshPattman/goevo v0.4.2 h1:Npu3GMLypdBB22jV1csb3AA8GsbtKnacqo/Vlrp1WCo=
 github.com/JoshPattman/goevo v0.4.2/go.mod h1:DshwapWnza1itL4CU7bMEuOauFT3CCSb9g4ZxDXG+i0=
-github.com/JoshPattman/goevo/geno/floatarr v0.4.2 h1:GTrvANbrSjZ/AxA2coPqRuaGIFVYz1E55/1bAdwlUVo=
-github.com/JoshPattman/goevo/geno/floatarr v0.4.2/go.mod h1:tcneLLf2oyympOJrYUbqtLopjiBCLve62oSeBZ2GSRw=
 github.com/JoshPattman/goevo/geno/neat v0.4.2 h1:sIZlEyJxTgBkUD+5GJNueqPWStFa3E59Sa11goN0mcs=
 github.com/JoshPattman/goevo/geno/neat v0.4.2/go.mod h1:5IPtUw1yXWur4mMvzHmQCmEKfcYrXQCucgQQDzpSjDg=
 github.com/JoshPattman/goevo/pop/simple v0.4.2 h1:eaEraN1Kzisgjk7Rj9ziXNfksNg5ipSaN8734jVx0LA=

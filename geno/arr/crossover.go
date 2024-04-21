@@ -1,4 +1,4 @@
-package floatarr
+package arr
 
 import (
 	"math/rand"
@@ -6,14 +6,14 @@ import (
 	"github.com/JoshPattman/goevo"
 )
 
-var _ goevo.CrossoverStrategy[*Genotype] = &PointCrossoverStrategy{}
-var _ goevo.CrossoverStrategy[*Genotype] = &AsexualCrossoverStrategy{}
+var _ goevo.CrossoverStrategy[*Genotype[int]] = &PointCrossoverStrategy[int]{}
+var _ goevo.CrossoverStrategy[*Genotype[bool]] = &AsexualCrossoverStrategy[bool]{}
 
-type PointCrossoverStrategy struct{}
-type AsexualCrossoverStrategy struct{}
+type PointCrossoverStrategy[T any] struct{}
+type AsexualCrossoverStrategy[T any] struct{}
 
 // Crossover implements goevo.CrossoverStrategy.
-func (p *PointCrossoverStrategy) Crossover(gs []*Genotype) *Genotype {
+func (p *PointCrossoverStrategy[T]) Crossover(gs []*Genotype[T]) *Genotype[T] {
 	if len(gs) != 2 {
 		panic("PointCrossoverStrategy requires exactly 2 parents")
 	}
@@ -21,7 +21,7 @@ func (p *PointCrossoverStrategy) Crossover(gs []*Genotype) *Genotype {
 	if len(pa.Values) != len(pb.Values) {
 		panic("genotypes must have the same length for PointCrossoverStrategy")
 	}
-	child := make([]float64, len(pa.Values))
+	child := make([]T, len(pa.Values))
 	for i := range child {
 		if rand.Float64() < 0.5 {
 			child[i] = pa.Values[i]
@@ -29,16 +29,16 @@ func (p *PointCrossoverStrategy) Crossover(gs []*Genotype) *Genotype {
 			child[i] = pb.Values[i]
 		}
 	}
-	return &Genotype{Values: child}
+	return &Genotype[T]{Values: child}
 }
 
 // NumParents implements goevo.CrossoverStrategy.
-func (p *PointCrossoverStrategy) NumParents() int {
+func (p *PointCrossoverStrategy[T]) NumParents() int {
 	return 2
 }
 
 // Crossover implements goevo.CrossoverStrategy.
-func (p *AsexualCrossoverStrategy) Crossover(gs []*Genotype) *Genotype {
+func (p *AsexualCrossoverStrategy[T]) Crossover(gs []*Genotype[T]) *Genotype[T] {
 	if len(gs) != 1 {
 		panic("AsexualCrossoverStrategy requires exactly 1 parent")
 	}
@@ -46,6 +46,6 @@ func (p *AsexualCrossoverStrategy) Crossover(gs []*Genotype) *Genotype {
 }
 
 // NumParents implements goevo.CrossoverStrategy.
-func (p *AsexualCrossoverStrategy) NumParents() int {
+func (p *AsexualCrossoverStrategy[T]) NumParents() int {
 	return 1
 }

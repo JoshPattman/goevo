@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/JoshPattman/goevo"
-	"github.com/JoshPattman/goevo/geno/floatarr"
+	"github.com/JoshPattman/goevo/geno/arr"
 	"github.com/JoshPattman/goevo/geno/neat"
 	"github.com/JoshPattman/goevo/pop/simple"
 	"github.com/JoshPattman/goevo/selec/tournament"
@@ -324,18 +324,20 @@ func TestRecurrency(t *testing.T) {
 }
 
 func TestFloatsGt(t *testing.T) {
-	mut := &floatarr.StdMutationStrategy{
+	mut := &arr.StdMutationStrategy[float64]{
 		MutateProbability: 0.1,
 		MutateStd:         0.05,
 	}
-	crs := &floatarr.PointCrossoverStrategy{}
+	crs := &arr.PointCrossoverStrategy[float64]{}
 	reprod := goevo.NewCrossoverMutateReproduction(crs, mut)
-	selec := &tournament.Selection[*floatarr.Genotype]{
+	selec := &tournament.Selection[*arr.Genotype[float64]]{
 		TournamentSize: 3,
 	}
-	var pop goevo.Population[*floatarr.Genotype] = simple.NewPopulation(func() *floatarr.Genotype { return floatarr.NewGenotype(10, 0.5) }, 100, selec, reprod)
+	var pop goevo.Population[*arr.Genotype[float64]] = simple.NewPopulation(func() *arr.Genotype[float64] {
+		return arr.NewFloatGenotype(10, 0.5)
+	}, 100, selec, reprod)
 	// Fitness is max (0) when all the numbers sum to 10
-	fitness := func(f *floatarr.Genotype) float64 {
+	fitness := func(f *arr.Genotype[float64]) float64 {
 		total := 0.0
 		for i := range f.Values {
 			total += f.Values[i]

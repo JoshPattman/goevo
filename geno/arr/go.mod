@@ -1,4 +1,4 @@
-module github.com/JoshPattman/goevo/geno/floatarr
+module arr
 
 go 1.22.2
 
