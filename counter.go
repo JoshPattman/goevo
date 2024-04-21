@@ -1,27 +1,20 @@
 package goevo
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+)
 
-// An interface that describes a type that can generate unique ids
-type Counter interface {
-	// Get the next innovation id
-	Next() int
+// Counter is a simple counter that can be used to generate unique IDs.
+type Counter struct {
+	n int64
 }
 
-// An implementation of the Counter interface which is goroutine safe
-type AtomicCounter struct {
-	I int64
+// NewCounter creates a new counter, starting at 0.
+func NewCounter() *Counter {
+	return &Counter{0}
 }
 
-// Get the next innovation id
-func (a *AtomicCounter) Next() int {
-	v := atomic.AddInt64(&a.I, 1)
-	return int(v)
-}
-
-// Create a new AtomicCounter which starts from id 0
-func NewAtomicCounter() Counter {
-	return &AtomicCounter{
-		I: -1,
-	}
+// Next returns the next value of the counter
+func (c *Counter) Next() int {
+	return int(atomic.AddInt64(&c.n, 1))
 }

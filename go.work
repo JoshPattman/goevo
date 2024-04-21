@@ -1,0 +1,13 @@
+go 1.22.2
+
+use (
+	.
+	./geno/floatarr
+	./geno/neat
+	./pop/hillclimber
+	./pop/neatpop
+	./pop/simple
+	./selec/elite
+	./selec/tournament
+	./goevo_test
+)
