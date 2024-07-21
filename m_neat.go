@@ -21,8 +21,8 @@ type NeatNeuronID int
 // NeatSynapseID is the unique identifier for a synapse in a NEATGenotype
 type NeatSynapseID int
 
-// SynapseEP is the endpoints of a synapse in a NEATGenotype
-type SynapseEP struct {
+// NeatSynapseEP is the endpoints of a synapse in a NEATGenotype
+type NeatSynapseEP struct {
 	From NeatNeuronID
 	To   NeatNeuronID
 }
@@ -38,8 +38,8 @@ type NeatGenotype struct {
 	inverseNeuronOrder    map[NeatNeuronID]int
 	activations           map[NeatNeuronID]Activation
 	weights               map[NeatSynapseID]float64
-	synapseEndpointLookup map[NeatSynapseID]SynapseEP
-	endpointSynapseLookup map[SynapseEP]NeatSynapseID
+	synapseEndpointLookup map[NeatSynapseID]NeatSynapseEP
+	endpointSynapseLookup map[NeatSynapseEP]NeatSynapseID
 	forwardSynapses       []NeatSynapseID // With these three we just track which synapses are of what type
 	backwardSynapses      []NeatSynapseID // A synapse can NEVER change type
 	selfSynapses          []NeatSynapseID
@@ -56,8 +56,8 @@ func NewNeatGenotype(counter *Counter, inputs, outputs int, outputActivation Act
 	inverseNeuronOrder := make(map[NeatNeuronID]int)
 	activations := make(map[NeatNeuronID]Activation)
 	weights := make(map[NeatSynapseID]float64)
-	synapseEndpointLookup := make(map[NeatSynapseID]SynapseEP)
-	endpointSynapseLookup := make(map[SynapseEP]NeatSynapseID)
+	synapseEndpointLookup := make(map[NeatSynapseID]NeatSynapseEP)
+	endpointSynapseLookup := make(map[NeatSynapseEP]NeatSynapseID)
 	forwardSyanpses := make([]NeatSynapseID, 0)
 	backwardSyanpses := make([]NeatSynapseID, 0)
 	selfSyanpses := make([]NeatSynapseID, 0)
@@ -268,8 +268,8 @@ func AddRandomNeuron(g *NeatGenotype, counter *Counter, activations ...Activatio
 	newSid := NeatSynapseID(counter.Next())
 	newNid := NeatNeuronID(counter.Next())
 
-	epa := SynapseEP{ep.From, newNid}
-	epb := SynapseEP{newNid, ep.To}
+	epa := NeatSynapseEP{ep.From, newNid}
+	epb := NeatSynapseEP{newNid, ep.To}
 
 	// Swap the old connection for a, which will also retain the original weight
 	delete(g.endpointSynapseLookup, ep)
@@ -355,7 +355,7 @@ func (g *NeatGenotype) AddRandomSynapse(counter *Counter, weightStd float64, rec
 			continue // Trying to connect either anything-input or output-output
 		}
 		aid, bid := g.neuronOrder[ao], g.neuronOrder[bo]
-		ep := SynapseEP{aid, bid}
+		ep := NeatSynapseEP{aid, bid}
 		if _, ok := g.endpointSynapseLookup[ep]; ok {
 			continue // This connection already exists, try to find another
 		}
@@ -713,13 +713,13 @@ func (g *NeatGenotype) UnmarshalJSON(bs []byte) error {
 		g.inverseNeuronOrder[mn.ID] = ni
 	}
 	g.weights = make(map[NeatSynapseID]float64)
-	g.synapseEndpointLookup = make(map[NeatSynapseID]SynapseEP)
-	g.endpointSynapseLookup = make(map[SynapseEP]NeatSynapseID)
+	g.synapseEndpointLookup = make(map[NeatSynapseID]NeatSynapseEP)
+	g.endpointSynapseLookup = make(map[NeatSynapseEP]NeatSynapseID)
 	g.forwardSynapses = make([]NeatSynapseID, 0)
 	g.backwardSynapses = make([]NeatSynapseID, 0)
 	g.selfSynapses = make([]NeatSynapseID, 0)
 	for _, ms := range mg.Synapses {
-		ep := SynapseEP{ms.From, ms.To}
+		ep := NeatSynapseEP{ms.From, ms.To}
 		g.weights[ms.ID] = ms.Weight
 		g.endpointSynapseLookup[ep] = ms.ID
 		g.synapseEndpointLookup[ms.ID] = ep
