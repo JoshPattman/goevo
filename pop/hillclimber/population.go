@@ -3,17 +3,17 @@ package hillclimber
 
 import "github.com/JoshPattman/goevo"
 
-var _ goevo.Population[int] = &Population[int]{}
+var _ goevo.Population[int] = &HillclimberPopulation[int]{}
 
-type Population[T any] struct {
+type HillclimberPopulation[T any] struct {
 	A            *goevo.Agent[T]
 	B            *goevo.Agent[T]
 	Selection    goevo.Selection[T]
 	Reproduction goevo.Reproduction[T]
 }
 
-func NewPopulation[T any](initialA, initialB T, selection goevo.Selection[T], reproduction goevo.Reproduction[T]) *Population[T] {
-	return &Population[T]{
+func NewHillclimberPopulation[T any](initialA, initialB T, selection goevo.Selection[T], reproduction goevo.Reproduction[T]) *HillclimberPopulation[T] {
+	return &HillclimberPopulation[T]{
 		A:            goevo.NewAgent(initialA),
 		B:            goevo.NewAgent(initialB),
 		Selection:    selection,
@@ -21,7 +21,7 @@ func NewPopulation[T any](initialA, initialB T, selection goevo.Selection[T], re
 	}
 }
 
-func (p *Population[T]) NextGeneration() goevo.Population[T] {
+func (p *HillclimberPopulation[T]) NextGeneration() goevo.Population[T] {
 	if p.Reproduction.NumParents() != 1 {
 		panic("Hillclimber only supports reproduction with 1 parent")
 	}
@@ -29,9 +29,9 @@ func (p *Population[T]) NextGeneration() goevo.Population[T] {
 	parent := p.Selection.Select()
 	a := goevo.NewAgent(parent.Genotype)
 	b := goevo.NewAgent(p.Reproduction.Reproduce([]T{parent.Genotype}))
-	return &Population[T]{A: a, B: b}
+	return &HillclimberPopulation[T]{A: a, B: b}
 }
 
-func (p *Population[T]) All() []*goevo.Agent[T] {
+func (p *HillclimberPopulation[T]) All() []*goevo.Agent[T] {
 	return []*goevo.Agent[T]{p.A, p.B}
 }

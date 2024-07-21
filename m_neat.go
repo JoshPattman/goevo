@@ -255,7 +255,7 @@ func (g *NeatGenotype) Validate() error {
 // AddRandomNeuron adds a new neuron to the genotype on a random forward synapse.
 // It will return false if there are no forward synapses to add to.
 // The new neuron will have a random activation function from the given list of activations.
-func AddRandomNeuron(g *NeatGenotype, counter *Counter, activations ...Activation) bool {
+func (g *NeatGenotype) AddRandomNeuron(counter *Counter, activations ...Activation) bool {
 	if len(g.forwardSynapses) == 0 {
 		return false
 	}
@@ -484,7 +484,7 @@ func (r *NeatMutationStd) Mutate(g *NeatGenotype) {
 	}
 	for i := 0; i < stdN(r.StdNumNewNeurons); i++ {
 		if r.MaxHiddenNeurons < 0 || g.NumHiddenNeurons() < r.MaxHiddenNeurons {
-			AddRandomNeuron(g, r.Counter, r.PossibleActivations...)
+			g.AddRandomNeuron(r.Counter, r.PossibleActivations...)
 		}
 	}
 	for i := 0; i < stdN(r.StdNumMutateSynapses); i++ {

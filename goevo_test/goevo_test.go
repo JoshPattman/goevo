@@ -85,7 +85,7 @@ func TestXOR(t *testing.T) {
 	crs := &neat.SimpleCrossoverStrategy{}
 	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
 
-	var pop goevo.Population[*neat.Genotype] = simple.NewPopulation[*neat.Genotype](func() *neat.Genotype {
+	var pop goevo.Population[*neat.Genotype] = simple.NewSimplePopulation[*neat.Genotype](func() *neat.Genotype {
 		gt := goevo.Clone(originalGt)
 		neat.AddRandomSynapse(gt, counter, 0.3, false)
 		return gt
@@ -267,7 +267,7 @@ func TestRecurrency(t *testing.T) {
 	crs := &neat.SimpleCrossoverStrategy{}
 	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
 
-	var pop goevo.Population[*neat.Genotype] = simple.NewPopulation[*neat.Genotype](func() *neat.Genotype {
+	var pop goevo.Population[*neat.Genotype] = simple.NewSimplePopulation[*neat.Genotype](func() *neat.Genotype {
 		gt := goevo.Clone(originalGt)
 		neat.AddRandomSynapse(gt, counter, 0.3, false)
 		return gt
@@ -335,7 +335,7 @@ func TestFloatsGt(t *testing.T) {
 	selec := &tournament.Selection[*arr.Genotype[float64]]{
 		TournamentSize: 3,
 	}
-	var pop goevo.Population[*arr.Genotype[float64]] = speciated.NewPopulation(
+	var pop goevo.Population[*arr.Genotype[float64]] = speciated.NewSpeciatedPopulation(
 		counter,
 		func() *arr.Genotype[float64] { return arr.NewFloatGenotype(10, 0.5) },
 		5,
