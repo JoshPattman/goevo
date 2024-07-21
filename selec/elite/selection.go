@@ -8,7 +8,7 @@ import (
 )
 
 // Ensure that Selection implements Selection.
-var _ goevo.SelectionStrategy[int] = &Selection[int]{}
+var _ goevo.Selection[int] = &Selection[int]{}
 
 type Selection[T any] struct {
 	lastBest *goevo.Agent[T]

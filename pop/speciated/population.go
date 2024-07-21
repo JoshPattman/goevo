@@ -24,13 +24,13 @@ type Population[T any] struct {
 	// Counter is a counter to keep track of the new species.
 	Counter *goevo.Counter
 	// The selection strategy to use when selecting agents to reproduce.
-	Selection goevo.SelectionStrategy[T]
+	Selection goevo.Selection[T]
 	// The reproduction strategy to use when creating new agents.
 	Reproduction goevo.Reproduction[T]
 }
 
 // NewPopulation creates a new speciated population.
-func NewPopulation[T any](counter *goevo.Counter, newGenotype func() T, numSpecies, numAgentsPerSpecies int, removeWorstSpeciesChance, stdNumAgentsSwap float64, selection goevo.SelectionStrategy[T], reproduction goevo.Reproduction[T]) *Population[T] {
+func NewPopulation[T any](counter *goevo.Counter, newGenotype func() T, numSpecies, numAgentsPerSpecies int, removeWorstSpeciesChance, stdNumAgentsSwap float64, selection goevo.Selection[T], reproduction goevo.Reproduction[T]) *Population[T] {
 	species := make(map[int][]*goevo.Agent[T])
 	for i := 0; i < numSpecies; i++ {
 		agents := make([]*goevo.Agent[T], numAgentsPerSpecies)

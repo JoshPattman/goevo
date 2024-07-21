@@ -1,30 +1,27 @@
-// Package tournament provides an implementation of the Selection interface that selects the best agent from a random tournament of n agents.
-package tournament
+package goevo
 
 import (
 	"math/rand"
-
-	"github.com/JoshPattman/goevo"
 )
 
-// Ensure that TournamentSelection implements Selection.
-var _ goevo.Selection[int] = &Selection[int]{}
+// Ensure that TournamentABC implements ABC.
+var _ Selection[int] = &TournamentSelection[int]{}
 
-// Selection is a selection strategy that selects the best agent from a random tournament of agents.
-// It implements [Selection].
-type Selection[T any] struct {
+// TournamentSelection is a TournamentSelection strategy that selects the best agent from a random tournament of agents.
+// It implements [TournamentSelection].
+type TournamentSelection[T any] struct {
 	// The number of agents to include in each tournament.
 	TournamentSize int
-	agents         []*goevo.Agent[T]
+	agents         []*Agent[T]
 }
 
 // SetAgents sets the agents to select from for this generation.
-func (t *Selection[T]) SetAgents(agents []*goevo.Agent[T]) {
+func (t *TournamentSelection[T]) SetAgents(agents []*Agent[T]) {
 	t.agents = agents
 }
 
 // Select returns an agent selected from the population using a tournament.
-func (t *Selection[T]) Select() *goevo.Agent[T] {
+func (t *TournamentSelection[T]) Select() *Agent[T] {
 	if t.agents == nil {
 		panic("must call SetAgents before selecting")
 	}
