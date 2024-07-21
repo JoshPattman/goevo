@@ -1,4 +1,4 @@
-package goevo_test
+package goevo
 
 import (
 	"bytes"
@@ -9,13 +9,6 @@ import (
 	"math/rand"
 	"os"
 	"testing"
-
-	"github.com/JoshPattman/goevo"
-	"github.com/JoshPattman/goevo/geno/arr"
-	"github.com/JoshPattman/goevo/geno/neat"
-	"github.com/JoshPattman/goevo/pop/simple"
-	"github.com/JoshPattman/goevo/pop/speciated"
-	"github.com/JoshPattman/goevo/selec/tournament"
 )
 
 func assertEq[T comparable](t *testing.T, a T, b T, name string) {
@@ -26,8 +19,8 @@ func assertEq[T comparable](t *testing.T, a T, b T, name string) {
 
 // Test the genotype constructor makes a valid genotype that can be run
 func TestNewGenotype(t *testing.T) {
-	c := goevo.NewCounter()
-	g := neat.NewGenotype(c, 10, 5, goevo.Tanh)
+	c := NewCounter()
+	g := NewNeatGenotype(c, 10, 5, Tanh)
 	assertEq(t, g.NumInputNeurons(), 10, "inputs")
 	assertEq(t, g.NumOutputNeurons(), 5, "outputs")
 	p := g.Build()
@@ -51,7 +44,7 @@ func TestXOR(t *testing.T) {
 		{0},
 	}
 
-	fitness := func(f goevo.Forwarder) float64 {
+	fitness := func(f Forwarder) float64 {
 		fitness := 0.0
 		for i := range X {
 			pred := f.Forward(X[i])
@@ -61,16 +54,16 @@ func TestXOR(t *testing.T) {
 		return fitness
 	}
 
-	counter := goevo.NewCounter()
+	counter := NewCounter()
 
-	originalGt := neat.NewGenotype(counter, 3, 1, goevo.Sigmoid)
-	neat.AddRandomSynapse(originalGt, counter, 0.3, false)
+	originalGt := NewNeatGenotype(counter, 3, 1, Sigmoid)
+	originalGt.AddRandomSynapse(counter, 0.3, false)
 
-	selec := &tournament.Selection[*neat.Genotype]{
+	selec := &TournamentSelection[*NeatGenotype]{
 		TournamentSize: 3,
 	}
 
-	mut := &neat.StdMutation{
+	mut := &NeatMutationStd{
 		StdNumNewSynapses:       1,
 		StdNumNewNeurons:        0.5,
 		StdNumMutateSynapses:    2,
@@ -79,20 +72,20 @@ func TestXOR(t *testing.T) {
 		StdNewSynapseWeight:     0.2,
 		StdMutateSynapseWeight:  0.4,
 		Counter:                 counter,
-		PossibleActivations:     goevo.AllActivations,
+		PossibleActivations:     AllActivations,
 		MaxHiddenNeurons:        3,
 	}
-	crs := &neat.SimpleCrossoverStrategy{}
-	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
+	crs := &NeatCrossoverSimple{}
+	reprod := NewTwoPhaseReproduction(crs, mut)
 
-	var pop goevo.Population[*neat.Genotype] = simple.NewSimplePopulation[*neat.Genotype](func() *neat.Genotype {
-		gt := goevo.Clone(originalGt)
-		neat.AddRandomSynapse(gt, counter, 0.3, false)
+	var pop Population[*NeatGenotype] = NewSimplePopulation[*NeatGenotype](func() *NeatGenotype {
+		gt := Clone(originalGt)
+		gt.AddRandomSynapse(counter, 0.3, false)
 		return gt
 	}, 100, selec, reprod)
 
 	var maxFitness float64
-	var maxGt *neat.Genotype
+	var maxGt *NeatGenotype
 	debugging := false
 	for gen := 0; gen < 5000; gen++ {
 		maxFitness = math.Inf(-1)
@@ -144,19 +137,19 @@ func TestXOR(t *testing.T) {
 
 // Check we can save and load the genotype
 func TestSaving(t *testing.T) {
-	counter := goevo.NewCounter()
-	gt := neat.NewGenotype(counter, 3, 2, goevo.Tanh)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
-	neat.AddRandomNeuron(gt, counter, goevo.Tanh, goevo.Relu, goevo.Sigmoid)
-	neat.AddRandomNeuron(gt, counter, goevo.Tanh, goevo.Relu, goevo.Sigmoid)
-	neat.AddRandomNeuron(gt, counter, goevo.Tanh, goevo.Relu, goevo.Sigmoid)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
-	neat.AddRandomSynapse(gt, counter, 0.5, false)
+	counter := NewCounter()
+	gt := NewNeatGenotype(counter, 3, 2, Tanh)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomNeuron(counter, Tanh, Relu, Sigmoid)
+	gt.AddRandomNeuron(counter, Tanh, Relu, Sigmoid)
+	gt.AddRandomNeuron(counter, Tanh, Relu, Sigmoid)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
+	gt.AddRandomSynapse(counter, 0.5, false)
 
 	input := []float64{1, 1, 1}
 	originalOutput := gt.Build().Forward(input)
@@ -165,7 +158,7 @@ func TestSaving(t *testing.T) {
 	if err := json.NewEncoder(buf).Encode(gt); err != nil {
 		t.Fatal(err)
 	}
-	var loadedGt *neat.Genotype
+	var loadedGt *NeatGenotype
 	if err := json.NewDecoder(buf).Decode(&loadedGt); err != nil {
 		t.Fatal(err)
 	}
@@ -177,15 +170,15 @@ func TestSaving(t *testing.T) {
 
 // Randomly perform mutation operations on a genotype to check if it remains valid
 func TestGenotypeStressTest(t *testing.T) {
-	counter := goevo.NewCounter()
-	gt := neat.NewGenotype(counter, 5, 3, goevo.Sigmoid)
+	counter := NewCounter()
+	gt := NewNeatGenotype(counter, 5, 3, Sigmoid)
 	if err := gt.Validate(); err != nil {
 		t.Fatalf("error after creating genotype: %v", err)
 	}
 
 	for i := 0; i < 5000; i++ {
 		var op string
-		cachedGt := goevo.Clone(gt)
+		cachedGt := Clone(gt)
 		if err := cachedGt.Validate(); err != nil {
 			t.Fatalf("error after cloning genotype: %v\nORIGINAL:\n%v\nCLONED:\n%v", err, gt, cachedGt)
 		}
@@ -193,22 +186,22 @@ func TestGenotypeStressTest(t *testing.T) {
 		switch opId {
 		case 0:
 			op = "AddFwdSynapse"
-			neat.AddRandomSynapse(gt, counter, 0.5, false)
+			gt.AddRandomSynapse(counter, 0.5, false)
 		case 1:
 			op = "AddRecSynapse"
-			neat.AddRandomSynapse(gt, counter, 0.5, true)
+			gt.AddRandomSynapse(counter, 0.5, true)
 		case 2:
 			op = "RemoveSynapse"
-			neat.RemoveRandomSynapse(gt)
+			gt.RemoveRandomSynapse()
 		case 3:
 			op = "AddNeuron"
-			neat.AddRandomNeuron(gt, counter, goevo.Relu, goevo.Tanh, goevo.Sigmoid)
+			gt.AddRandomNeuron(counter, Relu, Tanh, Sigmoid)
 		case 4:
 			op = "MutateSynapse"
-			neat.MutateRandomSynapse(gt, 0.3)
+			gt.MutateRandomSynapse(.3)
 		case 5:
 			op = "MutateActivation"
-			neat.MutateRandomActivation(gt, goevo.Relu, goevo.Tanh, goevo.Sigmoid)
+			gt.MutateRandomActivation(Relu, Tanh, Sigmoid)
 		}
 		if err := gt.Validate(); err != nil {
 			t.Fatalf("error after performing %v op on genotype: %v\nBEFORE:\n%v\nAFTER:\n%v", err, op, cachedGt, gt)
@@ -232,7 +225,7 @@ func TestRecurrency(t *testing.T) {
 		{0},
 	}
 
-	fitness := func(f goevo.Forwarder) float64 {
+	fitness := func(f Forwarder) float64 {
 		fitness := 0.0
 		for i := range X {
 			pred := f.Forward(X[i])
@@ -242,16 +235,16 @@ func TestRecurrency(t *testing.T) {
 		return fitness
 	}
 
-	counter := goevo.NewCounter()
+	counter := NewCounter()
 
-	originalGt := neat.NewGenotype(counter, 1, 1, goevo.Sigmoid)
-	neat.AddRandomSynapse(originalGt, counter, 0.3, false)
+	originalGt := NewNeatGenotype(counter, 1, 1, Sigmoid)
+	originalGt.AddRandomSynapse(counter, 0.3, false)
 
-	selec := &tournament.Selection[*neat.Genotype]{
+	selec := &TournamentSelection[*NeatGenotype]{
 		TournamentSize: 3,
 	}
 
-	mut := &neat.StdMutation{
+	mut := &NeatMutationStd{
 		StdNumNewSynapses:          1,
 		StdNumNewRecurrentSynapses: 0.5,
 		StdNumNewNeurons:           0.5,
@@ -261,20 +254,20 @@ func TestRecurrency(t *testing.T) {
 		StdNewSynapseWeight:        0.2,
 		StdMutateSynapseWeight:     0.4,
 		Counter:                    counter,
-		PossibleActivations:        goevo.AllActivations,
+		PossibleActivations:        AllActivations,
 		MaxHiddenNeurons:           3,
 	}
-	crs := &neat.SimpleCrossoverStrategy{}
-	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
+	crs := &NeatCrossoverSimple{}
+	reprod := NewTwoPhaseReproduction(crs, mut)
 
-	var pop goevo.Population[*neat.Genotype] = simple.NewSimplePopulation[*neat.Genotype](func() *neat.Genotype {
-		gt := goevo.Clone(originalGt)
-		neat.AddRandomSynapse(gt, counter, 0.3, false)
+	var pop Population[*NeatGenotype] = NewSimplePopulation[*NeatGenotype](func() *NeatGenotype {
+		gt := Clone(originalGt)
+		gt.AddRandomSynapse(counter, 0.3, false)
 		return gt
 	}, 100, selec, reprod)
 
 	var maxFitness float64
-	var maxGt *neat.Genotype
+	var maxGt *NeatGenotype
 	debugging := false
 	for gen := 0; gen < 5000; gen++ {
 		maxFitness = math.Inf(-1)
@@ -325,19 +318,19 @@ func TestRecurrency(t *testing.T) {
 }
 
 func TestFloatsGt(t *testing.T) {
-	counter := goevo.NewCounter()
-	mut := &arr.StdMutationStrategy[float64]{
+	counter := NewCounter()
+	mut := &ArrayMutationStd[float64]{
 		MutateProbability: 0.1,
 		MutateStd:         0.05,
 	}
-	crs := &arr.KPointCrossoverStrategy[float64]{K: 2}
-	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
-	selec := &tournament.Selection[*arr.Genotype[float64]]{
+	crs := &ArrayCrossoverKPoint[float64]{K: 2}
+	reprod := NewTwoPhaseReproduction(crs, mut)
+	selec := &TournamentSelection[*ArrayGenotype[float64]]{
 		TournamentSize: 3,
 	}
-	var pop goevo.Population[*arr.Genotype[float64]] = speciated.NewSpeciatedPopulation(
+	var pop Population[*ArrayGenotype[float64]] = NewSpeciatedPopulation(
 		counter,
-		func() *arr.Genotype[float64] { return arr.NewFloatGenotype(10, 0.5) },
+		func() *ArrayGenotype[float64] { return NewFloatArrayGenotype(10, 0.5) },
 		5,
 		20,
 		0.1,
@@ -346,7 +339,7 @@ func TestFloatsGt(t *testing.T) {
 		reprod,
 	)
 	// Fitness is max (0) when all the numbers sum to 10
-	fitness := func(f *arr.Genotype[float64]) float64 {
+	fitness := func(f *ArrayGenotype[float64]) float64 {
 		total := 0.0
 		for i := range f.Values {
 			total += f.Values[i]
