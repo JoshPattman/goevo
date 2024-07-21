@@ -83,7 +83,7 @@ func TestXOR(t *testing.T) {
 		MaxHiddenNeurons:        3,
 	}
 	crs := &neat.SimpleCrossoverStrategy{}
-	reprod := goevo.NewCrossoverMutateReproduction(crs, mut)
+	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
 
 	var pop goevo.Population[*neat.Genotype] = simple.NewPopulation[*neat.Genotype](func() *neat.Genotype {
 		gt := goevo.Clone(originalGt)
@@ -265,7 +265,7 @@ func TestRecurrency(t *testing.T) {
 		MaxHiddenNeurons:           3,
 	}
 	crs := &neat.SimpleCrossoverStrategy{}
-	reprod := goevo.NewCrossoverMutateReproduction(crs, mut)
+	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
 
 	var pop goevo.Population[*neat.Genotype] = simple.NewPopulation[*neat.Genotype](func() *neat.Genotype {
 		gt := goevo.Clone(originalGt)
@@ -331,7 +331,7 @@ func TestFloatsGt(t *testing.T) {
 		MutateStd:         0.05,
 	}
 	crs := &arr.KPointCrossoverStrategy[float64]{K: 2}
-	reprod := goevo.NewCrossoverMutateReproduction(crs, mut)
+	reprod := goevo.NewTwoPhaseReproduction(crs, mut)
 	selec := &tournament.Selection[*arr.Genotype[float64]]{
 		TournamentSize: 3,
 	}

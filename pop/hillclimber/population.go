@@ -9,10 +9,10 @@ type Population[T any] struct {
 	A            *goevo.Agent[T]
 	B            *goevo.Agent[T]
 	Selection    goevo.SelectionStrategy[T]
-	Reproduction goevo.ReproductionStrategy[T]
+	Reproduction goevo.Reproduction[T]
 }
 
-func NewPopulation[T any](initialA, initialB T, selection goevo.SelectionStrategy[T], reproduction goevo.ReproductionStrategy[T]) *Population[T] {
+func NewPopulation[T any](initialA, initialB T, selection goevo.SelectionStrategy[T], reproduction goevo.Reproduction[T]) *Population[T] {
 	return &Population[T]{
 		A:            goevo.NewAgent(initialA),
 		B:            goevo.NewAgent(initialB),

@@ -2,7 +2,7 @@ package neat
 
 import "github.com/JoshPattman/goevo"
 
-var _ goevo.MutationStrategy[*Genotype] = &StdMutation{}
+var _ goevo.Mutation[*Genotype] = &StdMutation{}
 
 // StdMutation is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
 // The standard deviation is not scaled by the size of the network, meaning that larger networks will tend to have more mutations than smaller networks.

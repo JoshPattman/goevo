@@ -6,7 +6,7 @@ import (
 	"github.com/JoshPattman/goevo"
 )
 
-var _ goevo.MutationStrategy[*Genotype[float64]] = &StdMutationStrategy[float64]{}
+var _ goevo.Mutation[*Genotype[float64]] = &StdMutationStrategy[float64]{}
 
 type StdMutationStrategy[T floatType] struct {
 	// The probability of mutating each locus

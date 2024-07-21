@@ -6,7 +6,7 @@ import (
 	"github.com/JoshPattman/goevo"
 )
 
-var _ goevo.MutationStrategy[*Genotype[rune]] = &RandomRuneMutationStrategy{}
+var _ goevo.Mutation[*Genotype[rune]] = &RandomRuneMutationStrategy{}
 
 type RandomRuneMutationStrategy struct {
 	// The probability of mutating each locus

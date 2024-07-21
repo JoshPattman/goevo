@@ -1,7 +1,7 @@
 package goevo
 
-// MutationStrategy is an interface for a mutation strategy on a genotype with type T.
-type MutationStrategy[T any] interface {
+// Mutation is an interface for a mutation strategy on a genotype with type T.
+type Mutation[T any] interface {
 	// Mutate performs a mutation in-place with this strategy on the given genotype
 	Mutate(T)
 }
@@ -15,10 +15,10 @@ type CrossoverStrategy[T any] interface {
 	NumParents() int
 }
 
-// ReproductionStrategy is an interface for a reproduction strategy on a genotype with type T.
-// Most of the time, this will be a [CrossoverMutateReproduction], however it
+// Reproduction is an interface for a reproduction strategy on a genotype with type T.
+// Most of the time, this will be a [TwoPhaseReproduction], however it
 // is possible to imlement a custom one for more complex behaviour.
-type ReproductionStrategy[T any] interface {
+type Reproduction[T any] interface {
 	// Reproduce takes a set of parent genotypes and returns a child genotype.
 	Reproduce([]T) T
 	// NumParents returns the number of parents required for this reproduction strategy

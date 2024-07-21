@@ -26,11 +26,11 @@ type Population[T any] struct {
 	// The selection strategy to use when selecting agents to reproduce.
 	Selection goevo.SelectionStrategy[T]
 	// The reproduction strategy to use when creating new agents.
-	Reproduction goevo.ReproductionStrategy[T]
+	Reproduction goevo.Reproduction[T]
 }
 
 // NewPopulation creates a new speciated population.
-func NewPopulation[T any](counter *goevo.Counter, newGenotype func() T, numSpecies, numAgentsPerSpecies int, removeWorstSpeciesChance, stdNumAgentsSwap float64, selection goevo.SelectionStrategy[T], reproduction goevo.ReproductionStrategy[T]) *Population[T] {
+func NewPopulation[T any](counter *goevo.Counter, newGenotype func() T, numSpecies, numAgentsPerSpecies int, removeWorstSpeciesChance, stdNumAgentsSwap float64, selection goevo.SelectionStrategy[T], reproduction goevo.Reproduction[T]) *Population[T] {
 	species := make(map[int][]*goevo.Agent[T])
 	for i := 0; i < numSpecies; i++ {
 		agents := make([]*goevo.Agent[T], numAgentsPerSpecies)
