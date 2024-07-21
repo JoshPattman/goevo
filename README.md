@@ -1,5 +1,9 @@
 > WARNING: This package is currently under a period of intense development and will be extremely unstable until version `v0.5.0`.
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/JoshPattman/goras.svg)](https://pkg.go.dev/github.com/JoshPattman/goras)
+[![Go Report](https://goreportcard.com/badge/github.com/JoshPattman/goevo)](https://goreportcard.com/badge/github.com/JoshPattman/goevo)
+[![Stability](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
+
 # GoEvo - Extensible Evolutionary Algorithms
 <img src="./assets/icon-background.svg" width=256 align="right"/>
 
