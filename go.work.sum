@@ -1,8 +1,14 @@
 git.sr.ht/~sbinet/gg v0.3.1/go.mod h1:KGYtlADtqsqANL9ueOFkWymvzUvLMQllU5Ixo+8v3pc=
+github.com/JoshPattman/goevo v0.4.3/go.mod h1:DshwapWnza1itL4CU7bMEuOauFT3CCSb9g4ZxDXG+i0=
+github.com/JoshPattman/goevo/geno/arr v0.4.3 h1:KTACKNC7bldSWRbhrSCqxQbhF8oxdy7IBx1LHFjo6b0=
 github.com/JoshPattman/goevo/geno/arr v0.4.3/go.mod h1:Zz9a1T9aNI86A9DV9SgU8DGNgaoWQrrFxtuO9XeWLyE=
+github.com/JoshPattman/goevo/geno/neat v0.4.3 h1:5pqFU+OOzhhUKnqw5VcMtUtg+hHKKZCWpg4uH1lFiSM=
 github.com/JoshPattman/goevo/geno/neat v0.4.3/go.mod h1:LRqIttotnGLJlAbFuoe8qeCW9LLnW/oqtxQhbmwSp34=
+github.com/JoshPattman/goevo/pop/simple v0.4.3 h1:iguuJJzcWvsnWfOXXTGTmOTHaoQPfGX5VzoqkMm8rBo=
 github.com/JoshPattman/goevo/pop/simple v0.4.3/go.mod h1:LJZ8TDCdJkZkavt9w4Fse3hoSWFYYErnUSIjrA+sUv4=
+github.com/JoshPattman/goevo/pop/speciated v0.4.3 h1:OKnb+itDRjNBitNMvxpr0Ew1ZXHShPVV1MyQZpFVwis=
 github.com/JoshPattman/goevo/pop/speciated v0.4.3/go.mod h1:2Z7/giiYopD1hE45bw2TjwR4/R6HzAxAzpvZrXWJRGA=
+github.com/JoshPattman/goevo/selec/tournament v0.4.3 h1:HUSrjToZsX9RJd6LlcAZLNqnAiUQq9f0st8OKJLdVcQ=
 github.com/JoshPattman/goevo/selec/tournament v0.4.3/go.mod h1:KIezngDadoAnaUPaN/CiNInA0cAf6KnTPvp1muDdObM=
 github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b/go.mod h1:1KcenG0jGWcpt8ov532z81sp/kMMUG485J2InIOyADM=
 github.com/go-fonts/liberation v0.3.0/go.mod h1:jdJ+cqF+F4SUL2V+qxBth8fvBpBDS7yloUL5Fi8GTGY=
