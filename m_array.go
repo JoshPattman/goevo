@@ -6,10 +6,6 @@ import (
 	"math/rand/v2"
 )
 
-type floatType interface {
-	float32 | float64
-}
-
 var _ Cloneable = ArrayGenotype[int]{}
 
 // ArrayGenotype is a genotype that is a slice of values.
