@@ -1,9 +1,0 @@
-XxxReproductionYyy - Reproduction strategy for Xxx genotypes with algorithm Yyy
-XxxCrossoverYyy - Crossover strategy for Xxx genotypes with algorithm Yyy
-XxxMutationYyy - Mutation strategy for Xxx genotypes with algorithm Yyy
-XxxSelection - Selection strategy with algorithm Xxx
-
-XxxGenotype - Genotype for Xxx
-XxxPhenotype - Phenotype for Xxx
-
-XxxPopulation - Population for Xxx
