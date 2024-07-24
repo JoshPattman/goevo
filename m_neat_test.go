@@ -88,6 +88,14 @@ func TestNeatSaving(t *testing.T) {
 	if originalOutput[0] != loadedOutput[0] || originalOutput[1] != loadedOutput[1] {
 		t.Fatalf("unmatching outputs: %v and %v", loadedOutput, originalOutput)
 	}
+
+	if gt.RenderDot(10, 10) == "" {
+		t.Fatal("RenderDot failed")
+	}
+
+	if gt.RenderImage(5, 5) == nil {
+		t.Fatal("RenderImage failed")
+	}
 }
 
 // Randomly perform mutation operations on a genotype to check if it remains valid

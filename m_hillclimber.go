@@ -26,7 +26,7 @@ func (p *HillClimberPopulation[T]) NextGeneration() Population[T] {
 	parent := p.Selection.Select()
 	a := NewAgent(parent.Genotype)
 	b := NewAgent(p.Reproduction.Reproduce([]T{parent.Genotype}))
-	return &HillClimberPopulation[T]{A: a, B: b}
+	return &HillClimberPopulation[T]{A: a, B: b, Selection: p.Selection, Reproduction: p.Reproduction}
 }
 
 func (p *HillClimberPopulation[T]) All() []*Agent[T] {

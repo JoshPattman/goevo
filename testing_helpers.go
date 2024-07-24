@@ -1,8 +1,6 @@
 package goevo
 
 import (
-	"encoding/json"
-	"fmt"
 	"math"
 	"testing"
 )
@@ -71,7 +69,6 @@ func testWithDataset[T any](t *testing.T, X, Y [][]float64, pop Population[T], b
 func testWithFitnessFunc[T any](t *testing.T, fitness func(T) float64, pop Population[T]) {
 	var maxFitness float64
 	var maxGt T
-	debugging := false
 	for gen := 0; gen < 5000; gen++ {
 		maxFitness = math.Inf(-1)
 		maxGt = *new(T)
@@ -86,16 +83,8 @@ func testWithFitnessFunc[T any](t *testing.T, fitness func(T) float64, pop Popul
 		if maxFitness > -0.1 {
 			break
 		}
-		// Below is only for debug
-		if debugging && gen%100 == 0 {
-			fmt.Printf("Generation %v: Max fitness %v\n", gen, maxFitness)
-		}
 
 		pop = pop.NextGeneration()
-	}
-	if debugging {
-		bs, _ := json.MarshalIndent(maxGt, "", "\t")
-		fmt.Println(string(bs))
 	}
 	if maxFitness < -0.1 {
 		t.Fatalf("Recurrency Failed to converge, ending with fitness %f", maxFitness)
