@@ -28,9 +28,6 @@ jobs:
       uses: ncruces/go-coverage-report@v0
       with:
         report: true
-        chart: true
-        amend: true
-      if: |
-        matrix.os == 'ubuntu-latest' &&
+      if:
         github.event_name == 'push'  
       continue-on-error: true
