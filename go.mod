@@ -1,6 +1,6 @@
 module github.com/JoshPattman/goevo
 
-go 1.21.0
+go 1.22.0
 
 require github.com/goccy/go-graphviz v0.1.3
 
