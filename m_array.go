@@ -50,7 +50,7 @@ func (g ArrayGenotype[T]) Clone() any {
 	return &ArrayGenotype[T]{Values: clone}
 }
 
-var _ CrossoverStrategy[*ArrayGenotype[int]] = &ArrayCrossoverUniform[int]{}
+var _ Crossover[*ArrayGenotype[int]] = &ArrayCrossoverUniform[int]{}
 
 // ArrayCrossoverUniform is a crossover strategy that selects each gene from one of the parents with equal probability.
 // The location of a gene has no effect on the probability of it being selected from either parent.
@@ -82,7 +82,7 @@ func (p *ArrayCrossoverUniform[T]) NumParents() int {
 	return 2
 }
 
-var _ CrossoverStrategy[*ArrayGenotype[bool]] = &ArrayCrossoverAsexual[bool]{}
+var _ Crossover[*ArrayGenotype[bool]] = &ArrayCrossoverAsexual[bool]{}
 
 // ArrayCrossoverAsexual is a crossover strategy that clones the parent.
 // It only requires one parent.
@@ -101,7 +101,7 @@ func (p *ArrayCrossoverAsexual[T]) NumParents() int {
 	return 1
 }
 
-var _ CrossoverStrategy[*ArrayGenotype[int]] = &ArrayCrossoverKPoint[int]{}
+var _ Crossover[*ArrayGenotype[int]] = &ArrayCrossoverKPoint[int]{}
 
 // ArrayCrossoverKPoint is a crossover strategy that selects K locations in the genome to switch parents.
 // It requires two parents.

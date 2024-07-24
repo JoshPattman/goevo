@@ -3,15 +3,15 @@ package goevo
 // Implementations
 var _ Reproduction[int] = &TwoPhaseReproduction[int]{}
 
-// TwoPhaseReproduction is a [Reproduction] that first performs a [CrossoverStrategy]
+// TwoPhaseReproduction is a [Reproduction] that first performs a [Crossover]
 // and then a [Mutation] on the resulting child.
 type TwoPhaseReproduction[T any] struct {
-	Crossover CrossoverStrategy[T]
+	Crossover Crossover[T]
 	Mutate    Mutation[T]
 }
 
-// NewTwoPhaseReproduction creates a new [TwoPhaseReproduction] with the given [CrossoverStrategy] and [Mutation].
-func NewTwoPhaseReproduction[T any](crossover CrossoverStrategy[T], mutate Mutation[T]) *TwoPhaseReproduction[T] {
+// NewTwoPhaseReproduction creates a new [TwoPhaseReproduction] with the given [Crossover] and [Mutation].
+func NewTwoPhaseReproduction[T any](crossover Crossover[T], mutate Mutation[T]) *TwoPhaseReproduction[T] {
 	return &TwoPhaseReproduction[T]{
 		Crossover: crossover,
 		Mutate:    mutate,

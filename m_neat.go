@@ -500,11 +500,11 @@ func (r *NeatMutationStd) Mutate(g *NeatGenotype) {
 
 type NeatCrossoverSimple struct{}
 
-var _ CrossoverStrategy[*NeatGenotype] = &NeatCrossoverSimple{}
+var _ Crossover[*NeatGenotype] = &NeatCrossoverSimple{}
 
 type NeatCrossoverAsexual struct{}
 
-var _ CrossoverStrategy[*NeatGenotype] = &NeatCrossoverAsexual{}
+var _ Crossover[*NeatGenotype] = &NeatCrossoverAsexual{}
 
 // Crossover implements CrossoverStrategy.
 func (s *NeatCrossoverSimple) Crossover(gs []*NeatGenotype) *NeatGenotype {

@@ -6,8 +6,8 @@ type Mutation[T any] interface {
 	Mutate(T)
 }
 
-// CrossoverStrategy is an interface for a crossover strategy on a genotype with type T.
-type CrossoverStrategy[T any] interface {
+// Crossover is an interface for a crossover strategy on a genotype with type T.
+type Crossover[T any] interface {
 	// Crossover performs a crossover with this strategy on the given genotypes.
 	// It can combine any number of genotypes (for example 1 for asexual, 2 for sexual, n for averaging of multiple?)
 	Crossover([]T) T

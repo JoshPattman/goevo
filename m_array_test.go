@@ -7,7 +7,7 @@ import (
 
 func setupArrayTestStuff[T any](mut Mutation[*ArrayGenotype[T]], newGenotype func() *ArrayGenotype[T], crsType int, selecType int) Population[*ArrayGenotype[T]] {
 	counter := NewCounter()
-	var crs CrossoverStrategy[*ArrayGenotype[T]]
+	var crs Crossover[*ArrayGenotype[T]]
 	switch crsType {
 	case 0:
 		crs = &ArrayCrossoverKPoint[T]{K: 2}
