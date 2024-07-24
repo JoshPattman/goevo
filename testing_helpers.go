@@ -54,7 +54,8 @@ func testWithDataset[T any](t *testing.T, X, Y [][]float64, pop Population[T], b
 
 	}
 	// We add a bias on the end of each input, which is always 1
-	fitness := func(f Forwarder) float64 {
+	fitness := func(geno T) float64 {
+		f := build(geno)
 		fitness := 0.0
 		for i := range X {
 			pred := f.Forward(X[i])
@@ -64,11 +65,10 @@ func testWithDataset[T any](t *testing.T, X, Y [][]float64, pop Population[T], b
 		return fitness
 	}
 
-	counter := NewCounter()
+	testWithFitnessFunc(t, fitness, pop)
+}
 
-	originalGt := NewNeatGenotype(counter, 1, 1, Sigmoid)
-	originalGt.AddRandomSynapse(counter, 0.3, false)
-
+func testWithFitnessFunc[T any](t *testing.T, fitness func(T) float64, pop Population[T]) {
 	var maxFitness float64
 	var maxGt T
 	debugging := false
@@ -76,8 +76,7 @@ func testWithDataset[T any](t *testing.T, X, Y [][]float64, pop Population[T], b
 		maxFitness = math.Inf(-1)
 		maxGt = *new(T)
 		for _, a := range pop.All() {
-			fwd := build(a.Genotype)
-			a.Fitness = fitness(fwd)
+			a.Fitness = fitness(a.Genotype)
 			if a.Fitness > maxFitness {
 				maxFitness = a.Fitness
 				maxGt = a.Genotype
@@ -95,11 +94,6 @@ func testWithDataset[T any](t *testing.T, X, Y [][]float64, pop Population[T], b
 		pop = pop.NextGeneration()
 	}
 	if debugging {
-		maxPt := build(maxGt)
-		fmt.Println(maxPt.Forward([]float64{1}))
-		fmt.Println(maxPt.Forward([]float64{1}))
-		fmt.Println(maxPt.Forward([]float64{1}))
-		fmt.Println(maxPt.Forward([]float64{1}))
 		bs, _ := json.MarshalIndent(maxGt, "", "\t")
 		fmt.Println(string(bs))
 	}

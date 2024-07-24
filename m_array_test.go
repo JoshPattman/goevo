@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestFloatsGt(t *testing.T) {
+func TestArrayGenotype(t *testing.T) {
 	counter := NewCounter()
 	mut := &ArrayMutationStd[float64]{
 		MutateProbability: 0.1,
@@ -34,18 +34,5 @@ func TestFloatsGt(t *testing.T) {
 		}
 		return -math.Abs(10 - total)
 	}
-	var highestFitness float64
-	for gen := 0; gen < 100; gen++ {
-		highestFitness = math.Inf(-1)
-		for _, a := range pop.All() {
-			a.Fitness = fitness(a.Genotype)
-			if a.Fitness > highestFitness {
-				highestFitness = a.Fitness
-			}
-		}
-		pop = pop.NextGeneration()
-	}
-	if highestFitness < -0.1 {
-		t.Fatalf("Failed to converge, ending with fitness %f", highestFitness)
-	}
+	testWithFitnessFunc(t, fitness, pop)
 }
