@@ -1,6 +1,6 @@
 > WARNING: This package is currently under a period of intense development and will be extremely unstable until this message is removed. If you would like to use this package, I would highly recommend using a specific tagged version.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/JoshPattman/goras.svg)](https://pkg.go.dev/github.com/JoshPattman/goras)
+[![Go Reference](https://pkg.go.dev/badge/github.com/JoshPattman/goevo.svg)](https://pkg.go.dev/github.com/JoshPattman/goevo)
 [![Go Report](https://goreportcard.com/badge/github.com/JoshPattman/goevo)](https://goreportcard.com/badge/github.com/JoshPattman/goevo)
 [![Go](https://github.com/JoshPattman/goevo/actions/workflows/go.yml/badge.svg)](https://github.com/JoshPattman/goevo/actions/workflows/go.yml)
 [![Go Coverage](https://github.com/JoshPattman/goevo/wiki/coverage.svg)](https://raw.githack.com/wiki/JoshPattman/goevo/coverage.html)
