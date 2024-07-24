@@ -1,4 +1,4 @@
-package neat
+package goevo
 
 import (
 	"fmt"
@@ -6,6 +6,10 @@ import (
 	"math/rand"
 	"strings"
 )
+
+type floatType interface {
+	float32 | float64
+}
 
 func stdN(std float64) int {
 	v := math.Abs(rand.NormFloat64() * std)
