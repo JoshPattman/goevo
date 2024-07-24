@@ -2,7 +2,9 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/JoshPattman/goras.svg)](https://pkg.go.dev/github.com/JoshPattman/goras)
 [![Go Report](https://goreportcard.com/badge/github.com/JoshPattman/goevo)](https://goreportcard.com/badge/github.com/JoshPattman/goevo)
-[![Stability](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
+[![Go](https://github.com/JoshPattman/goevo/actions/workflows/go.yml/badge.svg)](https://github.com/JoshPattman/goevo/actions/workflows/go.yml)
+[![Go Coverage](https://github.com/JoshPattman/goevo/wiki/coverage.svg)](https://raw.githack.com/wiki/JoshPattman/goevo/coverage.html)
+![Stability](https://img.shields.io/badge/stability-unstable-yellow)
 
 # GoEvo - Extensible Evolutionary Algorithms
 <img src="./assets/icon-background.svg" width=256 align="right"/>
