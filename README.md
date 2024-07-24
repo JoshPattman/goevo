@@ -1,4 +1,4 @@
-> WARNING: This package is currently under a period of intense development and will be extremely unstable until version `v0.5.0`.
+> WARNING: This package is currently under a period of intense development and will be extremely unstable until this message is removed. If you would like to use this package, I would highly reccomend using a specific tagged version.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/JoshPattman/goras.svg)](https://pkg.go.dev/github.com/JoshPattman/goras)
 [![Go Report](https://goreportcard.com/badge/github.com/JoshPattman/goevo)](https://goreportcard.com/badge/github.com/JoshPattman/goevo)
