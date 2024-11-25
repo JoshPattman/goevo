@@ -48,7 +48,10 @@ func NewSpeciatedPopulation[T any](counter *Counter, newGenotype func() T, numSp
 }
 
 // NextGeneration implements [Population].
-func (p *SpeciatedPopulation[T]) NextGeneration() Population[T] {
+func (p *SpeciatedPopulation[T]) NextGeneration(recycle func(T)) Population[T] {
+	if recycle == nil {
+		recycle = func(t T) {}
+	}
 	var agentsPerGen int
 	for _, agents := range p.Species {
 		agentsPerGen = len(agents)
@@ -128,6 +131,10 @@ func (p *SpeciatedPopulation[T]) NextGeneration() Population[T] {
 			panic("population: duplicate species id, should not have happened")
 		}
 		sanityFoundIds[id] = struct{}{}
+	}
+	// Recycle this species (we never re-use genotypes in this population)
+	for _, a := range p.All() {
+		recycle(a.Genotype)
 	}
 	// Return the new population
 	return &SpeciatedPopulation[T]{

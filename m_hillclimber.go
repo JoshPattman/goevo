@@ -18,7 +18,10 @@ func NewHillClimberPopulation[T any](initialA, initialB T, selection Selection[T
 	}
 }
 
-func (p *HillClimberPopulation[T]) NextGeneration() Population[T] {
+func (p *HillClimberPopulation[T]) NextGeneration(recycle func(T)) Population[T] {
+	if recycle == nil {
+		recycle = func(t T) {}
+	}
 	if p.Reproduction.NumParents() != 1 {
 		panic("Hillclimber only supports reproduction with 1 parent")
 	}
@@ -26,6 +29,11 @@ func (p *HillClimberPopulation[T]) NextGeneration() Population[T] {
 	parent := p.Selection.Select()
 	a := NewAgent(parent.Genotype)
 	b := NewAgent(p.Reproduction.Reproduce([]T{parent.Genotype}))
+	if parent == p.A {
+		recycle(p.B.Genotype)
+	} else {
+		recycle(p.A.Genotype)
+	}
 	return &HillClimberPopulation[T]{A: a, B: b, Selection: p.Selection, Reproduction: p.Reproduction}
 }
 

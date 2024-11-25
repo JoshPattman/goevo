@@ -18,6 +18,7 @@ type Crossover[T any] interface {
 // Reproduction is an interface for a reproduction strategy on a genotype with type T.
 // Most of the time, this will be a [TwoPhaseReproduction], however it
 // is possible to imlement a custom one for more complex behaviour.
+// DO NOT return any of the parents as the new child without performing a deep copy. This WILL cause memory bugs.
 type Reproduction[T any] interface {
 	// Reproduce takes a set of parent genotypes and returns a child genotype.
 	Reproduce([]T) T

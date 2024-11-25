@@ -23,12 +23,19 @@ func NewSimplePopulation[T any](newGenotype func() T, n int, selection Selection
 }
 
 // NextGeneration creates a new SimplePopulation from the current one, using the given selection and reproduction strategies.
-func (p *SimplePopulation[T]) NextGeneration() Population[T] {
+func (p *SimplePopulation[T]) NextGeneration(recycle func(T)) Population[T] {
+	if recycle == nil {
+		recycle = func(t T) {}
+	}
 	p.Selection.SetAgents(p.Agents)
-	return NewSimplePopulation(func() T {
+	newPop := NewSimplePopulation(func() T {
 		parents := SelectNGenotypes(p.Selection, p.Reproduction.NumParents())
 		return p.Reproduction.Reproduce(parents)
 	}, len(p.Agents), p.Selection, p.Reproduction)
+	for _, a := range p.All() {
+		recycle(a.Genotype)
+	}
+	return newPop
 }
 
 // Agents returns the agents in the population.

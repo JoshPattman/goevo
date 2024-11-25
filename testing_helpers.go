@@ -84,7 +84,7 @@ func testWithFitnessFunc[T any](t *testing.T, fitness func(T) float64, pop Popul
 			break
 		}
 
-		pop = pop.NextGeneration()
+		pop = pop.NextGeneration(nil)
 	}
 	if maxFitness < -0.1 {
 		t.Fatalf("Recurrency Failed to converge, ending with fitness %f", maxFitness)
