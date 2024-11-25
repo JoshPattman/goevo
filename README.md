@@ -15,6 +15,7 @@ Some Key Features:
 - **Many Algorithms**: Support for many types of evolutionary algorithms, from basic hill-climbers to full [NEAT](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf).
 - **Optimize Anything**: NEAT genotypes, slices of floats, or any type that you can perform crossover, mutation, and fitness evaluation on are supported by this package.
 - **Flexible for Your Use-Case**: As long as your components (such as mutation functions, selection functions, etc) implement the easy-to-understand interfaces specified, you can implement interesting and unique custom behavior.
+- **Performance Oriented**: The package has support for memory pools to reduce slow allocations, and has been written with performance in mind at all times.
 
 ## Documentation
 Currently, the only documentation can be found on the [pkg.go.dev](https://pkg.go.dev/github.com/JoshPattman/goevo) website. However, examples and possibly a wiki will be coming soon.
