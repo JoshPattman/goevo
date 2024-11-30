@@ -53,9 +53,3 @@ Below are the components that GoEvo currently ships with. If you require one tha
 - `SimplePopulation` - One species generational population
 - `SpeciatedPopulation` - Generation population with multiple species
 - `HillClimberPopulation` - Population with two agents that perform hill climbing
-
-## TODO pre `v1.0`
-- NEAT Population
-- Dense genotype using Gonum
-- Add an example dir and/or a wiki
-- Possibly add a pre-made evolutionary loop
