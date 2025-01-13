@@ -6,7 +6,7 @@ import (
 	"math/rand/v2"
 )
 
-var _ Cloneable = ArrayGenotype[int]{}
+var _ Cloneable = &ArrayGenotype[int]{}
 
 // ArrayGenotype is a genotype that is a slice of values.
 type ArrayGenotype[T any] struct {
