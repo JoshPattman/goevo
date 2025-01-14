@@ -5,6 +5,8 @@ import (
 	"math"
 	"math/rand"
 	"strings"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 type floatType interface {
@@ -53,6 +55,49 @@ func clamp(x, min, max float64) float64 {
 		return max
 	}
 	return x
+}
+
+type mutMat interface {
+	mat.Matrix
+	Set(r, c int, v float64)
+}
+
+type mutVecWrapper struct {
+	*mat.VecDense
+}
+
+func (m *mutVecWrapper) Set(r, c int, v float64) {
+	if c != 0 {
+		panic("cannot set vector at anything other than column 0")
+	}
+	m.SetVec(r, v)
+}
+
+func mutateMatrix(m mutMat, chance, maxVal, std float64) {
+	rs, cs := m.Dims()
+	for ri := range rs {
+		for ci := range cs {
+			if rand.Float64() > chance {
+				continue
+			}
+			v := m.At(ri, ci)
+			v += rand.NormFloat64() * std
+			v = math.Min(v, maxVal)
+			v = math.Max(v, -maxVal)
+			m.Set(ri, ci, v)
+		}
+	}
+}
+
+// make sure to check the shapes first!!
+func randomChoiceMatrix(into mutMat, ms []mutMat) {
+	rs, cs := into.Dims()
+	for ri := range rs {
+		for ci := range cs {
+			idx := rand.Intn(len(ms))
+			into.Set(ri, ci, ms[idx].At(ri, ci))
+		}
+	}
 }
 
 // Utility struct to build up a simple graphviz graph one statement at a time

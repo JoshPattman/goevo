@@ -85,5 +85,108 @@ func (d *DenseGenotype) Forward(input []float64) []float64 {
 
 // Clone implements Cloneable.
 func (d *DenseGenotype) Clone() any {
-	panic("unimplemented")
+	gn := &DenseGenotype{
+		weights:          make([]*mat.Dense, len(d.weights)),
+		biases:           make([]*mat.VecDense, len(d.biases)),
+		buffers:          make([]*mat.VecDense, len(d.buffers)),
+		inputActivation:  d.inputActivation,
+		hiddenActivation: d.hiddenActivation,
+		outputActivation: d.outputActivation,
+	}
+
+	for bi := range d.buffers {
+		gn.biases[bi] = mat.VecDenseCopyOf(d.biases[bi])
+		gn.buffers[bi] = mat.VecDenseCopyOf(d.buffers[bi])
+	}
+	for wi := range d.weights {
+		gn.weights[wi] = mat.DenseCopyOf(d.weights[wi])
+	}
+	return gn
+}
+
+var _ Mutation[*DenseGenotype] = &DenseMutationStd{}
+
+// DenseMutationStd is a type of mutation for dense genotypes.
+// For each weight and bias, with a certain chance, it mutates the value within a normal distribution.
+// It then caps all values at the maximum value.
+type DenseMutationStd struct {
+	// The standard deviation to mutate the weights by.
+	WeightStd float64
+	// The standard deviation to mutate the biases by.
+	BiasStd float64
+	// The maximum (or -minimum) value that the weights can be.
+	// Set to Inf for no limit.
+	WeightMax float64
+	// The maximum (or -minimum) value that the biases can be.
+	// Set to Inf for no limit.
+	BiasMax float64
+	// The chance (between 0 and 1) that each weight will be mutated.
+	WeightChance float64
+	// The chance (between 0 and 1) that each bias will be mutated.
+	BiasChance float64
+}
+
+// Mutate implements Mutation.
+func (m *DenseMutationStd) Mutate(g *DenseGenotype) {
+	for _, w := range g.weights {
+		mutateMatrix(w, m.WeightChance, m.WeightMax, m.WeightStd)
+	}
+	for _, b := range g.biases {
+		mutateMatrix(&mutVecWrapper{b}, m.BiasChance, m.BiasMax, m.BiasStd)
+	}
+}
+
+var _ Crossover[*DenseGenotype] = &DenseCrossoverUniform{}
+
+// DenseCrossoverUniform is a type of crossover for dense genotypes.
+// For each weight and bias, it chooses randomly from one of its parents.
+// The number of parents is a parameter.
+type DenseCrossoverUniform struct {
+	Parents int
+}
+
+// Crossover implements Crossover.
+func (c *DenseCrossoverUniform) Crossover(parents []*DenseGenotype) *DenseGenotype {
+	if len(parents) != c.Parents {
+		panic("incorrect number of parents")
+	}
+	if c.Parents <= 0 {
+		panic("must have at least one parent")
+	}
+	g := Clone(parents[0])
+	for _, p := range parents {
+		if len(p.weights) != len(g.weights) {
+			panic("inconsistent parent num layers")
+		}
+	}
+	for wi, w := range g.weights {
+		wr, wc := w.Dims()
+		pws := make([]mutMat, len(parents))
+		for pi, p := range parents {
+			pr, pc := p.weights[wi].Dims()
+			if wr != pr || wc != pc {
+				panic("incorrect weight sizes")
+			}
+			pws[pi] = p.weights[wi]
+		}
+		randomChoiceMatrix(w, pws)
+	}
+	for bi, b := range g.biases {
+		br := b.Len()
+		pbs := make([]mutMat, len(parents))
+		for pi, p := range parents {
+			pr := p.biases[bi].Len()
+			if br != pr {
+				panic("incorrect bias sizes")
+			}
+			pbs[pi] = &mutVecWrapper{p.biases[bi]}
+		}
+		randomChoiceMatrix(&mutVecWrapper{b}, pbs)
+	}
+	return g
+}
+
+// NumParents implements Crossover.
+func (c *DenseCrossoverUniform) NumParents() int {
+	return c.Parents
 }
