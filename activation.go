@@ -62,6 +62,8 @@ func (a Activation) String() string {
 		return "sawtooth"
 	case Abs:
 		return "abs"
+	case Softmax:
+		return "softmax"
 	}
 	panic("unknown activation")
 }
@@ -179,6 +181,8 @@ func (a *Activation) UnmarshalJSON(bs []byte) error {
 		*a = Sawtooth
 	case Abs.String():
 		*a = Abs
+	case Softmax.String():
+		*a = Softmax
 	default:
 		return fmt.Errorf("invalid activation: '%s'", s)
 	}
