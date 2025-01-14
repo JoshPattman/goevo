@@ -1,6 +1,7 @@
 package goevo
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
@@ -95,6 +96,7 @@ func testWithFitnessFunc[T any](t *testing.T, fitness func(T) float64, pop Popul
 			t.Fatalf("final genotype was not valid: %v\nGenotype:\n%v", err, maxGt)
 		}
 	}
+	fmt.Println("max fitness", maxFitness)
 }
 
 func assertEq[T comparable](t *testing.T, a T, b T, name string) {
