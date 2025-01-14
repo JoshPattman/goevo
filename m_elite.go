@@ -2,9 +2,6 @@ package goevo
 
 import "math"
 
-// Ensure that Selection implements Selection.
-var _ Selection[int] = &EliteSelection[int]{}
-
 type EliteSelection[T any] struct {
 	lastBest *Agent[T]
 }

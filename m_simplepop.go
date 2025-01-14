@@ -1,7 +1,5 @@
 package goevo
 
-var _ Population[int] = &SimplePopulation[int]{}
-
 // SimplePopulation has a single species, and generates the entire next generation by selcting and breeding from the previous one.
 type SimplePopulation[T any] struct {
 	Agents       []*Agent[T]

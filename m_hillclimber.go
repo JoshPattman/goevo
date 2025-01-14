@@ -1,7 +1,5 @@
 package goevo
 
-var _ Population[int] = &HillClimberPopulation[int]{}
-
 type HillClimberPopulation[T any] struct {
 	A            *Agent[T]
 	B            *Agent[T]

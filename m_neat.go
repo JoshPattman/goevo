@@ -12,9 +12,6 @@ import (
 	"github.com/goccy/go-graphviz"
 )
 
-var _ Cloneable = &NeatGenotype{}
-var _ Buildable = &NeatGenotype{}
-
 // NeatNeuronID is the unique identifier for a neuron in a NEATGenotype
 type NeatNeuronID int
 
@@ -442,8 +439,6 @@ func (g *NeatGenotype) MutateRandomActivation(activations ...Activation) bool {
 	return true
 }
 
-var _ Mutation[*NeatGenotype] = &NeatMutationStd{}
-
 // NeatMutationStd is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
 // The standard deviation is not scaled by the size of the network, meaning that larger networks will tend to have more mutations than smaller networks.
 type NeatMutationStd struct {
@@ -500,11 +495,7 @@ func (r *NeatMutationStd) Mutate(g *NeatGenotype) {
 
 type NeatCrossoverSimple struct{}
 
-var _ Crossover[*NeatGenotype] = &NeatCrossoverSimple{}
-
 type NeatCrossoverAsexual struct{}
-
-var _ Crossover[*NeatGenotype] = &NeatCrossoverAsexual{}
 
 // Crossover implements CrossoverStrategy.
 func (s *NeatCrossoverSimple) Crossover(gs []*NeatGenotype) *NeatGenotype {
@@ -558,8 +549,6 @@ type phenotypeConnection struct {
 	toIdx int
 	w     float64
 }
-
-var _ Forwarder = &NeatPhenotype{}
 
 // NeatPhenotype is a phenotype for a NEAT genotype.
 // It conceptually represents a neural network, built according to the instructions in the NEATGenotype (DNA).

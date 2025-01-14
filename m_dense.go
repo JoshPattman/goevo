@@ -2,9 +2,6 @@ package goevo
 
 import "gonum.org/v1/gonum/mat"
 
-var _ Cloneable = &DenseGenotype{}
-var _ Forwarder = &DenseGenotype{}
-
 // DenseGenotype is a type of genotype/phenotype that is a dense feed-forward neural network.
 type DenseGenotype struct {
 	weights          []*mat.Dense
@@ -104,8 +101,6 @@ func (d *DenseGenotype) Clone() any {
 	return gn
 }
 
-var _ Mutation[*DenseGenotype] = &DenseMutationStd{}
-
 // DenseMutationStd is a type of mutation for dense genotypes.
 // For each weight and bias, with a certain chance, it mutates the value within a normal distribution.
 // It then caps all values at the maximum value.
@@ -135,8 +130,6 @@ func (m *DenseMutationStd) Mutate(g *DenseGenotype) {
 		mutateMatrix(&mutVecWrapper{b}, m.BiasChance, m.BiasMax, m.BiasStd)
 	}
 }
-
-var _ Crossover[*DenseGenotype] = &DenseCrossoverUniform{}
 
 // DenseCrossoverUniform is a type of crossover for dense genotypes.
 // For each weight and bias, it chooses randomly from one of its parents.

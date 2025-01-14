@@ -1,8 +1,5 @@
 package goevo
 
-// Implementations
-var _ Reproduction[int] = &TwoPhaseReproduction[int]{}
-
 // TwoPhaseReproduction is a [Reproduction] that first performs a [Crossover]
 // and then a [Mutation] on the resulting child.
 type TwoPhaseReproduction[T any] struct {

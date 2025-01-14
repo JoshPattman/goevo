@@ -6,8 +6,6 @@ import (
 	"math/rand/v2"
 )
 
-var _ Cloneable = &ArrayGenotype[int]{}
-
 // ArrayGenotype is a genotype that is a slice of values.
 type ArrayGenotype[T any] struct {
 	Values []T
@@ -50,8 +48,6 @@ func (g ArrayGenotype[T]) Clone() any {
 	return &ArrayGenotype[T]{Values: clone}
 }
 
-var _ Crossover[*ArrayGenotype[int]] = &ArrayCrossoverUniform[int]{}
-
 // ArrayCrossoverUniform is a crossover strategy that selects each gene from one of the parents with equal probability.
 // The location of a gene has no effect on the probability of it being selected from either parent.
 // It requires two parents.
@@ -82,8 +78,6 @@ func (p *ArrayCrossoverUniform[T]) NumParents() int {
 	return 2
 }
 
-var _ Crossover[*ArrayGenotype[bool]] = &ArrayCrossoverAsexual[bool]{}
-
 // ArrayCrossoverAsexual is a crossover strategy that clones the parent.
 // It only requires one parent.
 type ArrayCrossoverAsexual[T any] struct{}
@@ -100,8 +94,6 @@ func (p *ArrayCrossoverAsexual[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenot
 func (p *ArrayCrossoverAsexual[T]) NumParents() int {
 	return 1
 }
-
-var _ Crossover[*ArrayGenotype[int]] = &ArrayCrossoverKPoint[int]{}
 
 // ArrayCrossoverKPoint is a crossover strategy that selects K locations in the genome to switch parents.
 // It requires two parents.
@@ -143,8 +135,6 @@ func (p *ArrayCrossoverKPoint[T]) NumParents() int {
 	return 2
 }
 
-var _ Mutation[*ArrayGenotype[bool]] = &ArrayMutationRandomBool{}
-
 type ArrayMutationRandomBool struct {
 	// The probability of mutating each locus
 	MutateProbability float64
@@ -157,8 +147,6 @@ func (s *ArrayMutationRandomBool) Mutate(gt *ArrayGenotype[bool]) {
 		}
 	}
 }
-
-var _ Mutation[*ArrayGenotype[float64]] = &ArrayMutationStd[float64]{}
 
 type ArrayMutationStd[T floatType] struct {
 	// The probability of mutating each locus
@@ -174,8 +162,6 @@ func (s *ArrayMutationStd[T]) Mutate(gt *ArrayGenotype[T]) {
 		}
 	}
 }
-
-var _ Mutation[*ArrayGenotype[rune]] = &ArrayMutationRandomRune{}
 
 type ArrayMutationRandomRune struct {
 	// The probability of mutating each locus

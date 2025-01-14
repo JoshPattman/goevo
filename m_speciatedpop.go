@@ -6,8 +6,6 @@ import (
 	"math/rand"
 )
 
-var _ Population[int] = &SpeciatedPopulation[int]{}
-
 // SpeciatedPopulation is a speciated population of agents.
 // Each species has the same number of agents, and there are always the same number of species.
 // Each generation, with a chance, the worst species is removed, and replaced with a random species or the best species.
