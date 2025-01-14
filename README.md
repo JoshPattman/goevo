@@ -30,7 +30,7 @@ GoEvo is broken down into distinct components, each of which may have multiple i
 - **Population** - A higher level concept that stores some number of agents, and is capable of creating a new generation
 
 ## Built-In Components List
-Below are the components that GoEvo currently ships with. If you require one that is not included, feel free to create it and make a pull request!
+Below are the components that GoEvo currently ships with. If you require one that is not included, feel free to create it and make a pull request! You can also see all implementations of GoEvo interfaces (there are a lot!) in the [implementations.go](implementations.go) file.
 
 ### Genotypes, Mutations, and Crossovers
 - `NeatGenotype` - Provides a [NEAT](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf) (Neuro Evolution of Augmenting Topologies) gene graph
