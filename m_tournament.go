@@ -4,9 +4,6 @@ import (
 	"math/rand"
 )
 
-// Ensure that TournamentABC implements ABC.
-var _ Selection[int] = &TournamentSelection[int]{}
-
 // TournamentSelection is a TournamentSelection strategy that selects the best agent from a random tournament of agents.
 // It implements [TournamentSelection].
 type TournamentSelection[T any] struct {
