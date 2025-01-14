@@ -32,7 +32,7 @@ func setupNeatTestStuff(numIn, numOut int, useRecurrent bool) Population[*NeatGe
 		StdNewSynapseWeight:        0.2,
 		StdMutateSynapseWeight:     0.4,
 		Counter:                    counter,
-		PossibleActivations:        AllActivations,
+		PossibleActivations:        AllSingleActivations,
 		MaxHiddenNeurons:           3,
 	}
 	crs := &NeatCrossoverSimple{}

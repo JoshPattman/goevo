@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"slices"
 	"strings"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 // Activation is an enum representing the different activation functions that can be used in a neural network.
@@ -22,10 +25,17 @@ const (
 	Reln
 	Sawtooth
 	Abs
+	Softmax
 )
 
-// AllActivations is a list of all possible activations.
-var AllActivations = []Activation{Relu, Linear, Sigmoid, Tanh, Sin, Cos, Binary, Reln, Relum, Sawtooth, Abs}
+// AllSingleActivations is a list of all possible activations that can be applied to a single value,
+// i.e. they can be used in Activate()
+var AllSingleActivations = []Activation{Relu, Linear, Sigmoid, Tanh, Sin, Cos, Binary, Reln, Relum, Sawtooth, Abs}
+
+// AllLayerActivations is a list of all possible activations that can be applied to a vector,
+// i.e. they can be used in ActivateVecor.
+// This is a superset of [AllSingleActivations].
+var AllVectorActivations = append([]Activation{Softmax}, AllSingleActivations...)
 
 // String returns the string representation of the activation.
 func (a Activation) String() string {
@@ -52,11 +62,20 @@ func (a Activation) String() string {
 		return "sawtooth"
 	case Abs:
 		return "abs"
+	case Softmax:
+		return "softmax"
 	}
 	panic("unknown activation")
 }
 
+// CanSingleApply returns if the activation can be applied to a single value,
+// i.e. with [Activate]
+func (a Activation) CanSingleApply() bool {
+	return slices.Contains(AllSingleActivations, a)
+}
+
 // Activate applies the activation function to the given value.
+// Not all activation functions (for example softmax) can be applied with this function, you can check with [Activation.CanSingleApply]
 func Activate(x float64, a Activation) float64 {
 	switch a {
 	case Relu:
@@ -100,8 +119,35 @@ func Activate(x float64, a Activation) float64 {
 		return x - xr
 	case Abs:
 		return math.Abs(x)
+	case Softmax:
+		panic(fmt.Sprintf("the activation '%s' is not supported for activating a single node", a))
 	}
 	panic("unknown activation")
+}
+
+// ActivateVector applies the given activation function into the vector.
+// For most activation functions, this falls back to element-wise [Activate].
+func ActivateVector(x *mat.VecDense, a Activation) {
+	switch a {
+	case Softmax:
+		total := 0.0
+		for i := range x.Len() {
+			total += math.Exp(x.AtVec(i))
+		}
+		if total == 0 {
+			for i := range x.Len() {
+				x.SetVec(i, 0)
+			}
+		} else {
+			for i := range x.Len() {
+				x.SetVec(i, math.Exp(x.AtVec(i))/total)
+			}
+		}
+	default:
+		for i := range x.Len() {
+			x.SetVec(i, Activate(x.AtVec(i), a))
+		}
+	}
 }
 
 // Implementations
@@ -135,6 +181,8 @@ func (a *Activation) UnmarshalJSON(bs []byte) error {
 		*a = Sawtooth
 	case Abs.String():
 		*a = Abs
+	case Softmax.String():
+		*a = Softmax
 	default:
 		return fmt.Errorf("invalid activation: '%s'", s)
 	}
