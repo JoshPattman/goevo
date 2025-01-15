@@ -87,7 +87,7 @@
     <circle cx="0" cy="0" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_61" r="35" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0"/>
    </g>
   </g>
-  <text fill="#7cbdff" font-family="Monospace" font-size="200" id="svg_3" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1, 0, 0, 1, 0, -8)" x="724" xml:space="preserve" y="217">GoEvo</text>
-  <text fill="#7cbdff" font-family="Monospace" font-size="28" id="svg_6" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1, 0, 0, 1, 0, -8)" x="729.99" xml:space="preserve" y="257">Extensible Evolutionary Algorithms</text>
+  <text fill="#7cbdff" font-family="Monospace" font-size="200" id="svg_3" stroke="#000000" stroke-width="0" style="cursor: move;" text-anchor="middle" transform="matrix(1, 0, 0, 1, 0, 0) matrix(1, 0, 0, 1, 0, -8)" x="724" xml:space="preserve" y="217">GoEvo</text>
+  <text fill="#7cbdff" font-family="Monospace" font-size="28" id="svg_6" stroke="#000000" stroke-width="0" style="cursor: move;" text-anchor="middle" transform="matrix(1, 0, 0, 1, 0, -8)" x="729.99" xml:space="preserve" y="257">Extensible Evolutionary Algorithms</text>
  </g>
 </svg>
