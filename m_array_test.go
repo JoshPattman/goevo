@@ -55,8 +55,11 @@ func TestArrayGenotype(t *testing.T) {
 		MutateProbability: 0.1,
 		MutateStd:         0.05,
 	}
-	newGenotype := func() *ArrayGenotype[float64] { return NewFloatArrayGenotype(10, 0.5) }
-	pop := setupArrayTestStuff(mut, newGenotype, 0, 0)
+	genotypeFactory := &ArrayFactoryGenerator[float64]{
+		Generator: &NormalGenerator[float64]{Std: 0.5},
+		Length:    10,
+	}
+	pop := setupArrayTestStuff(mut, genotypeFactory.New, 0, 0)
 	// Fitness is max (0) when all the numbers sum to 10
 	fitness := func(f *ArrayGenotype[float64]) float64 {
 		total := 0.0
@@ -74,8 +77,11 @@ func TestRuneGenotype(t *testing.T) {
 		MutateProbability: 0.1,
 		Runeset:           runeset,
 	}
-	newGenotype := func() *ArrayGenotype[rune] { return NewRuneArrayGenotype(10, runeset) }
-	pop := setupArrayTestStuff(mut, newGenotype, 1, 0)
+	genotypeFactory := &ArrayFactoryGenerator[rune]{
+		Generator: &ChoiceGenerator[rune]{Choices: runeset},
+		Length:    10,
+	}
+	pop := setupArrayTestStuff(mut, genotypeFactory.New, 1, 0)
 	// Fitness is max (0) when there are 10 'a's
 	fitness := func(f *ArrayGenotype[rune]) float64 {
 		total := 0.0
@@ -93,8 +99,11 @@ func TestBoolGenotype(t *testing.T) {
 	mut := &ArrayMutationRandomBool{
 		MutateProbability: 0.1,
 	}
-	newGenotype := func() *ArrayGenotype[bool] { return NewBoolArrayGenotype(10) }
-	pop := setupArrayTestStuff(mut, newGenotype, 2, 1)
+	genotypeFactory := &ArrayFactoryGenerator[bool]{
+		Generator: &ChoiceGenerator[bool]{Choices: []bool{false, true}},
+		Length:    10,
+	}
+	pop := setupArrayTestStuff(mut, genotypeFactory.New, 2, 1)
 	// Fitness is max (0) when there are 10 'true's
 	fitness := func(f *ArrayGenotype[bool]) float64 {
 		total := 0.0

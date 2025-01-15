@@ -1,6 +1,7 @@
 package goevo
 
 import (
+	"fmt"
 	"sort"
 
 	"math/rand/v2"
@@ -11,41 +12,39 @@ type ArrayGenotype[T any] struct {
 	Values []T
 }
 
-// NewFloatArrayGenotype creates a new genotype with the given size,
-// where each value is a random float (of type T) with a normal distribution with the given standard deviation.
-func NewFloatArrayGenotype[T floatType](size int, std T) *ArrayGenotype[T] {
-	gt := make([]T, size)
-	for i := range gt {
-		gt[i] = T(rand.NormFloat64()) * std
-	}
-	return &ArrayGenotype[T]{Values: gt}
-}
-
-// NewRuneArrayGenotype creates a new genotype with the given size,
-// where each value is a random rune from the given runeset.
-func NewRuneArrayGenotype(size int, runeset []rune) *ArrayGenotype[rune] {
-	gt := make([]rune, size)
-	for i := range gt {
-		gt[i] = runeset[rand.N(len(runeset))]
-	}
-	return &ArrayGenotype[rune]{Values: gt}
-}
-
-// NewBoolArrayGenotype creates a new genotype with the given size,
-// where each value is a random boolean.
-func NewBoolArrayGenotype(size int) *ArrayGenotype[bool] {
-	gt := make([]bool, size)
-	for i := range gt {
-		gt[i] = rand.Float64() < 0.5
-	}
-	return &ArrayGenotype[bool]{Values: gt}
-}
-
 // Clone returns a new genotype that is a copy of this genotype.
 func (g ArrayGenotype[T]) Clone() any {
 	clone := make([]T, len(g.Values))
 	copy(clone, g.Values)
 	return &ArrayGenotype[T]{Values: clone}
+}
+
+// ArrayFactoryGenerator creates [ArrayGenotype]s
+// using the provided [Generator] with the given length.
+type ArrayFactoryGenerator[T any] struct {
+	Length    int
+	Generator Generator[T]
+}
+
+// New implements ValidateableFactory.
+func (a *ArrayFactoryGenerator[T]) New() *ArrayGenotype[T] {
+	MustValidate(a)
+	gt := make([]T, a.Length)
+	for i := range gt {
+		gt[i] = a.Generator.Next()
+	}
+	return &ArrayGenotype[T]{Values: gt}
+}
+
+// Validate implements ValidateableFactory.
+func (a *ArrayFactoryGenerator[T]) Validate() error {
+	if a.Length < 0 {
+		return fmt.Errorf("cannot create array genotypes with negative (%v) size", a.Length)
+	}
+	if a.Generator == nil {
+		return fmt.Errorf("cannot use an ArrayFactoryGenerator with a nil generator")
+	}
+	return nil
 }
 
 // ArrayCrossoverUniform is a crossover strategy that selects each gene from one of the parents with equal probability.

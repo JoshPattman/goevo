@@ -4,6 +4,7 @@ package goevo
 
 // Generators
 var _ Generator[float64] = &NormalGenerator[float64]{}
+var _ Generator[any] = &ChoiceGenerator[any]{}
 
 // Reproductions
 var _ Reproduction[any] = &TwoPhaseReproduction[any]{}
@@ -12,6 +13,7 @@ var _ Reproduction[any] = &TwoPhaseReproduction[any]{}
 
 // Array genotypes
 var _ Cloneable = &ArrayGenotype[int]{}
+var _ Factory[*ArrayGenotype[any]] = &ArrayFactoryGenerator[any]{}
 var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverUniform[any]{}
 var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverAsexual[any]{}
 var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverKPoint[any]{}
