@@ -6,8 +6,7 @@
 [![Go Coverage](https://github.com/JoshPattman/goevo/wiki/coverage.svg)](https://raw.githack.com/wiki/JoshPattman/goevo/coverage.html)
 ![Stability](https://img.shields.io/badge/stability-unstable-yellow)
 
-# GoEvo - Extensible Evolutionary Algorithms
-<img src="./assets/icon-background.svg" width=256 align="right"/>
+<img src="./assets/github.banner.svg" width=100% align="center"/>
 
 GoEvo is an evolutionary algorithms package for Go that provides both flexible and fast implementations of many genetic algorithms.
 
