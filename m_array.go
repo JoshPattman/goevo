@@ -12,8 +12,17 @@ type ArrayGenotype[T any] struct {
 	Values []T
 }
 
-// Clone returns a new genotype that is a copy of this genotype.
-func (g ArrayGenotype[T]) Clone() any {
+// Validate implements Validateable.
+func (g *ArrayGenotype[T]) Validate() error {
+	if g.Values == nil {
+		return fmt.Errorf("an array genotype may not have nil values array")
+	}
+	return nil
+}
+
+// Clone implements Cloneable.
+func (g *ArrayGenotype[T]) Clone() any {
+	MustValidate(g)
 	clone := make([]T, len(g.Values))
 	copy(clone, g.Values)
 	return &ArrayGenotype[T]{Values: clone}
@@ -54,6 +63,7 @@ type ArrayCrossoverUniform[T any] struct{}
 
 // Crossover implements CrossoverStrategy.
 func (p *ArrayCrossoverUniform[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
+	MustValidateAll(gs...)
 	if len(gs) != 2 {
 		panic("PointCrossoverStrategy requires exactly 2 parents")
 	}
@@ -83,6 +93,7 @@ type ArrayCrossoverAsexual[T any] struct{}
 
 // Crossover implements CrossoverStrategy.
 func (p *ArrayCrossoverAsexual[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
+	MustValidateAll(gs...)
 	if len(gs) != 1 {
 		panic("AsexualCrossoverStrategy requires exactly 1 parent")
 	}
@@ -101,6 +112,7 @@ type ArrayCrossoverKPoint[T any] struct {
 }
 
 func (p *ArrayCrossoverKPoint[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
+	MustValidateAll(gs...)
 	if len(gs) != 2 {
 		panic("KPointCrossoverStrategy requires exactly 2 parents")
 	}
@@ -140,6 +152,7 @@ type ArrayMutationRandomBool struct {
 }
 
 func (s *ArrayMutationRandomBool) Mutate(gt *ArrayGenotype[bool]) {
+	MustValidate(gt)
 	for i := range gt.Values {
 		if rand.Float64() < s.MutateProbability {
 			gt.Values[i] = !gt.Values[i]
@@ -155,6 +168,7 @@ type ArrayMutationStd[T floatType] struct {
 }
 
 func (s *ArrayMutationStd[T]) Mutate(gt *ArrayGenotype[T]) {
+	MustValidate(gt)
 	for i := range gt.Values {
 		if T(rand.Float64()) < s.MutateProbability {
 			gt.Values[i] += T(rand.NormFloat64()) * s.MutateStd
@@ -170,6 +184,7 @@ type ArrayMutationRandomRune struct {
 }
 
 func (s *ArrayMutationRandomRune) Mutate(gt *ArrayGenotype[rune]) {
+	MustValidate(gt)
 	for i := range gt.Values {
 		if rand.Float64() < s.MutateProbability {
 			gt.Values[i] = s.Runeset[rand.N(len(s.Runeset))]

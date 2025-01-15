@@ -18,3 +18,9 @@ func MustValidate(v Validateable) {
 		panic(fmt.Errorf("failed to validate: %v", err))
 	}
 }
+
+func MustValidateAll[T Validateable](vs ...T) {
+	for _, v := range vs {
+		MustValidate(v)
+	}
+}
