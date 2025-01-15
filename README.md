@@ -1,13 +1,12 @@
-> WARNING: This package is currently under a period of intense development and will be extremely unstable until this message is removed. If you would like to use this package, I would highly recommend using a specific tagged version.
-
 [![Go Reference](https://pkg.go.dev/badge/github.com/JoshPattman/goevo.svg)](https://pkg.go.dev/github.com/JoshPattman/goevo)
 [![Go Report](https://goreportcard.com/badge/github.com/JoshPattman/goevo)](https://goreportcard.com/badge/github.com/JoshPattman/goevo)
 [![Go](https://github.com/JoshPattman/goevo/actions/workflows/go.yml/badge.svg)](https://github.com/JoshPattman/goevo/actions/workflows/go.yml)
 [![Go Coverage](https://github.com/JoshPattman/goevo/wiki/coverage.svg)](https://raw.githack.com/wiki/JoshPattman/goevo/coverage.html)
 ![Stability](https://img.shields.io/badge/stability-unstable-yellow)
 
-# GoEvo - Extensible Evolutionary Algorithms
-<img src="./assets/icon-background.svg" width=256 align="right"/>
+<img src="./assets/github-banner.svg" width=100% align="center"/>
+
+> WARNING: This package is currently under a period of intense development and will be extremely unstable until this message is removed. If you would like to use this package, I would highly recommend using a specific tagged version.
 
 GoEvo is an evolutionary algorithms package for Go that provides both flexible and fast implementations of many genetic algorithms.
 

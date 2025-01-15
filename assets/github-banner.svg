@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<svg width="1200" height="300" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" version="1.1" xml:space="preserve">
+ <desc>Created with Fabric.js 5.2.4</desc>
+
+ <g class="layer">
+  <title>Layer 1</title>
+  <g id="d91f766a-365d-4ecf-ab7f-55d1ee60fb2c" transform="matrix(1, 0, 0, 1, 0, 0) translate(-1.97255, -1.95034) matrix(1.00166, 0, 0, 1.01986, 601.973, 153.95)">
+   <rect fill="rgb(33,33,33)" fill-rule="nonzero" height="300" id="svg_1" stroke-dashoffset="0" stroke-miterlimit="4" width="1200" x="-600" y="-150"/>
+  </g>
+  <g id="svg_28" transform="matrix(25, 0, 0, 25, 519.83, 192.07) matrix(0.28, 0, 0, 0.28, -8.6079, 0.458384)">
+   <path d="m26.01,17.05c-0.12,-0.03 -0.24,-0.1 -0.33,-0.19" fill="rgb(198,177,152)" fill-rule="evenodd" id="svg_29" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-25.85, -16.95)"/>
+  </g>
+  <g id="svg_7" transform="translate(-1) translate(-1) translate(-1) translate(1) matrix(1, 0, 0, 1, 47, -4)">
+   <g id="svg_10" transform="matrix(1.63, 0, 0, 1.63, 18.4, -408.19) matrix(0.28, 0, 0, 0.28, 89.4675, 272.176)">
+    <circle cx="0" cy="0" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_11" r="35" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0"/>
+   </g>
+   <g id="svg_12" transform="matrix(2.9, 0, 0, 2.9, 309.17, -114.52) matrix(0.28, 0, 0, 0.28, -21.9043, 80.0705)">
+    <circle cx="0" cy="0" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_13" r="35" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0"/>
+   </g>
+   <g id="svg_14" transform="matrix(4.5, 0, 0, 4.5, -323.77, 253.82) matrix(0.28, 0, 0, 0.28, 87.1543, -7.33342)">
+    <circle cx="0" cy="0" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_15" r="35" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0"/>
+   </g>
+   <g id="svg_16" transform="matrix(6.5, 0, 0, 6.5, 182.6, 286.39) matrix(0.28, 0, 0, 0.28, 4.24738, -8.68474)">
+    <circle cx="0" cy="0" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_17" r="35" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0"/>
+   </g>
+   <g id="svg_18" transform="matrix(3.64, -3.64, 0.71, 0.71, -137.05, -261.9) matrix(0.28, 0, 0, 0.28, -11.0662, 419.77)">
+    <path d="m94.75,50c0,6.21 -5.24,11.25 -11.7,11.25l-66.1,0c-6.46,0 -11.7,-5.04 -11.7,-11.25l0,0c0,-6.21 5.24,-11.25 11.7,-11.25l66.1,0c6.46,0 11.7,5.04 11.7,11.25l0,0z" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_19" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0" transform=" translate(-50, -50)"/>
+   </g>
+   <g id="svg_20" transform="matrix(1.56, -4.91, 0.95, 0.3, -283.2, 63.28) matrix(0.28, 0, 0, 0.28, 1.93205, 378.916)">
+    <path d="m94.75,50c0,6.21 -5.24,11.25 -11.7,11.25l-66.1,0c-6.46,0 -11.7,-5.04 -11.7,-11.25l0,0c0,-6.21 5.24,-11.25 11.7,-11.25l66.1,0c6.46,0 11.7,5.04 11.7,11.25l0,0z" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_21" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0" transform=" translate(-50, -50)"/>
+   </g>
+   <g id="svg_22" transform="matrix(-3.64, -3.64, 0.71, -0.71, -45.7, 53.13) matrix(0.28, 0, 0, 0.28, -41.6869, 56.6814)">
+    <path d="m94.75,50c0,6.21 -5.24,11.25 -11.7,11.25l-66.1,0c-6.46,0 -11.7,-5.04 -11.7,-11.25l0,0c0,-6.21 5.24,-11.25 11.7,-11.25l66.1,0c6.46,0 11.7,5.04 11.7,11.25l0,0z" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_23" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0" transform=" translate(-50, -50)"/>
+   </g>
+   <g id="svg_24" transform="matrix(-3.44, -3.83, 0.74, -0.67, 182.21, -262.38) matrix(0.28, 0, 0, 0.28, -52.4025, -205.913)">
+    <path d="m94.75,50c0,6.21 -5.24,11.25 -11.7,11.25l-66.1,0c-6.46,0 -11.7,-5.04 -11.7,-11.25l0,0c0,-6.21 5.24,-11.25 11.7,-11.25l66.1,0c6.46,0 11.7,5.04 11.7,11.25l0,0z" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_25" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0" transform=" translate(-50, -50)"/>
+   </g>
+   <g id="svg_26" transform="matrix(25, 0, 0, 25, 27.57, 194.38) matrix(0.28, 0, 0, 0.28, 5.56918, 0.391856)">
+    <path d="m5.99,17.15c0.12,-0.03 0.24,-0.09 0.33,-0.19" fill="rgb(198,177,152)" fill-rule="evenodd" id="svg_27" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-6.15, -17.06)"/>
+   </g>
+   <g id="svg_30" transform="matrix(31.54, 0, 0, 31.54, 286.56, 254.26) matrix(0.28, 0, 0, 0.28, -1.49788, -1.05635)">
+    <path d="m16.24,6.33c0.57,3.3 5.97,2.43 5.2,-0.9c-0.7,-2.99 -5.39,-2.16 -5.2,0.9" fill="rgb(255,255,255)" fill-rule="evenodd" id="svg_31" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-18.87, -5.99)"/>
+   </g>
+   <g id="svg_32" transform="matrix(31.54, 0, 0, 31.54, 286.46, 253.83) matrix(0.28, 0, 0, 0.28, -1.4956, -1.04653)">
+    <path d="m18.81,8.48c-0.34,0.01 -0.67,-0.05 -0.99,-0.16c-0.88,-0.29 -1.52,-1.06 -1.65,-1.98l0,-0.01c-0.09,-1.43 0.98,-2.68 2.41,-2.81c1.33,-0.28 2.64,0.57 2.93,1.89c0.24,0.85 -0.02,1.75 -0.67,2.34c-0.57,0.48 -1.29,0.74 -2.03,0.73zm-2.49,-2.16c0.12,0.86 0.72,1.58 1.55,1.86c0.98,0.33 2.07,0.13 2.86,-0.54c0.62,-0.55 0.86,-1.41 0.63,-2.2c-0.28,-1.25 -1.51,-2.04 -2.76,-1.77c-1.35,0.13 -2.36,1.3 -2.28,2.65z" fill="rgb(0,0,0)" fill-rule="nonzero" id="svg_33" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-18.88, -5.98)"/>
+   </g>
+   <g id="svg_34" transform="matrix(31.54, 0, 0, 31.54, 80.53, 263.44) matrix(0.28, 0, 0, 0.28, 3.2054, -1.26591)">
+    <path d="m9.79,6.86c0.73,2.88 5.34,2.14 5.17,-0.74c-0.21,-3.46 -5.88,-2.79 -5.17,0.74" fill="rgb(255,255,255)" fill-rule="evenodd" id="svg_35" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-12.34, -6.26)"/>
+   </g>
+   <g id="svg_36" transform="matrix(31.54, 0, 0, 31.54, 79.82, 263.09) matrix(0.28, 0, 0, 0.28, 3.22161, -1.25792)">
+    <path d="m12.24,8.76c-0.46,0.01 -0.93,-0.11 -1.34,-0.32c-0.6,-0.33 -1.03,-0.9 -1.18,-1.56l0,0c-0.24,-0.91 0.09,-1.88 0.82,-2.47c0.89,-0.67 2.06,-0.82 3.09,-0.39c0.84,0.36 1.38,1.18 1.4,2.1c0.05,1.33 -0.96,2.48 -2.29,2.6c-0.16,0.03 -0.33,0.04 -0.5,0.04zm-2.38,-1.91c0.33,1.25 1.59,2.02 2.86,1.73c1.26,-0.12 2.2,-1.2 2.16,-2.46c-0.01,-0.86 -0.52,-1.63 -1.31,-1.97c-0.98,-0.41 -2.1,-0.27 -2.94,0.37c-0.69,0.56 -0.99,1.47 -0.77,2.33z" fill="rgb(0,0,0)" fill-rule="nonzero" id="svg_37" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-12.34, -6.27)"/>
+   </g>
+   <g id="svg_38" transform="matrix(31.54, 0, 0, 31.54, 207.54, 411.65) matrix(0.28, 0, 0, 0.28, 0.305999, -4.64927)">
+    <path d="m16.89,10.29c0.05,0.46 0.06,0.92 0.02,1.37c-0.11,0.21 -0.33,0.23 -0.51,0.32c-0.26,-0.04 -0.47,-0.21 -0.58,-0.45c-0.02,-0.52 -0.01,-1.04 0.05,-1.55l1.02,0.31z" fill="rgb(255,255,255)" fill-rule="evenodd" id="svg_39" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-16.37, -10.98)"/>
+   </g>
+   <g id="svg_40" transform="matrix(31.54, 0, 0, 31.54, 207.31, 411.76) matrix(0.28, 0, 0, 0.28, 0.311249, -4.65178)">
+    <path d="m16.41,12.06l-0.02,0c-0.29,-0.05 -0.53,-0.24 -0.64,-0.5l0,-0.01l0,-0.01c-0.03,-0.36 -0.03,-0.71 0.01,-1.07c0.02,-0.16 0.03,-0.33 0.03,-0.5l0,-0.1l1.18,0.37l0,0.05c0,0.15 0.02,0.29 0.03,0.45c0.03,0.31 0.03,0.62 -0.01,0.94l0,0.01l-0.01,0.01c-0.09,0.15 -0.24,0.26 -0.41,0.3c-0.05,0.02 -0.09,0.03 -0.13,0.05l-0.03,0.01zm-0.51,-0.55c0.09,0.2 0.27,0.34 0.49,0.38c0.04,-0.01 0.08,-0.03 0.12,-0.04c0.13,-0.03 0.25,-0.11 0.33,-0.21c0.03,-0.3 0.03,-0.6 0,-0.89c-0.02,-0.14 -0.02,-0.27 -0.03,-0.4l-0.87,-0.27c-0.01,0.14 -0.02,0.27 -0.03,0.4c-0.04,0.34 -0.04,0.68 -0.01,1.03z" fill="rgb(0,0,0)" fill-rule="nonzero" id="svg_41" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-16.38, -10.96)"/>
+   </g>
+   <g id="svg_42" transform="matrix(31.54, 0, 0, 31.54, 39.74, 267.28) matrix(0.28, 0, 0, 0.28, 4.13656, -1.35357)">
+    <ellipse cx="0" cy="0" fill="rgb(0,0,0)" fill-rule="nonzero" id="svg_43" rx="0.78" ry="0.84" stroke-dashoffset="0" stroke-miterlimit="4"/>
+   </g>
+   <g id="svg_44" transform="matrix(31.54, 0, 0, 31.54, 50.91, 273.27) matrix(0.28, 0, 0, 0.28, 3.88157, -1.49031)">
+    <ellipse cx="0" cy="0" fill="rgb(255,255,255)" fill-rule="nonzero" id="svg_45" rx="0.18" ry="0.21" stroke-dashoffset="0" stroke-miterlimit="4"/>
+   </g>
+   <g id="svg_46" transform="matrix(31.54, 0, 0, 31.54, 245.28, 260.65) matrix(0.28, 0, 0, 0.28, -0.555536, -1.20222)">
+    <ellipse cx="0" cy="0" fill="rgb(0,0,0)" fill-rule="nonzero" id="svg_47" rx="0.77" ry="0.84" stroke-dashoffset="0" stroke-miterlimit="4"/>
+   </g>
+   <g id="svg_48" transform="matrix(31.54, 0, 0, 31.54, 256.25, 266.65) matrix(0.28, 0, 0, 0.28, -0.805961, -1.33919)">
+    <ellipse cx="0" cy="0" fill="rgb(255,255,255)" fill-rule="nonzero" id="svg_49" rx="0.18" ry="0.21" stroke-dashoffset="0" stroke-miterlimit="4"/>
+   </g>
+   <g id="svg_50" transform="matrix(31.54, 0, 0, 31.54, 170.52, 410.87) matrix(0.28, 0, 0, 0.28, 1.1511, -4.63146)">
+    <path d="m14.67,10.25c-0.34,0.82 0.19,2.46 1.11,1.25c-0.03,-0.52 -0.01,-1.03 0.04,-1.55l-1.15,0.3z" fill="rgb(255,255,255)" fill-rule="evenodd" id="svg_51" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-15.19, -10.94)"/>
+   </g>
+   <g id="svg_52" transform="matrix(31.54, 0, 0, 31.54, 170.02, 410.5) matrix(0.28, 0, 0, 0.28, 1.16251, -4.62302)">
+    <path d="m15.17,12.01c-0.08,0 -0.16,-0.02 -0.23,-0.06c-0.45,-0.46 -0.59,-1.14 -0.34,-1.73l0.01,-0.04l1.29,-0.33l0,0.1c-0.01,0.17 -0.02,0.34 -0.03,0.5c-0.04,0.34 -0.04,0.69 -0.01,1.03l0,0.03l-0.02,0.03c-0.27,0.36 -0.49,0.47 -0.67,0.47zm-0.44,-1.7c-0.19,0.52 -0.08,1.1 0.29,1.5c0.24,0.14 0.5,-0.1 0.68,-0.33c-0.03,-0.35 -0.03,-0.69 0.01,-1.03c0.01,-0.13 0.02,-0.26 0.03,-0.4l-1.01,0.26z" fill="rgb(0,0,0)" fill-rule="nonzero" id="svg_53" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-15.19, -10.93)"/>
+   </g>
+   <g id="svg_54" transform="matrix(31.54, 0, 0, 31.54, 193.9, 365.91) matrix(0.28, 0, 0, 0.28, 0.617375, -3.60511)">
+    <path d="m14.79,8.66c-0.32,0.03 -0.61,0.22 -0.77,0.49c-0.16,0.28 -0.18,0.62 -0.05,0.91c0.43,0.79 1.4,-0.07 2.01,0.01c0.7,0.02 1.27,0.74 1.83,0.14c0.62,-0.68 -0.27,-1.34 -0.97,-1.63l-2.05,0.08z" fill="rgb(246,210,162)" fill-rule="evenodd" id="svg_55" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-15.95, -9.51)"/>
+   </g>
+   <g id="svg_56" transform="matrix(31.54, 0, 0, 31.54, 193.3, 365.83) matrix(0.28, 0, 0, 0.28, 0.631072, -3.60328)">
+    <path d="m17.31,10.53c-0.23,-0.02 -0.44,-0.08 -0.64,-0.18c-0.22,-0.11 -0.45,-0.18 -0.69,-0.2l-0.01,0c-0.25,0 -0.49,0.05 -0.71,0.15c-0.49,0.17 -1.05,0.37 -1.36,-0.2c-0.16,-0.28 -0.15,-0.63 0.01,-0.91c0.17,-0.33 0.5,-0.56 0.87,-0.6l0,0l2.08,-0.09l0.01,0.01c0.52,0.21 1.11,0.61 1.21,1.08c0.03,0.23 -0.04,0.46 -0.19,0.63c-0.14,0.18 -0.35,0.29 -0.58,0.3l0,0.01zm-1.33,-0.53c0.26,0.02 0.52,0.09 0.75,0.21c0.39,0.16 0.7,0.29 1.02,-0.05c0.14,-0.14 0.21,-0.34 0.18,-0.53c-0.09,-0.4 -0.64,-0.77 -1.1,-0.97l-2.04,0.08c-0.32,0.04 -0.59,0.24 -0.74,0.52c-0.14,0.24 -0.14,0.53 -0.02,0.77c0.25,0.45 0.7,0.29 1.17,0.13c0.25,-0.11 0.52,-0.16 0.78,-0.16z" fill="rgb(35,31,32)" fill-rule="nonzero" id="svg_57" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-15.94, -9.51)"/>
+   </g>
+   <g id="svg_58" transform="matrix(31.54, 0, 0, 31.54, 191.45, 331.41) matrix(0.28, 0, 0, 0.28, 0.673304, -2.81754)">
+    <path d="m14.71,8.63c-0.05,-1.09 2.04,-1.23 2.29,-0.32c0.25,0.92 -2.19,1.13 -2.29,0.32z" fill="rgb(0,0,0)" fill-rule="evenodd" id="svg_59" stroke-dashoffset="0" stroke-miterlimit="4" transform=" translate(-15.86, -8.42)"/>
+   </g>
+   <g id="svg_60" transform="matrix(2.9, 0, 0, 2.9, -218.16, -125.63) matrix(0.28, 0, 0, 0.28, 109.019, 82.8288)">
+    <circle cx="0" cy="0" fill="rgb(117,206,222)" fill-rule="nonzero" id="svg_61" r="35" stroke="rgb(0,0,0)" stroke-dashoffset="0" stroke-miterlimit="4" stroke-width="0"/>
+   </g>
+  </g>
+  <text fill="#7cbdff" font-family="Monospace" font-size="200" id="svg_3" stroke="#000000" stroke-width="0" style="cursor: move;" text-anchor="middle" transform="matrix(1, 0, 0, 1, 0, 0) matrix(1, 0, 0, 1, 0, -8)" x="724" xml:space="preserve" y="217">GoEvo</text>
+  <text fill="#7cbdff" font-family="Monospace" font-size="28" id="svg_6" stroke="#000000" stroke-width="0" style="cursor: move;" text-anchor="middle" transform="matrix(1, 0, 0, 1, 0, -8)" x="729.99" xml:space="preserve" y="257">Extensible Evolutionary Algorithms</text>
+ </g>
+</svg>
