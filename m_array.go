@@ -64,6 +64,7 @@ type ArrayCrossoverUniform[T any] struct{}
 // Crossover implements CrossoverStrategy.
 func (p *ArrayCrossoverUniform[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
 	MustValidateAll(gs...)
+	MustValidate(p)
 	if len(gs) != 2 {
 		panic("PointCrossoverStrategy requires exactly 2 parents")
 	}
@@ -87,6 +88,8 @@ func (p *ArrayCrossoverUniform[T]) NumParents() int {
 	return 2
 }
 
+func (*ArrayCrossoverUniform[T]) Validate() error { return nil }
+
 // ArrayCrossoverAsexual is a crossover strategy that clones the parent.
 // It only requires one parent.
 type ArrayCrossoverAsexual[T any] struct{}
@@ -94,6 +97,7 @@ type ArrayCrossoverAsexual[T any] struct{}
 // Crossover implements CrossoverStrategy.
 func (p *ArrayCrossoverAsexual[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
 	MustValidateAll(gs...)
+	MustValidate(p)
 	if len(gs) != 1 {
 		panic("AsexualCrossoverStrategy requires exactly 1 parent")
 	}
@@ -105,6 +109,8 @@ func (p *ArrayCrossoverAsexual[T]) NumParents() int {
 	return 1
 }
 
+func (*ArrayCrossoverAsexual[T]) Validate() error { return nil }
+
 // ArrayCrossoverKPoint is a crossover strategy that selects K locations in the genome to switch parents.
 // It requires two parents.
 type ArrayCrossoverKPoint[T any] struct {
@@ -113,6 +119,7 @@ type ArrayCrossoverKPoint[T any] struct {
 
 func (p *ArrayCrossoverKPoint[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
 	MustValidateAll(gs...)
+	MustValidate(p)
 	if len(gs) != 2 {
 		panic("KPointCrossoverStrategy requires exactly 2 parents")
 	}
@@ -146,6 +153,13 @@ func (p *ArrayCrossoverKPoint[T]) NumParents() int {
 	return 2
 }
 
+func (p *ArrayCrossoverKPoint[T]) Validate() error {
+	if p.K < 0 {
+		return fmt.Errorf("cannot set K < 0")
+	}
+	return nil
+}
+
 type ArrayMutationRandomBool struct {
 	// The probability of mutating each locus
 	MutateProbability float64
@@ -153,11 +167,19 @@ type ArrayMutationRandomBool struct {
 
 func (s *ArrayMutationRandomBool) Mutate(gt *ArrayGenotype[bool]) {
 	MustValidate(gt)
+	MustValidate(s)
 	for i := range gt.Values {
 		if rand.Float64() < s.MutateProbability {
 			gt.Values[i] = !gt.Values[i]
 		}
 	}
+}
+
+func (p *ArrayMutationRandomBool) Validate() error {
+	if p.MutateProbability < 0 || p.MutateProbability > 1 {
+		return fmt.Errorf("cannot set mutation probability out of range 0-1")
+	}
+	return nil
 }
 
 type ArrayMutationStd[T floatType] struct {
@@ -169,11 +191,22 @@ type ArrayMutationStd[T floatType] struct {
 
 func (s *ArrayMutationStd[T]) Mutate(gt *ArrayGenotype[T]) {
 	MustValidate(gt)
+	MustValidate(s)
 	for i := range gt.Values {
 		if T(rand.Float64()) < s.MutateProbability {
 			gt.Values[i] += T(rand.NormFloat64()) * s.MutateStd
 		}
 	}
+}
+
+func (p *ArrayMutationStd[T]) Validate() error {
+	if p.MutateProbability < 0 || p.MutateProbability > 1 {
+		return fmt.Errorf("cannot set mutation probability out of range 0-1")
+	}
+	if p.MutateStd < 0 {
+		return fmt.Errorf("cannot set mutate std < 0")
+	}
+	return nil
 }
 
 type ArrayMutationRandomRune struct {
@@ -185,9 +218,20 @@ type ArrayMutationRandomRune struct {
 
 func (s *ArrayMutationRandomRune) Mutate(gt *ArrayGenotype[rune]) {
 	MustValidate(gt)
+	MustValidate(s)
 	for i := range gt.Values {
 		if rand.Float64() < s.MutateProbability {
 			gt.Values[i] = s.Runeset[rand.N(len(s.Runeset))]
 		}
 	}
+}
+
+func (p *ArrayMutationRandomRune) Validate() error {
+	if p.MutateProbability < 0 || p.MutateProbability > 1 {
+		return fmt.Errorf("cannot set mutation probability out of range 0-1")
+	}
+	if len(p.Runeset) == 0 {
+		return fmt.Errorf("cannot have a runeset of length 0")
+	}
+	return nil
 }
