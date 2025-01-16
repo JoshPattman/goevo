@@ -3,7 +3,8 @@ package goevo
 // ================================== Utilities ==================================
 
 // Generators
-var _ Generator[float64] = &NormalGenerator[float64]{}
+var _ Generator[float64] = NewGeneratorNormal(0.0, 0.0)
+var _ Generator[rune] = NewGeneratorChoices([]rune("abcdefg"))
 
 // Reproductions
 var _ Reproduction[any] = &TwoPhaseReproduction[any]{}

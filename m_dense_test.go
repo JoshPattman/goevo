@@ -25,9 +25,7 @@ func setupDenseTestStuff(numIn, numOut int) Population[*DenseGenotype] {
 
 	reprod := NewTwoPhaseReproduction(crs, mut)
 
-	gen := &NormalGenerator[float64]{
-		Std: 0.5,
-	}
+	gen := NewGeneratorNormal(0.0, 0.5)
 
 	var pop Population[*DenseGenotype] = NewSimplePopulation(func() *DenseGenotype {
 		return NewDenseGenotype([]int{numIn, 5, numOut}, Linear, Relu, Sigmoid, gen, gen)
@@ -37,12 +35,8 @@ func setupDenseTestStuff(numIn, numOut int) Population[*DenseGenotype] {
 }
 
 func TestNewDenseGenotype(t *testing.T) {
-	wg := &NormalGenerator[float64]{
-		Std: 0.5,
-	}
-	bg := &NormalGenerator[float64]{
-		Std: 0.1,
-	}
+	wg := NewGeneratorNormal(0.0, 0.5)
+	bg := NewGeneratorNormal(0.0, 0.1)
 	g1 := NewDenseGenotype([]int{5, 4, 3}, Linear, Relu, Softmax, wg, bg)
 	fmt.Println(g1.Forward([]float64{0, 1, 2, 3, 4}))
 
