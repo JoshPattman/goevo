@@ -13,6 +13,10 @@ type floatType interface {
 	float32 | float64
 }
 
+type numberType interface {
+	floatType | int | int16 | int32 | int64
+}
+
 func stdN(std float64) int {
 	v := math.Abs(rand.NormFloat64() * std)
 	if v > std*10 {

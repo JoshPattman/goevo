@@ -10,11 +10,11 @@ func setupArrayTestStuff[T any](mut Mutation[*ArrayGenotype[T]], newGenotype fun
 	var crs Crossover[*ArrayGenotype[T]]
 	switch crsType {
 	case 0:
-		crs = &ArrayCrossoverKPoint[T]{K: 2}
+		crs = &arrayCrossoverKPoint[T]{k: 2}
 	case 1:
-		crs = &ArrayCrossoverUniform[T]{}
+		crs = &arrayCrossoverUniform[T]{}
 	case 2:
-		crs = &ArrayCrossoverAsexual[T]{}
+		crs = &arrayCrossoverAsexual[T]{}
 	}
 	reprod := NewTwoPhaseReproduction(crs, mut)
 	var selec Selection[*ArrayGenotype[T]]
@@ -51,17 +51,16 @@ func setupArrayTestStuff[T any](mut Mutation[*ArrayGenotype[T]], newGenotype fun
 }
 
 func TestArrayGenotype(t *testing.T) {
-	mut := &ArrayMutationStd[float64]{
-		MutateProbability: 0.1,
-		MutateStd:         0.05,
+	mut := NewArrayMutationGeneratorAdd(NewGeneratorNormal(0, 0.05), 0.1)
+	newGenotype := func() *ArrayGenotype[float64] {
+		return NewArrayGenotype(10, NewGeneratorNormal(0, 0.5))
 	}
-	newGenotype := func() *ArrayGenotype[float64] { return NewFloatArrayGenotype(10, 0.5) }
 	pop := setupArrayTestStuff(mut, newGenotype, 0, 0)
 	// Fitness is max (0) when all the numbers sum to 10
 	fitness := func(f *ArrayGenotype[float64]) float64 {
 		total := 0.0
-		for i := range f.Values {
-			total += f.Values[i]
+		for i := range f.values {
+			total += f.values[i]
 		}
 		return -math.Abs(10 - total)
 	}
@@ -70,17 +69,15 @@ func TestArrayGenotype(t *testing.T) {
 
 func TestRuneGenotype(t *testing.T) {
 	runeset := []rune("ab")
-	mut := &ArrayMutationRandomRune{
-		MutateProbability: 0.1,
-		Runeset:           runeset,
-	}
-	newGenotype := func() *ArrayGenotype[rune] { return NewRuneArrayGenotype(10, runeset) }
+	valueGen := NewGeneratorChoices(runeset)
+	mut := NewArrayMutationGeneratorReplace(valueGen, 0.1)
+	newGenotype := func() *ArrayGenotype[rune] { return NewArrayGenotype(10, valueGen) }
 	pop := setupArrayTestStuff(mut, newGenotype, 1, 0)
 	// Fitness is max (0) when there are 10 'a's
 	fitness := func(f *ArrayGenotype[rune]) float64 {
 		total := 0.0
-		for i := range f.Values {
-			if f.Values[i] == 'a' {
+		for i := range f.values {
+			if f.values[i] == 'a' {
 				total += 1
 			}
 		}
@@ -90,16 +87,15 @@ func TestRuneGenotype(t *testing.T) {
 }
 
 func TestBoolGenotype(t *testing.T) {
-	mut := &ArrayMutationRandomBool{
-		MutateProbability: 0.1,
-	}
-	newGenotype := func() *ArrayGenotype[bool] { return NewBoolArrayGenotype(10) }
+	valueGen := NewGeneratorChoices([]bool{false, true})
+	mut := NewArrayMutationGeneratorReplace(valueGen, 0.1)
+	newGenotype := func() *ArrayGenotype[bool] { return NewArrayGenotype(10, valueGen) }
 	pop := setupArrayTestStuff(mut, newGenotype, 2, 1)
 	// Fitness is max (0) when there are 10 'true's
 	fitness := func(f *ArrayGenotype[bool]) float64 {
 		total := 0.0
-		for i := range f.Values {
-			if f.Values[i] {
+		for i := range f.values {
+			if f.values[i] {
 				total += 1
 			}
 		}

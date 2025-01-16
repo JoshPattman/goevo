@@ -13,12 +13,12 @@ var _ Reproduction[any] = &TwoPhaseReproduction[any]{}
 
 // Array genotypes
 var _ Cloneable = &ArrayGenotype[int]{}
-var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverUniform[any]{}
-var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverAsexual[any]{}
-var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverKPoint[any]{}
-var _ Mutation[*ArrayGenotype[bool]] = &ArrayMutationRandomBool{}
-var _ Mutation[*ArrayGenotype[rune]] = &ArrayMutationRandomRune{}
-var _ Mutation[*ArrayGenotype[float64]] = &ArrayMutationStd[float64]{}
+var _ Crossover[*ArrayGenotype[any]] = NewArrayCrossoverUniform[any]()
+var _ Crossover[*ArrayGenotype[any]] = NewArrayCrossoverAsexual[any]()
+var _ Crossover[*ArrayGenotype[any]] = NewArrayCrossoverKPoint[any](0)
+var _ Mutation[*ArrayGenotype[float64]] = NewArrayMutationGeneratorAdd(NewGeneratorNormal(0.0, 0.0), 0.0)
+var _ Mutation[*ArrayGenotype[bool]] = NewArrayMutationGeneratorReplace(NewGeneratorChoices([]bool{true, false}), 0.0)
+var _ Mutation[*ArrayGenotype[bool]] = NewArrayMutationGenerator(NewGeneratorChoices([]bool{true, false}), func(old, new bool) bool { return old && new }, 0.0)
 
 // Dense genotypes
 var _ Cloneable = &DenseGenotype{}

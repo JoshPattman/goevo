@@ -8,82 +8,88 @@ import (
 
 // ArrayGenotype is a genotype that is a slice of values.
 type ArrayGenotype[T any] struct {
-	Values []T
+	values []T
 }
 
-// NewFloatArrayGenotype creates a new genotype with the given size,
-// where each value is a random float (of type T) with a normal distribution with the given standard deviation.
-func NewFloatArrayGenotype[T floatType](size int, std T) *ArrayGenotype[T] {
-	gt := make([]T, size)
-	for i := range gt {
-		gt[i] = T(rand.NormFloat64()) * std
+func NewArrayGenotype[T any](length int, gen Generator[T]) *ArrayGenotype[T] {
+	if length <= 0 {
+		panic("must have length > 1")
 	}
-	return &ArrayGenotype[T]{Values: gt}
+	if gen == nil {
+		panic("must have non-nil generator")
+	}
+	vals := make([]T, length)
+	for i := range vals {
+		vals[i] = gen.Next()
+	}
+	return &ArrayGenotype[T]{
+		values: vals,
+	}
 }
 
-// NewRuneArrayGenotype creates a new genotype with the given size,
-// where each value is a random rune from the given runeset.
-func NewRuneArrayGenotype(size int, runeset []rune) *ArrayGenotype[rune] {
-	gt := make([]rune, size)
-	for i := range gt {
-		gt[i] = runeset[rand.N(len(runeset))]
-	}
-	return &ArrayGenotype[rune]{Values: gt}
+func (g *ArrayGenotype[T]) Len() int {
+	return len(g.values)
 }
 
-// NewBoolArrayGenotype creates a new genotype with the given size,
-// where each value is a random boolean.
-func NewBoolArrayGenotype(size int) *ArrayGenotype[bool] {
-	gt := make([]bool, size)
-	for i := range gt {
-		gt[i] = rand.Float64() < 0.5
-	}
-	return &ArrayGenotype[bool]{Values: gt}
+func (g *ArrayGenotype[T]) At(i int) T {
+	return g.values[i]
+}
+
+func (g *ArrayGenotype[T]) Set(i int, v T) {
+	g.values[i] = v
 }
 
 // Clone returns a new genotype that is a copy of this genotype.
-func (g ArrayGenotype[T]) Clone() any {
-	clone := make([]T, len(g.Values))
-	copy(clone, g.Values)
-	return &ArrayGenotype[T]{Values: clone}
+func (g *ArrayGenotype[T]) Clone() any {
+	clone := make([]T, len(g.values))
+	copy(clone, g.values)
+	return &ArrayGenotype[T]{values: clone}
 }
 
-// ArrayCrossoverUniform is a crossover strategy that selects each gene from one of the parents with equal probability.
+// arrayCrossoverUniform is a crossover strategy that selects each gene from one of the parents with equal probability.
 // The location of a gene has no effect on the probability of it being selected from either parent.
 // It requires two parents.
-type ArrayCrossoverUniform[T any] struct{}
+type arrayCrossoverUniform[T any] struct{}
+
+func NewArrayCrossoverUniform[T any]() Crossover[*ArrayGenotype[T]] {
+	return &arrayCrossoverUniform[T]{}
+}
 
 // Crossover implements CrossoverStrategy.
-func (p *ArrayCrossoverUniform[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
+func (p *arrayCrossoverUniform[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
 	if len(gs) != 2 {
 		panic("PointCrossoverStrategy requires exactly 2 parents")
 	}
 	pa, pb := gs[0], gs[1]
-	if len(pa.Values) != len(pb.Values) {
+	if len(pa.values) != len(pb.values) {
 		panic("genotypes must have the same length for PointCrossoverStrategy")
 	}
-	child := make([]T, len(pa.Values))
+	child := make([]T, len(pa.values))
 	for i := range child {
 		if rand.Float64() < 0.5 {
-			child[i] = pa.Values[i]
+			child[i] = pa.values[i]
 		} else {
-			child[i] = pb.Values[i]
+			child[i] = pb.values[i]
 		}
 	}
-	return &ArrayGenotype[T]{Values: child}
+	return &ArrayGenotype[T]{values: child}
 }
 
 // NumParents implements CrossoverStrategy.
-func (p *ArrayCrossoverUniform[T]) NumParents() int {
+func (p *arrayCrossoverUniform[T]) NumParents() int {
 	return 2
 }
 
-// ArrayCrossoverAsexual is a crossover strategy that clones the parent.
+// arrayCrossoverAsexual is a crossover strategy that clones the parent.
 // It only requires one parent.
-type ArrayCrossoverAsexual[T any] struct{}
+type arrayCrossoverAsexual[T any] struct{}
+
+func NewArrayCrossoverAsexual[T any]() Crossover[*ArrayGenotype[T]] {
+	return &arrayCrossoverAsexual[T]{}
+}
 
 // Crossover implements CrossoverStrategy.
-func (p *ArrayCrossoverAsexual[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
+func (p *arrayCrossoverAsexual[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
 	if len(gs) != 1 {
 		panic("AsexualCrossoverStrategy requires exactly 1 parent")
 	}
@@ -91,30 +97,39 @@ func (p *ArrayCrossoverAsexual[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenot
 }
 
 // NumParents implements CrossoverStrategy.
-func (p *ArrayCrossoverAsexual[T]) NumParents() int {
+func (p *arrayCrossoverAsexual[T]) NumParents() int {
 	return 1
 }
 
-// ArrayCrossoverKPoint is a crossover strategy that selects K locations in the genome to switch parents.
+// arrayCrossoverKPoint is a crossover strategy that selects K locations in the genome to switch parents.
 // It requires two parents.
-type ArrayCrossoverKPoint[T any] struct {
-	K int
+type arrayCrossoverKPoint[T any] struct {
+	k int
 }
 
-func (p *ArrayCrossoverKPoint[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
+func NewArrayCrossoverKPoint[T any](k int) Crossover[*ArrayGenotype[T]] {
+	if k < 0 {
+		panic("k must be > 0")
+	}
+	return &arrayCrossoverKPoint[T]{
+		k: k,
+	}
+}
+
+func (p *arrayCrossoverKPoint[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenotype[T] {
 	if len(gs) != 2 {
 		panic("KPointCrossoverStrategy requires exactly 2 parents")
 	}
 	pa, pb := gs[0], gs[1]
-	if len(pa.Values) != len(pb.Values) {
+	if len(pa.values) != len(pb.values) {
 		panic("genotypes must have the same length for KPointCrossoverStrategy")
 	}
-	crossoverPoints := make([]int, p.K)
-	for i := 0; i < p.K; i++ {
-		crossoverPoints[i] = rand.N(len(pa.Values))
+	crossoverPoints := make([]int, p.k)
+	for i := 0; i < p.k; i++ {
+		crossoverPoints[i] = rand.N(len(pa.values))
 	}
 	sort.Ints(crossoverPoints)
-	child := make([]T, len(pa.Values))
+	child := make([]T, len(pa.values))
 	fromParentA := rand.Float64() < 0.5
 	currentCrossoverPoint := 0
 	for i := range child {
@@ -123,57 +138,58 @@ func (p *ArrayCrossoverKPoint[T]) Crossover(gs []*ArrayGenotype[T]) *ArrayGenoty
 			currentCrossoverPoint++
 		}
 		if fromParentA {
-			child[i] = pa.Values[i]
+			child[i] = pa.values[i]
 		} else {
-			child[i] = pb.Values[i]
+			child[i] = pb.values[i]
 		}
 	}
-	return &ArrayGenotype[T]{Values: child}
+	return &ArrayGenotype[T]{values: child}
 }
 
-func (p *ArrayCrossoverKPoint[T]) NumParents() int {
+func (p *arrayCrossoverKPoint[T]) NumParents() int {
 	return 2
 }
 
-type ArrayMutationRandomBool struct {
-	// The probability of mutating each locus
-	MutateProbability float64
+type arrayMutationGenerator[T any] struct {
+	combine func(old, new T) T
+	gen     Generator[T]
+	chance  float64
 }
 
-func (s *ArrayMutationRandomBool) Mutate(gt *ArrayGenotype[bool]) {
-	for i := range gt.Values {
-		if rand.Float64() < s.MutateProbability {
-			gt.Values[i] = !gt.Values[i]
-		}
+func NewArrayMutationGeneratorAdd[T numberType](gen Generator[T], chance float64) Mutation[*ArrayGenotype[T]] {
+	combine := func(old, new T) T {
+		return old + new
+	}
+	return NewArrayMutationGenerator(gen, combine, chance)
+}
+
+func NewArrayMutationGeneratorReplace[T any](gen Generator[T], chance float64) Mutation[*ArrayGenotype[T]] {
+	combine := func(_, new T) T {
+		return new
+	}
+	return NewArrayMutationGenerator(gen, combine, chance)
+}
+
+func NewArrayMutationGenerator[T any](gen Generator[T], combine func(old, new T) T, chance float64) Mutation[*ArrayGenotype[T]] {
+	if gen == nil {
+		panic("cannot have nil generator")
+	}
+	if combine == nil {
+		panic("cannot have nil combine")
+	}
+	if chance < 0 {
+		panic("cannot have chance < 0")
+	}
+	return &arrayMutationGenerator[T]{
+		combine: combine,
+		gen:     gen,
+		chance:  chance,
 	}
 }
 
-type ArrayMutationStd[T floatType] struct {
-	// The probability of mutating each locus
-	MutateProbability T
-	// The standard deviation for the mutation
-	MutateStd T
-}
-
-func (s *ArrayMutationStd[T]) Mutate(gt *ArrayGenotype[T]) {
-	for i := range gt.Values {
-		if T(rand.Float64()) < s.MutateProbability {
-			gt.Values[i] += T(rand.NormFloat64()) * s.MutateStd
-		}
-	}
-}
-
-type ArrayMutationRandomRune struct {
-	// The probability of mutating each locus
-	MutateProbability float64
-	// The standard deviation for the mutation
-	Runeset []rune
-}
-
-func (s *ArrayMutationRandomRune) Mutate(gt *ArrayGenotype[rune]) {
-	for i := range gt.Values {
-		if rand.Float64() < s.MutateProbability {
-			gt.Values[i] = s.Runeset[rand.N(len(s.Runeset))]
-		}
+// Mutate implements Mutation.
+func (m *arrayMutationGenerator[T]) Mutate(g *ArrayGenotype[T]) {
+	for i := range g.Len() {
+		g.values[i] = m.combine(g.values[i], m.gen.Next())
 	}
 }
