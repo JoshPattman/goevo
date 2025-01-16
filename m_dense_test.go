@@ -11,9 +11,7 @@ func setupDenseTestStuff(numIn, numOut int) Population[*DenseGenotype] {
 	add := func(old, new float64) float64 { return old + new }
 	mut := NewDenseMutationUniform(diffGen, add, 0.1, diffGen, add, 0.1)
 
-	crs := &denseCrossoverUniform{
-		parents: 2,
-	}
+	crs := NewDenseCrossoverUniform(2)
 
 	reprod := NewTwoPhaseReproduction(crs, mut)
 

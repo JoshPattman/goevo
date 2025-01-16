@@ -30,9 +30,9 @@ var _ Mutation[*DenseGenotype] = &denseMutationUniform{}
 var _ Cloneable = &NeatGenotype{}
 var _ Buildable = &NeatGenotype{}
 var _ Forwarder = &NeatPhenotype{}
-var _ Crossover[*NeatGenotype] = &NeatCrossoverSimple{}
-var _ Crossover[*NeatGenotype] = &NeatCrossoverAsexual{}
-var _ Mutation[*NeatGenotype] = &NeatMutationStd{}
+var _ Crossover[*NeatGenotype] = &neatCrossoverSimple{}
+var _ Crossover[*NeatGenotype] = &neatCrossoverAsexual{}
+var _ Mutation[*NeatGenotype] = &neatMutationStd{}
 
 // ================================== Selections ==================================
 

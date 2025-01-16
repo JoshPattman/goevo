@@ -439,66 +439,103 @@ func (g *NeatGenotype) MutateRandomActivation(activations ...Activation) bool {
 	return true
 }
 
-// NeatMutationStd is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
+// neatMutationStd is a reproduction strategy that uses a standard deviation for the number of mutations in each category.
 // The standard deviation is not scaled by the size of the network, meaning that larger networks will tend to have more mutations than smaller networks.
-type NeatMutationStd struct {
+type neatMutationStd struct {
 	// The standard deviation for the number of new synapses
-	StdNumNewSynapses float64
+	stdNumNewSynapses float64
 	// The standard deviation for the number of new recurrent synapses
-	StdNumNewRecurrentSynapses float64
+	stdNumNewRecurrentSynapses float64
 	// The standard deviation for the number of new neurons
-	StdNumNewNeurons float64
+	stdNumNewNeurons float64
 	// The standard deviation for the number of synapses to mutate
-	StdNumMutateSynapses float64
+	stdNumMutateSynapses float64
 	// The standard deviation for the number of synapses to prune
-	StdNumPruneSynapses float64
+	stdNumPruneSynapses float64
 	// The standard deviation for the number of activations to mutate
-	StdNumMutateActivations float64
+	stdNumMutateActivations float64
 
 	// The standard deviation for the weight of new synapses
-	StdNewSynapseWeight float64
+	stdNewSynapseWeight float64
 	// The standard deviation for the weight of mutated synapses
-	StdMutateSynapseWeight float64
+	stdMutateSynapseWeight float64
 
 	// The maximum number of hidden neurons this mutation can add
-	MaxHiddenNeurons int
+	maxHiddenNeurons int
 
 	// The counter to use for new synapse IDs
-	Counter *Counter
+	counter *Counter
 	// The possible activations to use for new neurons
-	PossibleActivations []Activation
+	possibleActivations []Activation
+}
+
+func NewNeatMutationStd(
+	counter *Counter,
+	activations []Activation,
+	stdNumNewForwardSynapses float64,
+	stdNumNewRecurrentSynapses float64,
+	stdNumNewNeurons float64,
+	stdNumMutateSynapses float64,
+	stdNumPruneSynapses float64,
+	stdNumMutateActivations float64,
+	stdNewSynapseWeight float64,
+	stdMutateSynapseWeight float64,
+	maxHiddenNeurons int,
+) Mutation[*NeatGenotype] {
+	if counter == nil {
+		panic("cannot have nil counter")
+	}
+	if len(activations) == 0 {
+		panic("cannot have no activations")
+	}
+	// TODO: Should probably check stds are all above 0 but it wont break anything
+	return &neatMutationStd{
+		counter:                    counter,
+		possibleActivations:        activations,
+		stdNumNewSynapses:          stdNumNewForwardSynapses,
+		stdNumNewRecurrentSynapses: stdNumNewRecurrentSynapses,
+		stdNumNewNeurons:           stdNumNewNeurons,
+		stdNumMutateSynapses:       stdNumMutateSynapses,
+		stdNumPruneSynapses:        stdNumPruneSynapses,
+		stdNumMutateActivations:    stdNumMutateActivations,
+		stdNewSynapseWeight:        stdNewSynapseWeight,
+		stdMutateSynapseWeight:     stdMutateSynapseWeight,
+		maxHiddenNeurons:           maxHiddenNeurons,
+	}
 }
 
 // Reproduce creates a new genotype by crossing over and mutating the given genotypes.
-func (r *NeatMutationStd) Mutate(g *NeatGenotype) {
-	for i := 0; i < stdN(r.StdNewSynapseWeight); i++ {
-		g.AddRandomSynapse(r.Counter, r.StdNewSynapseWeight, false)
+func (r *neatMutationStd) Mutate(g *NeatGenotype) {
+	for i := 0; i < stdN(r.stdNewSynapseWeight); i++ {
+		g.AddRandomSynapse(r.counter, r.stdNewSynapseWeight, false)
 	}
-	for i := 0; i < stdN(r.StdNumNewRecurrentSynapses); i++ {
-		g.AddRandomSynapse(r.Counter, r.StdNewSynapseWeight, true)
+	for i := 0; i < stdN(r.stdNumNewRecurrentSynapses); i++ {
+		g.AddRandomSynapse(r.counter, r.stdNewSynapseWeight, true)
 	}
-	for i := 0; i < stdN(r.StdNumNewNeurons); i++ {
-		if r.MaxHiddenNeurons < 0 || g.NumHiddenNeurons() < r.MaxHiddenNeurons {
-			g.AddRandomNeuron(r.Counter, r.PossibleActivations...)
+	for i := 0; i < stdN(r.stdNumNewNeurons); i++ {
+		if r.maxHiddenNeurons < 0 || g.NumHiddenNeurons() < r.maxHiddenNeurons {
+			g.AddRandomNeuron(r.counter, r.possibleActivations...)
 		}
 	}
-	for i := 0; i < stdN(r.StdNumMutateSynapses); i++ {
-		g.MutateRandomSynapse(r.StdMutateSynapseWeight)
+	for i := 0; i < stdN(r.stdNumMutateSynapses); i++ {
+		g.MutateRandomSynapse(r.stdMutateSynapseWeight)
 	}
-	for i := 0; i < stdN(r.StdNumPruneSynapses); i++ {
+	for i := 0; i < stdN(r.stdNumPruneSynapses); i++ {
 		g.RemoveRandomSynapse()
 	}
-	for i := 0; i < stdN(r.StdNumMutateActivations); i++ {
-		g.MutateRandomActivation(r.PossibleActivations...)
+	for i := 0; i < stdN(r.stdNumMutateActivations); i++ {
+		g.MutateRandomActivation(r.possibleActivations...)
 	}
 }
 
-type NeatCrossoverSimple struct{}
+type neatCrossoverSimple struct{}
 
-type NeatCrossoverAsexual struct{}
+func NewNeatCrossoverSimple() Crossover[*NeatGenotype] {
+	return &neatCrossoverSimple{}
+}
 
 // Crossover implements CrossoverStrategy.
-func (s *NeatCrossoverSimple) Crossover(gs []*NeatGenotype) *NeatGenotype {
+func (s *neatCrossoverSimple) Crossover(gs []*NeatGenotype) *NeatGenotype {
 	if len(gs) != 2 {
 		panic("expected 2 parents for simple crossover")
 	}
@@ -530,18 +567,24 @@ func (s *NeatCrossoverSimple) Crossover(gs []*NeatGenotype) *NeatGenotype {
 }
 
 // NumParents implements CrossoverStrategy.
-func (s *NeatCrossoverSimple) NumParents() int {
+func (s *neatCrossoverSimple) NumParents() int {
 	return 2
 }
 
-func (s *NeatCrossoverAsexual) Crossover(gs []*NeatGenotype) *NeatGenotype {
+type neatCrossoverAsexual struct{}
+
+func NewNeatCrossoverAsexual() Crossover[*NeatGenotype] {
+	return &neatCrossoverAsexual{}
+}
+
+func (s *neatCrossoverAsexual) Crossover(gs []*NeatGenotype) *NeatGenotype {
 	if len(gs) != 1 {
 		panic("expected 1 parent for asexual crossover")
 	}
 	return Clone(gs[0])
 }
 
-func (s *NeatCrossoverAsexual) NumParents() int {
+func (s *neatCrossoverAsexual) NumParents() int {
 	return 1
 }
 
