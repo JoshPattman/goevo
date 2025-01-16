@@ -67,7 +67,7 @@ func (d *DenseGenotype) Forward(input []float64) []float64 {
 		} else {
 			ac = d.hiddenActivation
 		}
-		ActivateVector(d.buffers[bi], ac)
+		ac.ActivateVector(d.buffers[bi])
 		// Multiply by weights if not last
 		if bi < len(d.buffers)-1 {
 			d.buffers[bi+1].MulVec(d.weights[bi], d.buffers[bi])
@@ -101,49 +101,89 @@ func (d *DenseGenotype) Clone() any {
 	return gn
 }
 
-// DenseMutationStd is a type of mutation for dense genotypes.
+// denseMutationUniform is a type of mutation for dense genotypes.
 // For each weight and bias, with a certain chance, it mutates the value within a normal distribution.
 // It then caps all values at the maximum value.
-type DenseMutationStd struct {
-	// The standard deviation to mutate the weights by.
-	WeightStd float64
-	// The standard deviation to mutate the biases by.
-	BiasStd float64
-	// The maximum (or -minimum) value that the weights can be.
-	// Set to Inf for no limit.
-	WeightMax float64
-	// The maximum (or -minimum) value that the biases can be.
-	// Set to Inf for no limit.
-	BiasMax float64
-	// The chance (between 0 and 1) that each weight will be mutated.
-	WeightChance float64
-	// The chance (between 0 and 1) that each bias will be mutated.
-	BiasChance float64
+type denseMutationUniform struct {
+	genWeights     Generator[float64]
+	combineWeights func(old, new float64) float64
+	genBiases      Generator[float64]
+	combineBiases  func(old, new float64) float64
+	weightsChance  float64
+	biasesChance   float64
+}
+
+func NewDenseMutationUniform(
+	genWeights Generator[float64],
+	combineWeights func(old, new float64) float64,
+	weightsChance float64,
+	genBiases Generator[float64],
+	combineBiases func(old, new float64) float64,
+	biasesChance float64,
+) Mutation[*DenseGenotype] {
+	if genWeights == nil || genBiases == nil {
+		panic("cannot have nil generator")
+	}
+	if combineWeights == nil || combineBiases == nil {
+		panic("cannot have nil combine func")
+	}
+	if weightsChance < 0 || weightsChance > 1 || biasesChance < 0 || biasesChance > 1 {
+		panic("cannot have chance out of range 0-1")
+	}
+	return &denseMutationUniform{
+		genWeights:     genWeights,
+		genBiases:      genBiases,
+		combineWeights: combineWeights,
+		combineBiases:  combineBiases,
+		weightsChance:  weightsChance,
+		biasesChance:   biasesChance,
+	}
 }
 
 // Mutate implements Mutation.
-func (m *DenseMutationStd) Mutate(g *DenseGenotype) {
+func (m *denseMutationUniform) Mutate(g *DenseGenotype) {
 	for _, w := range g.weights {
-		mutateMatrix(w, m.WeightChance, m.WeightMax, m.WeightStd)
+		rs, cs := w.Dims()
+		for r := range rs {
+			for c := range cs {
+				v := w.At(r, c)
+				v = m.combineWeights(v, m.genWeights.Next())
+				w.Set(r, c, v)
+			}
+		}
 	}
 	for _, b := range g.biases {
-		mutateMatrix(&mutVecWrapper{b}, m.BiasChance, m.BiasMax, m.BiasStd)
+		rs := b.Len()
+		for r := range rs {
+			v := b.AtVec(r)
+			v = m.combineBiases(v, m.genBiases.Next())
+			b.SetVec(r, v)
+		}
 	}
 }
 
-// DenseCrossoverUniform is a type of crossover for dense genotypes.
+// denseCrossoverUniform is a type of crossover for dense genotypes.
 // For each weight and bias, it chooses randomly from one of its parents.
 // The number of parents is a parameter.
-type DenseCrossoverUniform struct {
-	Parents int
+type denseCrossoverUniform struct {
+	parents int
+}
+
+func NewDenseCrossoverUniform(parents int) Crossover[*DenseGenotype] {
+	if parents <= 0 {
+		panic("must have at least one parent")
+	}
+	return &denseCrossoverUniform{
+		parents: parents,
+	}
 }
 
 // Crossover implements Crossover.
-func (c *DenseCrossoverUniform) Crossover(parents []*DenseGenotype) *DenseGenotype {
-	if len(parents) != c.Parents {
+func (c *denseCrossoverUniform) Crossover(parents []*DenseGenotype) *DenseGenotype {
+	if len(parents) != c.parents {
 		panic("incorrect number of parents")
 	}
-	if c.Parents <= 0 {
+	if c.parents <= 0 {
 		panic("must have at least one parent")
 	}
 	g := Clone(parents[0])
@@ -180,6 +220,6 @@ func (c *DenseCrossoverUniform) Crossover(parents []*DenseGenotype) *DenseGenoty
 }
 
 // NumParents implements Crossover.
-func (c *DenseCrossoverUniform) NumParents() int {
-	return c.Parents
+func (c *denseCrossoverUniform) NumParents() int {
+	return c.parents
 }

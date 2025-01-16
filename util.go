@@ -13,6 +13,10 @@ type floatType interface {
 	float32 | float64
 }
 
+type numberType interface {
+	floatType | int | int16 | int32 | int64
+}
+
 func stdN(std float64) int {
 	v := math.Abs(rand.NormFloat64() * std)
 	if v > std*10 {
@@ -71,22 +75,6 @@ func (m *mutVecWrapper) Set(r, c int, v float64) {
 		panic("cannot set vector at anything other than column 0")
 	}
 	m.SetVec(r, v)
-}
-
-func mutateMatrix(m mutMat, chance, maxVal, std float64) {
-	rs, cs := m.Dims()
-	for ri := range rs {
-		for ci := range cs {
-			if rand.Float64() > chance {
-				continue
-			}
-			v := m.At(ri, ci)
-			v += rand.NormFloat64() * std
-			v = math.Min(v, maxVal)
-			v = math.Max(v, -maxVal)
-			m.Set(ri, ci, v)
-		}
-	}
 }
 
 // make sure to check the shapes first!!

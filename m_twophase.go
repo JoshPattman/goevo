@@ -1,31 +1,37 @@
 package goevo
 
-// TwoPhaseReproduction is a [Reproduction] that first performs a [Crossover]
+// twoPhaseReproduction is a [Reproduction] that first performs a [Crossover]
 // and then a [Mutation] on the resulting child.
-type TwoPhaseReproduction[T any] struct {
-	Crossover Crossover[T]
-	Mutate    Mutation[T]
+type twoPhaseReproduction[T any] struct {
+	crossover Crossover[T]
+	mutate    Mutation[T]
 }
 
-// NewTwoPhaseReproduction creates a new [TwoPhaseReproduction] with the given [Crossover] and [Mutation].
-func NewTwoPhaseReproduction[T any](crossover Crossover[T], mutate Mutation[T]) *TwoPhaseReproduction[T] {
-	return &TwoPhaseReproduction[T]{
-		Crossover: crossover,
-		Mutate:    mutate,
+// NewTwoPhaseReproduction creates a new [twoPhaseReproduction] with the given [Crossover] and [Mutation].
+func NewTwoPhaseReproduction[T any](crossover Crossover[T], mutate Mutation[T]) Reproduction[T] {
+	if crossover == nil {
+		panic("cannot have nil crossover")
+	}
+	if mutate == nil {
+		panic("cannot have nil mutate")
+	}
+	return &twoPhaseReproduction[T]{
+		crossover: crossover,
+		mutate:    mutate,
 	}
 }
 
 // Reproduce implements the [Reproduction] interface.
-func (r *TwoPhaseReproduction[T]) Reproduce(parents []T) T {
-	if len(parents) != r.Crossover.NumParents() {
+func (r *twoPhaseReproduction[T]) Reproduce(parents []T) T {
+	if len(parents) != r.crossover.NumParents() {
 		panic("incorrect number of parents")
 	}
-	child := r.Crossover.Crossover(parents)
-	r.Mutate.Mutate(child)
+	child := r.crossover.Crossover(parents)
+	r.mutate.Mutate(child)
 	return child
 }
 
 // NumParents implements the [Reproduction] interface.
-func (r *TwoPhaseReproduction[T]) NumParents() int {
-	return r.Crossover.NumParents()
+func (r *twoPhaseReproduction[T]) NumParents() int {
+	return r.crossover.NumParents()
 }

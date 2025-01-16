@@ -13,29 +13,27 @@ func setupNeatTestStuff(numIn, numOut int, useRecurrent bool) Population[*NeatGe
 	originalGt := NewNeatGenotype(counter, numIn, numOut, Sigmoid)
 	originalGt.AddRandomSynapse(counter, 0.3, false)
 
-	selec := &TournamentSelection[*NeatGenotype]{
-		TournamentSize: 3,
-	}
+	selec := NewTournamentSelection[*NeatGenotype](3)
 
 	r := 0.0
 	if useRecurrent {
 		r = 0.5
 	}
 
-	mut := &NeatMutationStd{
-		StdNumNewSynapses:          1,
-		StdNumNewRecurrentSynapses: r,
-		StdNumNewNeurons:           0.5,
-		StdNumMutateSynapses:       2,
-		StdNumPruneSynapses:        0,
-		StdNumMutateActivations:    0.5,
-		StdNewSynapseWeight:        0.2,
-		StdMutateSynapseWeight:     0.4,
-		Counter:                    counter,
-		PossibleActivations:        AllSingleActivations,
-		MaxHiddenNeurons:           3,
-	}
-	crs := &NeatCrossoverSimple{}
+	mut := NewNeatMutationStd(
+		counter,
+		AllSingleActivations,
+		1,
+		r,
+		0.5,
+		2,
+		0,
+		0.5,
+		0.2,
+		0.4,
+		3,
+	)
+	crs := NewNeatCrossoverSimple()
 	reprod := NewTwoPhaseReproduction(crs, mut)
 
 	var pop Population[*NeatGenotype] = NewSimplePopulation[*NeatGenotype](func() *NeatGenotype {

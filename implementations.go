@@ -3,43 +3,44 @@ package goevo
 // ================================== Utilities ==================================
 
 // Generators
-var _ Generator[float64] = &NormalGenerator[float64]{}
+var _ Generator[float64] = NewGeneratorNormal(0.0, 0.0)
+var _ Generator[rune] = NewGeneratorChoices([]rune("abcdefg"))
 
 // Reproductions
-var _ Reproduction[any] = &TwoPhaseReproduction[any]{}
+var _ Reproduction[any] = &twoPhaseReproduction[any]{}
 
 // ================================== Genotypes ==================================
 
 // Array genotypes
 var _ Cloneable = &ArrayGenotype[int]{}
-var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverUniform[any]{}
-var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverAsexual[any]{}
-var _ Crossover[*ArrayGenotype[any]] = &ArrayCrossoverKPoint[any]{}
-var _ Mutation[*ArrayGenotype[bool]] = &ArrayMutationRandomBool{}
-var _ Mutation[*ArrayGenotype[rune]] = &ArrayMutationRandomRune{}
-var _ Mutation[*ArrayGenotype[float64]] = &ArrayMutationStd[float64]{}
+var _ Crossover[*ArrayGenotype[any]] = NewArrayCrossoverUniform[any]()
+var _ Crossover[*ArrayGenotype[any]] = NewArrayCrossoverAsexual[any]()
+var _ Crossover[*ArrayGenotype[any]] = NewArrayCrossoverKPoint[any](0)
+var _ Mutation[*ArrayGenotype[float64]] = NewArrayMutationGeneratorAdd(NewGeneratorNormal(0.0, 0.0), 0.0)
+var _ Mutation[*ArrayGenotype[bool]] = NewArrayMutationGeneratorReplace(NewGeneratorChoices([]bool{true, false}), 0.0)
+var _ Mutation[*ArrayGenotype[bool]] = NewArrayMutationGenerator(NewGeneratorChoices([]bool{true, false}), func(old, new bool) bool { return old && new }, 0.0)
 
 // Dense genotypes
 var _ Cloneable = &DenseGenotype{}
 var _ Forwarder = &DenseGenotype{}
-var _ Crossover[*DenseGenotype] = &DenseCrossoverUniform{}
-var _ Mutation[*DenseGenotype] = &DenseMutationStd{}
+var _ Crossover[*DenseGenotype] = &denseCrossoverUniform{}
+var _ Mutation[*DenseGenotype] = &denseMutationUniform{}
 
 // NEAT genotypes + phenotypes
 var _ Cloneable = &NeatGenotype{}
 var _ Buildable = &NeatGenotype{}
 var _ Forwarder = &NeatPhenotype{}
-var _ Crossover[*NeatGenotype] = &NeatCrossoverSimple{}
-var _ Crossover[*NeatGenotype] = &NeatCrossoverAsexual{}
-var _ Mutation[*NeatGenotype] = &NeatMutationStd{}
+var _ Crossover[*NeatGenotype] = &neatCrossoverSimple{}
+var _ Crossover[*NeatGenotype] = &neatCrossoverAsexual{}
+var _ Mutation[*NeatGenotype] = &neatMutationStd{}
 
 // ================================== Selections ==================================
 
 // Elite selection
-var _ Selection[any] = &EliteSelection[any]{}
+var _ Selection[any] = &eliteSelection[any]{}
 
 // Tournament selection
-var _ Selection[any] = &TournamentSelection[any]{}
+var _ Selection[any] = NewTournamentSelection[any](3)
 
 // ================================== Populations ==================================
 
