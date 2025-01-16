@@ -7,7 +7,7 @@ var _ Generator[float64] = NewGeneratorNormal(0.0, 0.0)
 var _ Generator[rune] = NewGeneratorChoices([]rune("abcdefg"))
 
 // Reproductions
-var _ Reproduction[any] = &TwoPhaseReproduction[any]{}
+var _ Reproduction[any] = &twoPhaseReproduction[any]{}
 
 // ================================== Genotypes ==================================
 
