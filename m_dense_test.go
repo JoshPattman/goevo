@@ -5,9 +5,7 @@ import (
 )
 
 func setupDenseTestStuff(numIn, numOut int) Population[*DenseGenotype] {
-	selec := &TournamentSelection[*DenseGenotype]{
-		TournamentSize: 3,
-	}
+	selec := NewTournamentSelection[*DenseGenotype](3)
 
 	diffGen := NewGeneratorNormal(0.0, 0.1)
 	add := func(old, new float64) float64 { return old + new }

@@ -20,11 +20,9 @@ func setupArrayTestStuff[T any](mut Mutation[*ArrayGenotype[T]], newGenotype fun
 	var selec Selection[*ArrayGenotype[T]]
 	switch selecType {
 	case 0:
-		selec = &TournamentSelection[*ArrayGenotype[T]]{
-			TournamentSize: 3,
-		}
+		selec = NewTournamentSelection[*ArrayGenotype[T]](3)
 	case 1:
-		selec = &EliteSelection[*ArrayGenotype[T]]{}
+		selec = &eliteSelection[*ArrayGenotype[T]]{}
 	}
 	var pop Population[*ArrayGenotype[T]]
 	if crsType == 2 {

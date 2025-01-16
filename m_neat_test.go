@@ -13,9 +13,7 @@ func setupNeatTestStuff(numIn, numOut int, useRecurrent bool) Population[*NeatGe
 	originalGt := NewNeatGenotype(counter, numIn, numOut, Sigmoid)
 	originalGt.AddRandomSynapse(counter, 0.3, false)
 
-	selec := &TournamentSelection[*NeatGenotype]{
-		TournamentSize: 3,
-	}
+	selec := NewTournamentSelection[*NeatGenotype](3)
 
 	r := 0.0
 	if useRecurrent {

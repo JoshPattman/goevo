@@ -9,6 +9,12 @@ type twoPhaseReproduction[T any] struct {
 
 // NewTwoPhaseReproduction creates a new [twoPhaseReproduction] with the given [Crossover] and [Mutation].
 func NewTwoPhaseReproduction[T any](crossover Crossover[T], mutate Mutation[T]) Reproduction[T] {
+	if crossover == nil {
+		panic("cannot have nil crossover")
+	}
+	if mutate == nil {
+		panic("cannot have nil mutate")
+	}
 	return &twoPhaseReproduction[T]{
 		crossover: crossover,
 		mutate:    mutate,

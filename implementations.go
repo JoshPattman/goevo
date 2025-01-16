@@ -37,10 +37,10 @@ var _ Mutation[*NeatGenotype] = &NeatMutationStd{}
 // ================================== Selections ==================================
 
 // Elite selection
-var _ Selection[any] = &EliteSelection[any]{}
+var _ Selection[any] = &eliteSelection[any]{}
 
 // Tournament selection
-var _ Selection[any] = &TournamentSelection[any]{}
+var _ Selection[any] = NewTournamentSelection[any](3)
 
 // ================================== Populations ==================================
 
