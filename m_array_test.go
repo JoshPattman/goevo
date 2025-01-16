@@ -10,11 +10,11 @@ func setupArrayTestStuff[T any](mut Mutation[*ArrayGenotype[T]], newGenotype fun
 	var crs Crossover[*ArrayGenotype[T]]
 	switch crsType {
 	case 0:
-		crs = &arrayCrossoverKPoint[T]{k: 2}
+		crs = NewArrayCrossoverKPoint[T](2)
 	case 1:
-		crs = &arrayCrossoverUniform[T]{}
+		crs = NewArrayCrossoverUniform[T]()
 	case 2:
-		crs = &arrayCrossoverAsexual[T]{}
+		crs = NewArrayCrossoverAsexual[T]()
 	}
 	reprod := NewTwoPhaseReproduction(crs, mut)
 	var selec Selection[*ArrayGenotype[T]]
