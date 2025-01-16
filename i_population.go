@@ -13,3 +13,7 @@ type Population[T any] interface {
 	// This may have no particular order.
 	All() []*Agent[T]
 }
+
+func NextGeneration[T any, U Population[T]](pop U) U {
+	return pop.NextGeneration().(U)
+}
