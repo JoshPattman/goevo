@@ -665,7 +665,7 @@ func (p *NeatPhenotype) Forward(x []float64) []float64 {
 	}
 	// Apply forward connections
 	for i := 0; i < len(p.accumulators); i++ {
-		p.accumulators[i] = Activate(p.accumulators[i], p.activations[i])
+		p.accumulators[i] = p.activations[i].ActivateValue(p.accumulators[i])
 		for _, w := range p.forwardWeights[i] {
 			p.accumulators[w.toIdx] += w.w * p.accumulators[i]
 		}

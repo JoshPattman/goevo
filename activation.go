@@ -76,7 +76,7 @@ func (a Activation) CanSingleApply() bool {
 
 // Activate applies the activation function to the given value.
 // Not all activation functions (for example softmax) can be applied with this function, you can check with [Activation.CanSingleApply]
-func Activate(x float64, a Activation) float64 {
+func (a Activation) ActivateValue(x float64) float64 {
 	switch a {
 	case Relu:
 		if x < 0 {
@@ -127,7 +127,7 @@ func Activate(x float64, a Activation) float64 {
 
 // ActivateVector applies the given activation function into the vector.
 // For most activation functions, this falls back to element-wise [Activate].
-func ActivateVector(x *mat.VecDense, a Activation) {
+func (a Activation) ActivateVector(x *mat.VecDense) {
 	switch a {
 	case Softmax:
 		total := 0.0
@@ -145,7 +145,7 @@ func ActivateVector(x *mat.VecDense, a Activation) {
 		}
 	default:
 		for i := range x.Len() {
-			x.SetVec(i, Activate(x.AtVec(i), a))
+			x.SetVec(i, a.ActivateValue(x.AtVec(i)))
 		}
 	}
 }

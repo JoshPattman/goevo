@@ -67,7 +67,7 @@ func (d *DenseGenotype) Forward(input []float64) []float64 {
 		} else {
 			ac = d.hiddenActivation
 		}
-		ActivateVector(d.buffers[bi], ac)
+		ac.ActivateVector(d.buffers[bi])
 		// Multiply by weights if not last
 		if bi < len(d.buffers)-1 {
 			d.buffers[bi+1].MulVec(d.weights[bi], d.buffers[bi])
