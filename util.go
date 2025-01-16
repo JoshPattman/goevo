@@ -77,22 +77,6 @@ func (m *mutVecWrapper) Set(r, c int, v float64) {
 	m.SetVec(r, v)
 }
 
-func mutateMatrix(m mutMat, chance, maxVal, std float64) {
-	rs, cs := m.Dims()
-	for ri := range rs {
-		for ci := range cs {
-			if rand.Float64() > chance {
-				continue
-			}
-			v := m.At(ri, ci)
-			v += rand.NormFloat64() * std
-			v = math.Min(v, maxVal)
-			v = math.Max(v, -maxVal)
-			m.Set(ri, ci, v)
-		}
-	}
-}
-
 // make sure to check the shapes first!!
 func randomChoiceMatrix(into mutMat, ms []mutMat) {
 	rs, cs := into.Dims()

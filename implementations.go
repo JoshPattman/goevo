@@ -23,8 +23,8 @@ var _ Mutation[*ArrayGenotype[bool]] = NewArrayMutationGenerator(NewGeneratorCho
 // Dense genotypes
 var _ Cloneable = &DenseGenotype{}
 var _ Forwarder = &DenseGenotype{}
-var _ Crossover[*DenseGenotype] = &DenseCrossoverUniform{}
-var _ Mutation[*DenseGenotype] = &DenseMutationStd{}
+var _ Crossover[*DenseGenotype] = &denseCrossoverUniform{}
+var _ Mutation[*DenseGenotype] = &denseMutationUniform{}
 
 // NEAT genotypes + phenotypes
 var _ Cloneable = &NeatGenotype{}
